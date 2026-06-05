@@ -29,7 +29,22 @@
     "zakat": "已缴纳天课 (Zakat)",
     "monthlyPcb": "每月 PCB 扣税金额",
     "calculate": "计算税务",
-    "reset": "重置"
+    "reset": "重置",
+    "simpleMode": "快速估算",
+    "advancedMode": "完整计算",
+    "simpleTitle": "快速税务估算",
+    "monthlySalary": "每月薪资",
+    "numberOfChildren": "子女数量（18岁以下）",
+    "annualEquivalent": "年收入换算"
+  },
+  "categories": {
+    "personal": "个人",
+    "family": "家庭",
+    "medical": "医疗与健康",
+    "education": "教育",
+    "lifestyle": "生活方式",
+    "contribution": "保险与缴纳",
+    "housing": "住房"
   },
   "reliefs": {
     "individual": "个人减免",

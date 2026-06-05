@@ -29,7 +29,22 @@
     "zakat": "Zakat Dibayar",
     "monthlyPcb": "PCB Bulanan Dibayar",
     "calculate": "Kira Cukai",
-    "reset": "Set Semula"
+    "reset": "Set Semula",
+    "simpleMode": "Anggaran Pantas",
+    "advancedMode": "Kalkulator Penuh",
+    "simpleTitle": "Anggaran Cukai Pantas",
+    "monthlySalary": "Gaji Bulanan",
+    "numberOfChildren": "Bilangan Anak (Bawah 18)",
+    "annualEquivalent": "Setara tahunan"
+  },
+  "categories": {
+    "personal": "Peribadi",
+    "family": "Keluarga",
+    "medical": "Perubatan & Kesihatan",
+    "education": "Pendidikan",
+    "lifestyle": "Gaya Hidup",
+    "contribution": "Insurans & Caruman",
+    "housing": "Perumahan"
   },
   "reliefs": {
     "individual": "Pelepasan Individu",

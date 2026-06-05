@@ -29,7 +29,22 @@
     "zakat": "Zakat Paid",
     "monthlyPcb": "Monthly PCB Paid",
     "calculate": "Calculate Tax",
-    "reset": "Reset"
+    "reset": "Reset",
+    "simpleMode": "Quick Estimate",
+    "advancedMode": "Full Calculator",
+    "simpleTitle": "Quick Tax Estimate",
+    "monthlySalary": "Monthly Salary",
+    "numberOfChildren": "Number of Children (Under 18)",
+    "annualEquivalent": "Annual equivalent"
+  },
+  "categories": {
+    "personal": "Personal",
+    "family": "Family",
+    "medical": "Medical & Health",
+    "education": "Education",
+    "lifestyle": "Lifestyle",
+    "contribution": "Insurance & Contributions",
+    "housing": "Housing"
   },
   "reliefs": {
     "individual": "Individual Relief",
