@@ -35,7 +35,9 @@
     "simpleTitle": "快速税务估算",
     "monthlySalary": "每月薪资",
     "numberOfChildren": "子女数量（18岁以下）",
-    "annualEquivalent": "年收入换算"
+    "annualEquivalent": "年收入换算",
+    "estimatedAnnualTax": "预估年度应缴税额",
+    "perMonth": "月"
   },
   "categories": {
     "personal": "个人",

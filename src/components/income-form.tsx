@@ -234,6 +234,28 @@ export function IncomeForm() {
                 })}
               </p>
             )}
+
+            {simpleResult && (
+              <div className="rounded-lg bg-primary/5 border-2 border-primary/20 p-6 text-center space-y-2">
+                <p className="text-sm text-muted-foreground">
+                  {t("estimatedAnnualTax")}
+                </p>
+                <p className="text-4xl font-bold text-primary">
+                  RM{" "}
+                  {simpleResult.taxAfterRebateAndZakat.toLocaleString("en-MY", {
+                    minimumFractionDigits: 2,
+                  })}
+                </p>
+                <p className="text-sm text-muted-foreground">
+                  ≈ RM{" "}
+                  {(simpleResult.taxAfterRebateAndZakat / 12).toLocaleString(
+                    "en-MY",
+                    { minimumFractionDigits: 2, maximumFractionDigits: 2 }
+                  )}{" "}
+                  / {t("perMonth")}
+                </p>
+              </div>
+            )}
           </CardContent>
         </Card>
       ) : (

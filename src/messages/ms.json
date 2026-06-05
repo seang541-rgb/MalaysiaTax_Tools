@@ -35,7 +35,9 @@
     "simpleTitle": "Anggaran Cukai Pantas",
     "monthlySalary": "Gaji Bulanan",
     "numberOfChildren": "Bilangan Anak (Bawah 18)",
-    "annualEquivalent": "Setara tahunan"
+    "annualEquivalent": "Setara tahunan",
+    "estimatedAnnualTax": "Anggaran Cukai Tahunan",
+    "perMonth": "bulan"
   },
   "categories": {
     "personal": "Peribadi",

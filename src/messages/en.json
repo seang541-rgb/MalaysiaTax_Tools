@@ -35,7 +35,9 @@
     "simpleTitle": "Quick Tax Estimate",
     "monthlySalary": "Monthly Salary",
     "numberOfChildren": "Number of Children (Under 18)",
-    "annualEquivalent": "Annual equivalent"
+    "annualEquivalent": "Annual equivalent",
+    "estimatedAnnualTax": "Estimated Annual Tax",
+    "perMonth": "month"
   },
   "categories": {
     "personal": "Personal",
