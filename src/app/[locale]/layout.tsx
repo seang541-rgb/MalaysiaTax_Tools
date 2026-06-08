@@ -3,6 +3,7 @@ import { getMessages } from "next-intl/server";
 import { notFound } from "next/navigation";
 import { routing } from "@/i18n/routing";
 import { Header } from "@/components/header";
+import { ServiceWorkerRegister } from "@/components/sw-register";
 
 export default async function LocaleLayout({
   children,
@@ -21,8 +22,15 @@ export default async function LocaleLayout({
 
   return (
     <html lang={locale}>
+      <head>
+        <meta name="theme-color" content="#18181b" />
+        <meta name="apple-mobile-web-app-capable" content="yes" />
+        <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+        <link rel="apple-touch-icon" href="/icons/icon.svg" />
+      </head>
       <body className="min-h-screen bg-gray-50 flex flex-col">
         <NextIntlClientProvider messages={messages}>
+          <ServiceWorkerRegister />
           <Header />
           <main className="container mx-auto px-4 py-8 flex-1">
             {children}

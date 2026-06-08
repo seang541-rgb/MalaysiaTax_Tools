@@ -227,7 +227,17 @@
     "corporateTax": "Cukai Korporat",
     "batchPcb": "PCB Berkumpulan",
     "employer": "Majikan",
-    "sst": "SST"
+    "sst": "SST",
+    "aiTax": "Pembantu AI"
+  },
+  "aiTax": {
+    "pageTitle": "Pembantu Cukai AI",
+    "pageSubtitle": "Tanya saya apa sahaja tentang cukai Malaysia — peribadi, korporat, EPF, SOCSO, SST dan lain-lain",
+    "title": "Pembantu AI MYTax",
+    "subtitle": "Dikuasakan oleh Gemma 4 12B LLM tempatan",
+    "placeholder": "Tanya soalan cukai...",
+    "send": "Hantar",
+    "disclaimer": "Jawapan adalah untuk rujukan sahaja. Rujuk LHDN atau perunding cukai untuk nasihat rasmi."
   },
   "common": {
     "rm": "RM",

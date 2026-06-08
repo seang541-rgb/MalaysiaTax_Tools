@@ -227,7 +227,17 @@
     "corporateTax": "企业税",
     "batchPcb": "批量 PCB",
     "employer": "雇主缴纳",
-    "sst": "SST"
+    "sst": "SST",
+    "aiTax": "AI 助手"
+  },
+  "aiTax": {
+    "pageTitle": "AI 税务助手",
+    "pageSubtitle": "问我任何关于马来西亚税务的问题 — 个人税、企业税、EPF、SOCSO、SST 等",
+    "title": "MYTax AI 助手",
+    "subtitle": "由本地 Gemma 4 12B 大模型驱动",
+    "placeholder": "输入税务问题...",
+    "send": "发送",
+    "disclaimer": "回答仅供参考。请咨询 LHDN 或税务顾问获取正式建议。"
   },
   "common": {
     "rm": "RM",

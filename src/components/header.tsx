@@ -14,6 +14,7 @@ export function Header() {
     { href: "/batch-pcb", label: t("batchPcb") },
     { href: "/employer", label: t("employer") },
     { href: "/sst", label: t("sst") },
+    { href: "/ai-tax", label: t("aiTax") },
   ];
 
   return (

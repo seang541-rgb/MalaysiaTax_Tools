@@ -227,7 +227,17 @@
     "corporateTax": "Corporate Tax",
     "batchPcb": "Batch PCB",
     "employer": "Employer",
-    "sst": "SST"
+    "sst": "SST",
+    "aiTax": "AI Assistant"
+  },
+  "aiTax": {
+    "pageTitle": "AI Tax Assistant",
+    "pageSubtitle": "Ask me anything about Malaysia taxes — personal, corporate, EPF, SOCSO, SST and more",
+    "title": "MYTax AI Assistant",
+    "subtitle": "Powered by Gemma 4 12B local LLM",
+    "placeholder": "Ask a tax question...",
+    "send": "Send",
+    "disclaimer": "Answers are for reference only. Consult LHDN or a tax professional for official advice."
   },
   "common": {
     "rm": "RM",
