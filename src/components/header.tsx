@@ -12,6 +12,8 @@ export function Header() {
     { href: "/", label: t("personalTax") },
     { href: "/corporate", label: t("corporateTax") },
     { href: "/batch-pcb", label: t("batchPcb") },
+    { href: "/employer", label: t("employer") },
+    { href: "/sst", label: t("sst") },
   ];
 
   return (

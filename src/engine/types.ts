@@ -114,3 +114,64 @@ export interface BatchPcbSummary {
   totalAnnualPcb: number;
   totalAnnualTax: number;
 }
+
+// ─── Phase 3: Employer Statutory Contributions (EPF/SOCSO/EIS) ───
+
+export interface EmployerContributionInput {
+  monthlyGrossSalary: number;
+  employeeAge: "below60" | "60to65" | "above65"; // affects EPF rates
+  isMalaysianOrPR: boolean; // non-citizens have different SOCSO/EIS rules
+}
+
+export interface EmployerContributionResult {
+  employee: EmployerContributionInput;
+  epfEmployer: number;   // monthly
+  epfEmployee: number;   // monthly
+  socsoEmployer: number; // monthly
+  socsoEmployee: number; // monthly
+  eisEmployer: number;   // monthly
+  eisEmployee: number;   // monthly
+  totalEmployer: number; // monthly total employer portion
+  totalEmployee: number; // monthly total employee deduction
+  totalCost: number;     // monthly salary + employer portion
+}
+
+export interface BatchContributionInput {
+  name: string;
+  monthlyGrossSalary: number;
+  employeeAge: "below60" | "60to65" | "above65";
+  isMalaysianOrPR: boolean;
+}
+
+export interface BatchContributionResult {
+  employee: BatchContributionInput;
+  contributions: EmployerContributionResult;
+}
+
+export interface BatchContributionSummary {
+  employees: BatchContributionResult[];
+  totalMonthlyEpfEmployer: number;
+  totalMonthlySocsoEmployer: number;
+  totalMonthlyEisEmployer: number;
+  totalMonthlyEmployerCost: number;
+  totalMonthlySalary: number;
+  totalMonthlyTotalCost: number; // salary + all employer portions
+}
+
+// ─── Phase 3: SST (Sales & Service Tax) ───
+
+export interface SstInput {
+  taxableRevenue: number;       // annual taxable turnover
+  taxType: "sales" | "service"; // sales tax or service tax
+  salesTaxRate?: 5 | 10;        // sales tax: 5% or 10%
+}
+
+export interface SstResult {
+  taxableRevenue: number;
+  isRegistrationRequired: boolean; // threshold RM500k
+  taxType: "sales" | "service";
+  taxRate: number;               // percentage
+  estimatedTax: number;          // annual
+  monthlyTax: number;            // monthly estimate
+  registrationThreshold: number; // RM500k
+}
