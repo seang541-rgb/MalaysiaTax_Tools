@@ -59,3 +59,58 @@ export interface PcbEstimate {
   annualTax: number;
   difference: number;
 }
+
+// ─── Phase 2: Corporate Tax ───
+
+export interface CorporateTaxBand {
+  min: number;
+  max: number;
+  rate: number;
+  label: string;
+}
+
+export interface CorporateTaxBandResult {
+  band: CorporateTaxBand;
+  taxableInBand: number;
+  taxForBand: number;
+}
+
+export interface CorporateTaxInput {
+  yearOfAssessment: number;
+  chargeableIncome: number;
+  isSme: boolean; // Qualifies for SME preferential rates
+  paidUpCapital: number; // RM — SME if <= RM2.5M
+  annualRevenue: number; // RM — SME if < RM50M
+}
+
+export interface CorporateTaxResult {
+  chargeableIncome: number;
+  isSmeQualified: boolean;
+  bandBreakdown: CorporateTaxBandResult[];
+  totalTax: number;
+  effectiveRate: number; // percentage
+}
+
+// ─── Phase 2: Batch PCB ───
+
+export interface BatchEmployeeInput {
+  name: string;
+  monthlyGrossSalary: number;
+  maritalStatus: "single" | "married";
+  spouseHasIncome: boolean;
+  numberOfChildren: number;
+}
+
+export interface BatchPcbResult {
+  employee: BatchEmployeeInput;
+  monthlyPcb: number;
+  annualPcb: number;
+  annualTax: number;
+}
+
+export interface BatchPcbSummary {
+  employees: BatchPcbResult[];
+  totalMonthlyPcb: number;
+  totalAnnualPcb: number;
+  totalAnnualTax: number;
+}
