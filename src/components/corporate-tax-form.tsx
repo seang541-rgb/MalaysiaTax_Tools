@@ -26,6 +26,8 @@ export function CorporateTaxForm() {
   const [isSme, setIsSme] = useState(true);
   const [paidUpCapital, setPaidUpCapital] = useState(500000);
   const [annualRevenue, setAnnualRevenue] = useState(5000000);
+  const [isSubsidiary, setIsSubsidiary] = useState(false);
+  const [foreignOwned, setForeignOwned] = useState(false);
 
   const result = useMemo(() => {
     if (chargeableIncome <= 0) return null;
@@ -35,15 +37,19 @@ export function CorporateTaxForm() {
       isSme,
       paidUpCapital,
       annualRevenue,
+      isSubsidiaryOfLargeCompany: isSubsidiary,
+      foreignOwnershipOver20Pct: foreignOwned,
     };
     return calculateCorporateTax(input);
-  }, [chargeableIncome, isSme, paidUpCapital, annualRevenue]);
+  }, [chargeableIncome, isSme, paidUpCapital, annualRevenue, isSubsidiary, foreignOwned]);
 
   function handleReset() {
     setChargeableIncome(0);
     setIsSme(true);
     setPaidUpCapital(500000);
     setAnnualRevenue(5000000);
+    setIsSubsidiary(false);
+    setForeignOwned(false);
   }
 
   return (
@@ -106,6 +112,51 @@ export function CorporateTaxForm() {
                         setAnnualRevenue(parseFloat(e.target.value) || 0)
                       }
                     />
+                  </div>
+                </div>
+              </div>
+
+              <div className="space-y-3 pt-2">
+                <div className="flex items-center justify-between gap-4">
+                  <Label className="text-sm font-normal flex-1">
+                    {t("subsidiaryQuestion")}
+                  </Label>
+                  <div className="flex gap-2">
+                    <Button
+                      size="sm"
+                      variant={isSubsidiary ? "default" : "outline"}
+                      onClick={() => setIsSubsidiary(true)}
+                    >
+                      {t("yes")}
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant={!isSubsidiary ? "default" : "outline"}
+                      onClick={() => setIsSubsidiary(false)}
+                    >
+                      {t("no")}
+                    </Button>
+                  </div>
+                </div>
+                <div className="flex items-center justify-between gap-4">
+                  <Label className="text-sm font-normal flex-1">
+                    {t("foreignOwnershipQuestion")}
+                  </Label>
+                  <div className="flex gap-2">
+                    <Button
+                      size="sm"
+                      variant={foreignOwned ? "default" : "outline"}
+                      onClick={() => setForeignOwned(true)}
+                    >
+                      {t("yes")}
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant={!foreignOwned ? "default" : "outline"}
+                      onClick={() => setForeignOwned(false)}
+                    >
+                      {t("no")}
+                    </Button>
                   </div>
                 </div>
               </div>

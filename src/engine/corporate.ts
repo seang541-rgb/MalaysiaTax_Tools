@@ -36,6 +36,10 @@ function getCorporateTaxBands(
 
 function checkSmeEligibility(input: CorporateTaxInput): boolean {
   if (!input.isSme) return false;
+  // Related to a company with paid-up capital > RM2.5M (s2A/s2B ITA)
+  if (input.isSubsidiaryOfLargeCompany) return false;
+  // From YA2024: > 20% foreign company / non-citizen ownership disqualifies
+  if (input.foreignOwnershipOver20Pct) return false;
   return input.paidUpCapital <= 2500000 && input.annualRevenue < 50000000;
 }
 

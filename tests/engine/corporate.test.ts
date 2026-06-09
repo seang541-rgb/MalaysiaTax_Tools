@@ -99,6 +99,50 @@ describe("calculateCorporateTax", () => {
     expect(result.totalTax).toBe(120000);
   });
 
+  it("rejects SME if related to a company with paid-up capital > RM2.5M", () => {
+    const result = calculateCorporateTax(
+      makeInput({
+        chargeableIncome: 500000,
+        isSme: true,
+        paidUpCapital: 1000000,
+        annualRevenue: 20000000,
+        isSubsidiaryOfLargeCompany: true,
+      })
+    );
+    expect(result.isSmeQualified).toBe(false);
+    expect(result.totalTax).toBe(120000); // 500k * 24%
+  });
+
+  it("rejects SME if foreign ownership exceeds 20% (YA2024 rule)", () => {
+    const result = calculateCorporateTax(
+      makeInput({
+        chargeableIncome: 500000,
+        isSme: true,
+        paidUpCapital: 1000000,
+        annualRevenue: 20000000,
+        foreignOwnershipOver20Pct: true,
+      })
+    );
+    expect(result.isSmeQualified).toBe(false);
+    expect(result.totalTax).toBe(120000);
+  });
+
+  it("still qualifies as SME when both disqualifiers are explicitly false", () => {
+    const result = calculateCorporateTax(
+      makeInput({
+        chargeableIncome: 300000,
+        isSme: true,
+        paidUpCapital: 1000000,
+        annualRevenue: 20000000,
+        isSubsidiaryOfLargeCompany: false,
+        foreignOwnershipOver20Pct: false,
+      })
+    );
+    expect(result.isSmeQualified).toBe(true);
+    // 150k*15% + 150k*17% = 22,500 + 25,500
+    expect(result.totalTax).toBe(48000);
+  });
+
   it("calculates correct effective rate for SME", () => {
     const result = calculateCorporateTax(
       makeInput({

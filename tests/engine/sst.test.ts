@@ -68,4 +68,86 @@ describe("calculateSst", () => {
     expect(result.isRegistrationRequired).toBe(true);
     expect(result.estimatedTax).toBe(50000);
   });
+
+  // ─── 1 July 2025 service tax expansion ───
+
+  it("rental/leasing: 8% with RM1M threshold", () => {
+    const below = calculateSst({
+      taxableRevenue: 900000,
+      taxType: "service",
+      serviceCategory: "rental",
+    });
+    expect(below.isRegistrationRequired).toBe(false);
+
+    const above = calculateSst({
+      taxableRevenue: 1200000,
+      taxType: "service",
+      serviceCategory: "rental",
+    });
+    expect(above.isRegistrationRequired).toBe(true);
+    expect(above.taxRate).toBe(8);
+    expect(above.estimatedTax).toBe(96000);
+    expect(above.registrationThreshold).toBe(1000000);
+  });
+
+  it("construction: 6% with RM1.5M threshold", () => {
+    const result = calculateSst({
+      taxableRevenue: 2000000,
+      taxType: "service",
+      serviceCategory: "construction",
+    });
+    expect(result.isRegistrationRequired).toBe(true);
+    expect(result.taxRate).toBe(6);
+    expect(result.estimatedTax).toBe(120000);
+    expect(result.registrationThreshold).toBe(1500000);
+  });
+
+  it("financial services: 8% with RM1M threshold", () => {
+    const result = calculateSst({
+      taxableRevenue: 1000000,
+      taxType: "service",
+      serviceCategory: "financial",
+    });
+    expect(result.isRegistrationRequired).toBe(true);
+    expect(result.taxRate).toBe(8);
+  });
+
+  it("private healthcare: 6% with RM1.5M threshold", () => {
+    const result = calculateSst({
+      taxableRevenue: 1400000,
+      taxType: "service",
+      serviceCategory: "healthcare",
+    });
+    expect(result.isRegistrationRequired).toBe(false);
+    expect(result.registrationThreshold).toBe(1500000);
+  });
+
+  it("education: 6% with no threshold (registrable from any revenue)", () => {
+    const result = calculateSst({
+      taxableRevenue: 100000,
+      taxType: "service",
+      serviceCategory: "education",
+    });
+    expect(result.isRegistrationRequired).toBe(true);
+    expect(result.taxRate).toBe(6);
+    expect(result.estimatedTax).toBe(6000);
+
+    const zero = calculateSst({
+      taxableRevenue: 0,
+      taxType: "service",
+      serviceCategory: "education",
+    });
+    expect(zero.isRegistrationRequired).toBe(false);
+  });
+
+  it("F&B: 6% with RM1.5M threshold", () => {
+    const result = calculateSst({
+      taxableRevenue: 1500000,
+      taxType: "service",
+      serviceCategory: "fnb",
+    });
+    expect(result.isRegistrationRequired).toBe(true);
+    expect(result.taxRate).toBe(6);
+    expect(result.estimatedTax).toBe(90000);
+  });
 });

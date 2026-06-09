@@ -81,6 +81,9 @@ export interface CorporateTaxInput {
   isSme: boolean; // Qualifies for SME preferential rates
   paidUpCapital: number; // RM — SME if <= RM2.5M
   annualRevenue: number; // RM — SME if < RM50M
+  // SME disqualifiers (Income Tax Act s2A/s2B; foreign ownership rule from YA2024)
+  isSubsidiaryOfLargeCompany?: boolean; // related to a company with paid-up capital > RM2.5M
+  foreignOwnershipOver20Pct?: boolean;  // > 20% shares held by foreign companies / non-citizens
 }
 
 export interface CorporateTaxResult {
@@ -159,19 +162,34 @@ export interface BatchContributionSummary {
 }
 
 // ─── Phase 3: SST (Sales & Service Tax) ───
+// Updated for the 1 July 2025 service tax scope expansion
+
+export type ServiceTaxCategory =
+  | "general"      // professional, IT, consulting, etc. — 8%, RM500k
+  | "fnb"          // food & beverage — 6%, RM1.5M
+  | "telecom"      // telecommunications — 6%, RM500k
+  | "parking"      // vehicle parking — 6%, RM500k
+  | "logistics"    // logistics — 6%, RM500k
+  | "rental"       // rental/leasing (non-residential) — 8%, RM1M (new Jul 2025)
+  | "construction" // construction (non-residential) — 6%, RM1.5M (new Jul 2025)
+  | "financial"    // fee/commission-based financial services — 8%, RM1M (new Jul 2025)
+  | "healthcare"   // private healthcare for non-citizens — 6%, RM1.5M (new Jul 2025)
+  | "education";   // private education >RM60k/yr or non-citizen — 6%, no threshold (new Jul 2025)
 
 export interface SstInput {
   taxableRevenue: number;       // annual taxable turnover
   taxType: "sales" | "service"; // sales tax or service tax
   salesTaxRate?: 5 | 10;        // sales tax: 5% or 10%
+  serviceCategory?: ServiceTaxCategory; // defaults to "general"
 }
 
 export interface SstResult {
   taxableRevenue: number;
-  isRegistrationRequired: boolean; // threshold RM500k
+  isRegistrationRequired: boolean;
   taxType: "sales" | "service";
+  serviceCategory?: ServiceTaxCategory;
   taxRate: number;               // percentage
   estimatedTax: number;          // annual
   monthlyTax: number;            // monthly estimate
-  registrationThreshold: number; // RM500k
+  registrationThreshold: number; // category-dependent
 }

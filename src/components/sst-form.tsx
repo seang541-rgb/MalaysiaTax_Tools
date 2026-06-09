@@ -7,8 +7,10 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
-import { calculateSst } from "@/engine/sst";
-import { SstInput } from "@/engine/types";
+import { calculateSst, SERVICE_TAX_CATEGORIES } from "@/engine/sst";
+import { SstInput, ServiceTaxCategory } from "@/engine/types";
+
+const SERVICE_CATEGORIES = Object.keys(SERVICE_TAX_CATEGORIES) as ServiceTaxCategory[];
 
 function formatRM(amount: number): string {
   return `RM ${amount.toLocaleString("en-MY", {
@@ -22,6 +24,7 @@ export function SstForm() {
 
   const [taxType, setTaxType] = useState<"sales" | "service">("service");
   const [salesTaxRate, setSalesTaxRate] = useState<5 | 10>(10);
+  const [serviceCategory, setServiceCategory] = useState<ServiceTaxCategory>("general");
   const [taxableRevenue, setTaxableRevenue] = useState(0);
 
   const result = useMemo(() => {
@@ -30,15 +33,26 @@ export function SstForm() {
       taxableRevenue,
       taxType,
       salesTaxRate: taxType === "sales" ? salesTaxRate : undefined,
+      serviceCategory: taxType === "service" ? serviceCategory : undefined,
     };
     return calculateSst(input);
-  }, [taxableRevenue, taxType, salesTaxRate]);
+  }, [taxableRevenue, taxType, salesTaxRate, serviceCategory]);
 
   function handleReset() {
     setTaxType("service");
     setSalesTaxRate(10);
+    setServiceCategory("general");
     setTaxableRevenue(0);
   }
+
+  const activeThreshold =
+    taxType === "service"
+      ? SERVICE_TAX_CATEGORIES[serviceCategory].threshold
+      : 500000;
+  const activeRate =
+    taxType === "service"
+      ? SERVICE_TAX_CATEGORIES[serviceCategory].rate * 100
+      : salesTaxRate;
 
   return (
     <div className="space-y-6">
@@ -52,7 +66,7 @@ export function SstForm() {
               variant={taxType === "service" ? "default" : "outline"}
               onClick={() => setTaxType("service")}
             >
-              {t("serviceTax")} (8%)
+              {t("serviceTax")}
             </Button>
             <Button
               variant={taxType === "sales" ? "default" : "outline"}
@@ -61,6 +75,30 @@ export function SstForm() {
               {t("salesTax")}
             </Button>
           </div>
+
+          {taxType === "service" && (
+            <div className="space-y-2">
+              <Label htmlFor="service-category">{t("serviceCategory")}</Label>
+              <select
+                id="service-category"
+                className="w-full h-10 px-3 rounded-md border bg-background text-sm"
+                value={serviceCategory}
+                onChange={(e) =>
+                  setServiceCategory(e.target.value as ServiceTaxCategory)
+                }
+              >
+                {SERVICE_CATEGORIES.map((cat) => (
+                  <option key={cat} value={cat}>
+                    {t(`category_${cat}`)} —{" "}
+                    {SERVICE_TAX_CATEGORIES[cat].rate * 100}%
+                  </option>
+                ))}
+              </select>
+              <p className="text-xs text-muted-foreground">
+                {t("expansionNote")}
+              </p>
+            </div>
+          )}
 
           {taxType === "sales" && (
             <div className="space-y-2">
@@ -107,7 +145,11 @@ export function SstForm() {
             />
           </div>
           <p className="text-xs text-muted-foreground mt-2">
-            {t("threshold")}: RM 500,000
+            {t("threshold")}:{" "}
+            {activeThreshold === 0
+              ? t("noThreshold")
+              : `RM ${activeThreshold.toLocaleString("en-MY")}`}{" "}
+            · {t("taxRate")}: {activeRate}%
           </p>
         </CardContent>
       </Card>

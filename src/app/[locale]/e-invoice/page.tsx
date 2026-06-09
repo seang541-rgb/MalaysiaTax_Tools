@@ -1,0 +1,31 @@
+import { useTranslations } from "next-intl";
+import { getTranslations } from "next-intl/server";
+import { EInvoiceChecker } from "@/components/e-invoice-checker";
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ locale: string }>;
+}) {
+  const { locale } = await params;
+  const t = await getTranslations({ locale, namespace: "einvoice" });
+
+  return {
+    title: t("title"),
+    description: t("subtitle"),
+  };
+}
+
+export default function EInvoicePage() {
+  const t = useTranslations("einvoice");
+
+  return (
+    <div className="max-w-3xl mx-auto">
+      <div className="text-center py-8">
+        <h1 className="text-3xl font-bold mb-2">{t("title")}</h1>
+        <p className="text-muted-foreground">{t("subtitle")}</p>
+      </div>
+      <EInvoiceChecker />
+    </div>
+  );
+}
