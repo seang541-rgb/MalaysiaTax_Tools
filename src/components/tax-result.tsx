@@ -4,6 +4,9 @@ import { useTranslations } from "next-intl";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { TaxCalculationResult } from "@/engine/types";
+import { Printer, Share2, Check } from "lucide-react";
+import { useState } from "react";
+import { TaxCalculationInput } from "@/engine/types";
 
 function formatRM(amount: number): string {
   return `RM ${amount.toLocaleString("en-MY", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
@@ -11,13 +14,37 @@ function formatRM(amount: number): string {
 
 interface TaxResultProps {
   result: TaxCalculationResult;
+  input?: TaxCalculationInput;
 }
 
-export function TaxResult({ result }: TaxResultProps) {
+function encodeShareData(input: TaxCalculationInput): string {
+  const data = {
+    i: input.income,
+    r: input.reliefs,
+    m: input.maritalStatus,
+    s: input.spouseHasIncome,
+    z: input.zakatAmount,
+    p: input.monthlyPcbPaid,
+  };
+  return btoa(JSON.stringify(data));
+}
+
+export function TaxResult({ result, input }: TaxResultProps) {
   const t = useTranslations("results");
+  const [copied, setCopied] = useState(false);
+
+  function handleShare() {
+    if (!input) return;
+    const hash = encodeShareData(input);
+    const url = `${window.location.origin}${window.location.pathname}?d=${hash}`;
+    navigator.clipboard.writeText(url).then(() => {
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    });
+  }
 
   return (
-    <Card>
+    <Card role="region" aria-label={t("title")} aria-live="polite">
       <CardHeader>
         <CardTitle>{t("title")}</CardTitle>
       </CardHeader>
@@ -96,6 +123,25 @@ export function TaxResult({ result }: TaxResultProps) {
         <p className="text-xs text-muted-foreground mt-4 p-3 bg-muted rounded-md">
           {t("disclaimer")}
         </p>
+
+        <div className="flex gap-3 mt-4 print:hidden">
+          <button
+            onClick={() => window.print()}
+            className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 border rounded-lg text-sm text-muted-foreground hover:bg-muted transition-colors"
+          >
+            <Printer className="h-4 w-4" />
+            {t("printExport")}
+          </button>
+          {input && (
+            <button
+              onClick={handleShare}
+              className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 border rounded-lg text-sm text-muted-foreground hover:bg-muted transition-colors"
+            >
+              {copied ? <Check className="h-4 w-4 text-green-600" /> : <Share2 className="h-4 w-4" />}
+              {copied ? t("linkCopied") : t("shareResult")}
+            </button>
+          )}
+        </div>
       </CardContent>
     </Card>
   );

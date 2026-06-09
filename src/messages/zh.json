@@ -97,7 +97,10 @@
     "balance": "结余",
     "overpaid": "可退税金额",
     "underpaid": "需补缴税额",
-    "disclaimer": "此计算仅供参考，不构成税务建议。请咨询 LHDN 或持牌税务顾问以获取正式评估。"
+    "disclaimer": "此计算仅供参考，不构成税务建议。请咨询 LHDN 或持牌税务顾问以获取正式评估。",
+    "printExport": "打印 / 保存为PDF",
+    "shareResult": "复制分享链接",
+    "linkCopied": "链接已复制！"
   },
   "explanation": {
     "title": "了解您的税务",
@@ -244,5 +247,45 @@
     "perYear": "每年",
     "perMonth": "每月",
     "max": "上限"
+  },
+  "privacy": {
+    "title": "隐私政策",
+    "lastUpdated": "最后更新：2026年6月",
+    "collectTitle": "我们收集的信息",
+    "collectDesc": "MYTax 不会收集、存储或传输您输入的任何个人财务数据。所有税务计算完全在您的浏览器中进行。使用 AI 税务助手时，您的消息通过本地大模型处理，会话结束后不会被保存。",
+    "useTitle": "信息使用方式",
+    "useDesc": "我们可能会收集匿名使用分析数据（页面浏览量、功能使用情况）以改善服务。分析不会收集任何可识别个人身份的信息。",
+    "storageTitle": "数据存储",
+    "storageDesc": "您的税务计算输入不会保存到任何服务器。如果您使用分享链接功能，计算参数编码在 URL 中 — 我们的服务器不存储任何数据。",
+    "cookiesTitle": "Cookie",
+    "cookiesDesc": "我们仅使用必要的 Cookie 来保存语言偏好。不使用任何跟踪或广告 Cookie。",
+    "thirdPartyTitle": "第三方服务",
+    "thirdPartyDesc": "MYTax 可能使用第三方分析服务收集匿名使用数据。我们不会向第三方出售或分享任何用户数据。",
+    "changesTitle": "政策变更",
+    "changesDesc": "我们可能会不时更新本隐私政策。变更将发布在此页面并更新日期。",
+    "contactTitle": "联系方式",
+    "contactDesc": "如对本隐私政策有疑问，请通过 support@mytax.my 联系我们。"
+  },
+  "terms": {
+    "title": "使用条款",
+    "lastUpdated": "最后更新：2026年6月",
+    "acceptTitle": "条款接受",
+    "acceptDesc": "访问和使用 MYTax（mytax.my）即表示您同意受本使用条款约束。如不同意，请勿使用本服务。",
+    "serviceTitle": "服务描述",
+    "serviceDesc": "MYTax 提供免费的马来西亚税务在线计算工具，包括个人所得税、企业税、PCB、雇主法定缴款（EPF/SOCSO/EIS）及 SST。本服务还包括 AI 税务助手，用于解答一般税务问题。",
+    "disclaimerTitle": "免责声明",
+    "disclaimerDesc": "所有计算结果和 AI 回答仅供参考和估算使用，不构成专业税务建议。税法经常变化，个人情况各异。请务必咨询 LHDN（马来西亚内陆税收局）或持牌税务顾问以获取正式的税务评估和申报。",
+    "liabilityTitle": "责任限制",
+    "liabilityDesc": "MYTax 不对计算或提供的信息中的任何错误、遗漏或不准确承担责任。用户有责任在做出财务决策前独立验证所有结果。",
+    "ipTitle": "知识产权",
+    "ipDesc": "MYTax 上的所有内容、设计和代码均为 MYTax 的财产，受适用知识产权法律保护。未经事先书面同意，不得复制、分发或创作衍生作品。",
+    "changesTitle": "条款变更",
+    "changesDesc": "我们保留随时修改本条款的权利。变更后继续使用本服务即视为接受新条款。",
+    "lawTitle": "适用法律",
+    "lawDesc": "本条款受马来西亚法律管辖。因使用本服务引起的任何争议应受马来西亚法院的专属管辖。"
+  },
+  "footer": {
+    "privacy": "隐私政策",
+    "terms": "使用条款"
   }
 }

@@ -97,7 +97,10 @@
     "balance": "Balance",
     "overpaid": "Refund Due",
     "underpaid": "Additional Tax Payable",
-    "disclaimer": "This calculation is for reference only and does not constitute tax advice. Please consult LHDN or a licensed tax professional for official assessment."
+    "disclaimer": "This calculation is for reference only and does not constitute tax advice. Please consult LHDN or a licensed tax professional for official assessment.",
+    "printExport": "Print / Save as PDF",
+    "shareResult": "Copy Share Link",
+    "linkCopied": "Link Copied!"
   },
   "explanation": {
     "title": "Understanding Your Tax",
@@ -244,5 +247,45 @@
     "perYear": "per year",
     "perMonth": "per month",
     "max": "Max"
+  },
+  "privacy": {
+    "title": "Privacy Policy",
+    "lastUpdated": "Last updated: June 2026",
+    "collectTitle": "Information We Collect",
+    "collectDesc": "MYTax does not collect, store, or transmit any personal financial data you enter. All tax calculations are performed entirely in your browser. When using the AI Tax Assistant, your messages are processed through a local LLM and are not stored after the session ends.",
+    "useTitle": "How We Use Information",
+    "useDesc": "We may collect anonymous usage analytics (page views, feature usage) to improve the service. No personally identifiable information is collected through analytics.",
+    "storageTitle": "Data Storage",
+    "storageDesc": "Your tax calculation inputs are not saved to any server. If you use the share link feature, calculation parameters are encoded in the URL itself — no data is stored on our servers.",
+    "cookiesTitle": "Cookies",
+    "cookiesDesc": "We use essential cookies only for language preference. No tracking or advertising cookies are used.",
+    "thirdPartyTitle": "Third-Party Services",
+    "thirdPartyDesc": "MYTax may use third-party analytics services that collect anonymous usage data. We do not sell or share any user data with third parties.",
+    "changesTitle": "Changes to This Policy",
+    "changesDesc": "We may update this Privacy Policy from time to time. Changes will be posted on this page with an updated date.",
+    "contactTitle": "Contact",
+    "contactDesc": "For questions about this Privacy Policy, please contact us at support@mytax.my."
+  },
+  "terms": {
+    "title": "Terms of Service",
+    "lastUpdated": "Last updated: June 2026",
+    "acceptTitle": "Acceptance of Terms",
+    "acceptDesc": "By accessing and using MYTax (mytax.my), you agree to be bound by these Terms of Service. If you do not agree, please do not use the service.",
+    "serviceTitle": "Description of Service",
+    "serviceDesc": "MYTax provides free online tax calculation tools for Malaysian taxes, including personal income tax, corporate tax, PCB, employer contributions (EPF/SOCSO/EIS), and SST. The service also includes an AI-powered tax assistant for general tax queries.",
+    "disclaimerTitle": "Disclaimer",
+    "disclaimerDesc": "All calculations and AI-generated responses are for reference and estimation purposes only. They do not constitute professional tax advice. Tax laws change frequently and individual circumstances vary. Always consult LHDN (Inland Revenue Board of Malaysia) or a licensed tax professional for official tax assessment and filing.",
+    "liabilityTitle": "Limitation of Liability",
+    "liabilityDesc": "MYTax shall not be held liable for any errors, omissions, or inaccuracies in the calculations or information provided. Users are responsible for verifying all results independently before making financial decisions.",
+    "ipTitle": "Intellectual Property",
+    "ipDesc": "All content, design, and code on MYTax are the property of MYTax and are protected by applicable intellectual property laws. You may not reproduce, distribute, or create derivative works without prior written consent.",
+    "changesTitle": "Changes to Terms",
+    "changesDesc": "We reserve the right to modify these Terms at any time. Continued use of the service after changes constitutes acceptance of the new terms.",
+    "lawTitle": "Governing Law",
+    "lawDesc": "These Terms are governed by the laws of Malaysia. Any disputes arising from the use of this service shall be subject to the exclusive jurisdiction of Malaysian courts."
+  },
+  "footer": {
+    "privacy": "Privacy Policy",
+    "terms": "Terms of Service"
   }
 }

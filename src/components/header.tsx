@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useTranslations } from "next-intl";
 import { Link, usePathname } from "@/i18n/navigation";
 import { LocaleSwitcher } from "./locale-switcher";
+import { ThemeToggle } from "./theme-toggle";
 import { Menu, X } from "lucide-react";
 
 export function Header() {
@@ -21,7 +22,7 @@ export function Header() {
   ];
 
   return (
-    <header className="border-b bg-white relative">
+    <header className="border-b bg-white dark:bg-zinc-900 relative">
       <div className="container mx-auto flex h-16 items-center justify-between px-4">
         <div className="flex items-center gap-2">
           <Link href="/" className="text-xl font-bold text-primary">
@@ -51,6 +52,7 @@ export function Header() {
               );
             })}
           </nav>
+          <ThemeToggle />
           <LocaleSwitcher />
           {/* Mobile hamburger */}
           <button
@@ -66,7 +68,7 @@ export function Header() {
 
       {/* Mobile nav dropdown */}
       {mobileOpen && (
-        <nav className="md:hidden border-t bg-white absolute left-0 right-0 z-50 shadow-lg">
+        <nav className="md:hidden border-t bg-white dark:bg-zinc-900 absolute left-0 right-0 z-50 shadow-lg">
           <div className="container mx-auto px-4 py-2 flex flex-col gap-1">
             {navItems.map((item) => {
               const isActive =

@@ -128,3 +128,56 @@
     @apply font-sans;
   }
 }
+
+/* Focus visibility for keyboard navigation */
+*:focus-visible {
+  outline: 2px solid var(--ring);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+/* Print styles */
+@media print {
+  /* Hide non-essential elements */
+  header,
+  footer,
+  nav,
+  .print\:hidden {
+    display: none !important;
+  }
+
+  /* Clean background */
+  body {
+    background: white !important;
+    color: black !important;
+    font-size: 12pt;
+  }
+
+  /* Remove shadows and unnecessary borders */
+  * {
+    box-shadow: none !important;
+  }
+
+  /* Ensure cards look clean */
+  [class*="card"] {
+    border: 1px solid #ddd !important;
+    break-inside: avoid;
+  }
+
+  /* Page margins */
+  @page {
+    margin: 1.5cm;
+  }
+
+  /* Add site title for printed pages */
+  body::before {
+    content: "MYTax Calculator — mytax.my";
+    display: block;
+    text-align: center;
+    font-size: 10pt;
+    color: #666;
+    margin-bottom: 1cm;
+    border-bottom: 1px solid #ddd;
+    padding-bottom: 0.5cm;
+  }
+}

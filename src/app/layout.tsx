@@ -32,21 +32,12 @@ export const metadata: Metadata = {
     title: "MYTax - Free Malaysia Tax Calculator",
     description:
       "Calculate personal tax, corporate tax, PCB, EPF/SOCSO/EIS, and SST — free, trilingual, instant results.",
-    images: [
-      {
-        url: "/icons/icon.svg",
-        width: 512,
-        height: 512,
-        alt: "MYTax Logo",
-      },
-    ],
   },
   twitter: {
     card: "summary_large_image",
     title: "MYTax - Free Malaysia Tax Calculator",
     description:
       "Calculate personal tax, corporate tax, PCB, EPF/SOCSO/EIS, and SST — free, trilingual.",
-    images: ["/icons/icon.svg"],
   },
   manifest: "/manifest.json",
   icons: {

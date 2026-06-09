@@ -1,6 +1,7 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
+import { useSearchParams } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -33,7 +34,9 @@ function emptyIncome(): IncomeInput {
 
 export function IncomeForm() {
   const t = useTranslations("calculator");
+  const searchParams = useSearchParams();
   const [mode, setMode] = useState<"simple" | "advanced">("simple");
+  const [shareLoaded, setShareLoaded] = useState(false);
 
   // Simple mode state
   const [monthlySalary, setMonthlySalary] = useState(0);
@@ -54,6 +57,25 @@ export function IncomeForm() {
   ]);
   const [zakatAmount, setZakatAmount] = useState(0);
   const [monthlyPcb, setMonthlyPcb] = useState(0);
+
+  // Restore state from share link
+  useEffect(() => {
+    const d = searchParams.get("d");
+    if (!d || shareLoaded) return;
+    try {
+      const data = JSON.parse(atob(d));
+      if (data.i) setIncome(data.i);
+      if (data.r) setReliefClaims(data.r);
+      if (data.m) setMaritalStatus(data.m);
+      if (data.s !== undefined) setSpouseHasIncome(data.s);
+      if (data.z) setZakatAmount(data.z);
+      if (data.p) setMonthlyPcb(data.p);
+      setMode("advanced");
+      setShareLoaded(true);
+    } catch {
+      // invalid share data, ignore
+    }
+  }, [searchParams, shareLoaded]);
 
   const simpleResult = useMemo(() => {
     if (monthlySalary <= 0) return null;
@@ -127,6 +149,28 @@ export function IncomeForm() {
   ];
 
   const currentResult = mode === "simple" ? simpleResult : advancedResult;
+
+  const currentInput: TaxCalculationInput | undefined = currentResult
+    ? mode === "simple"
+      ? {
+          yearOfAssessment: YEAR_OF_ASSESSMENT,
+          income: { employment: monthlySalary * 12, commission: 0, rental: 0, interest: 0, dividend: 0, other: 0 },
+          reliefs: [{ reliefId: "individual", amount: 9000 }],
+          maritalStatus: simpleMarital,
+          spouseHasIncome: simpleSpouseIncome,
+          zakatAmount: 0,
+          monthlyPcbPaid: 0,
+        }
+      : {
+          yearOfAssessment: YEAR_OF_ASSESSMENT,
+          income,
+          reliefs: reliefClaims,
+          maritalStatus,
+          spouseHasIncome,
+          zakatAmount,
+          monthlyPcbPaid: monthlyPcb,
+        }
+    : undefined;
 
   return (
     <div className="space-y-6">
@@ -388,7 +432,7 @@ export function IncomeForm() {
       {currentResult && (
         <>
           <Separator />
-          <TaxResult result={currentResult} />
+          <TaxResult result={currentResult} input={currentInput} />
         </>
       )}
 
