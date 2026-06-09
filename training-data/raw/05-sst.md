@@ -1,5 +1,8 @@
 # SST (Sales & Service Tax) - Malaysia 2025
+# 销售与服务税 (SST) - 马来西亚 2025
+# Cukai Jualan dan Perkhidmatan (SST) - Malaysia 2025
 Source: Royal Malaysian Customs Department (RMCD/JKDM)
+Keywords: 销售税 服务税 SST GST 注册门槛 税率 cukai jualan perkhidmatan sales service tax
 
 ## Overview
 SST replaced GST in Malaysia from 1 September 2018. It consists of two separate taxes:

@@ -1,5 +1,8 @@
 # EPF (KWSP) Contribution Rates - 2025
+# 公积金 (EPF/KWSP) 缴纳率 - 2025
+# Kadar Caruman KWSP - 2025
 Source: kwsp.gov.my
+Keywords: 公积金 EPF KWSP 雇主缴纳 雇员缴纳 缴纳率 退休金 caruman majikan pekerja employer employee contribution
 
 ## Employer Contribution Rates
 

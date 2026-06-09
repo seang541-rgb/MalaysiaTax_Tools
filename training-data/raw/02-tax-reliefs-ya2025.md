@@ -1,5 +1,8 @@
 # Malaysia Individual Tax Reliefs - YA2025
+# 马来西亚个人税务减免 - 2025估税年 (YA2025)
+# Pelepasan Cukai Individu Malaysia - YA2025
 Source: LHDN / RinggitPlus compilation
+Keywords: 减免 扣除 个人减免 配偶 子女 教育 医疗 保险 EPF KWSP 生活方式 tax relief pelepasan cukai
 
 ## Personal Reliefs
 

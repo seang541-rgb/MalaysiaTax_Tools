@@ -1,5 +1,8 @@
 # SOCSO (PERKESO) Contribution Rates - 2025
+# 社会保险 (SOCSO/PERKESO) 缴纳率 - 2025
+# Kadar Caruman PERKESO - 2025
 Source: perkeso.gov.my
+Keywords: 社保 社会保险 SOCSO PERKESO EIS SIP 工伤 失业保险 雇主 雇员 caruman insurans pekerjaan
 
 ## Coverage
 - Employees' Social Security Act 1969 (Act 4)

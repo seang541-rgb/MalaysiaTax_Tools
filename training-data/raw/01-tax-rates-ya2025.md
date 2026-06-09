@@ -1,5 +1,8 @@
 # Malaysia Individual Income Tax Rates - YA2025
+# 马来西亚个人所得税税率 - 2025估税年 (YA2025)
+# Kadar Cukai Pendapatan Individu Malaysia - YA2025
 Source: LHDN (hasil.gov.my)
+Keywords: 个人税 税率 累进税率 所得税 income tax progressive rates cukai pendapatan individu
 
 ## Resident Individual Tax Rates (YA 2023, 2024 & 2025)
 

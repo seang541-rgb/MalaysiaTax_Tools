@@ -1,5 +1,8 @@
 # PCB (Potongan Cukai Bulanan / Monthly Tax Deduction)
+# 每月预扣税 (PCB) / 月度税务扣除
+# Potongan Cukai Bulanan (PCB)
 Source: LHDN Malaysia
+Keywords: PCB 预扣税 月度扣税 雇主代扣 工资扣税 monthly tax deduction potongan cukai bulanan
 
 ## What is PCB?
 PCB (Potongan Cukai Bulanan) or MTD (Monthly Tax Deduction) is the mechanism where employers deduct income tax from employees' monthly salary as advance tax payment to LHDN.
