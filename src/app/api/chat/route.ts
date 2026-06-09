@@ -1,5 +1,7 @@
 import { NextRequest } from "next/server";
 import { createClient } from "@supabase/supabase-js";
+import { TAX_RATES_YA2025 } from "@/engine/tax-rates";
+import { TaxBand } from "@/engine/types";
 
 const OLLAMA_BASE = process.env.OLLAMA_BASE_URL || "http://localhost:11434";
 const MODEL = process.env.OLLAMA_MODEL || "mytax-gemma4";
@@ -51,6 +53,154 @@ async function retrieveContext(query: string): Promise<string> {
   }
 }
 
+// ─── Pre-calculation: deterministic tax math ───
+
+/** Extract annual income amount from user message */
+function extractIncomeAmount(message: string): number | null {
+  // Normalize: remove commas, spaces in numbers
+  const normalized = message.replace(/,/g, "").replace(/\s+/g, " ");
+
+  // Patterns for annual income (支持 EN/ZH/MS)
+  const annualPatterns = [
+    // English: "annual income is RM80000", "yearly salary of RM80000", "income of RM 80000"
+    /(?:annual|yearly|year|tahunan|tahun|年收入|年薪|年入|收入)[^0-9]*(?:RM|rm)?\s*(\d+(?:\.\d+)?)\s*(?:k|K)?/i,
+    // Direct: "RM80000 per year", "RM80000 setahun", "RM80000一年"
+    /(?:RM|rm)\s*(\d+(?:\.\d+)?)\s*(?:k|K)?\s*(?:per year|a year|setahun|一年|每年|\/year)/i,
+    // Generic: "annual income RM80000" or "pendapatan tahunan RM80000"
+    /(?:RM|rm)\s*(\d+(?:\.\d+)?)\s*(?:k|K)?/i,
+  ];
+
+  // Monthly patterns (需要 ×12)
+  const monthlyPatterns = [
+    // English: "monthly salary RM8000", "monthly income RM8000"
+    /(?:monthly|month|sebulan|bulan|bulanan|月薪|月收入|月入|每月)[^0-9]*(?:RM|rm)?\s*(\d+(?:\.\d+)?)\s*(?:k|K)?/i,
+    // Direct: "RM8000 per month", "RM8000 sebulan", "RM8000一个月"
+    /(?:RM|rm)\s*(\d+(?:\.\d+)?)\s*(?:k|K)?\s*(?:per month|a month|sebulan|\/month|一个月|每个月|每月|\/bulan)/i,
+    // "gaji RM8000" (salary in Malay, often implies monthly)
+    /(?:gaji|salary|薪水|工资)[^0-9]*(?:RM|rm)?\s*(\d+(?:\.\d+)?)\s*(?:k|K)?/i,
+  ];
+
+  // Check monthly patterns first (more specific)
+  for (const pattern of monthlyPatterns) {
+    const match = normalized.match(pattern);
+    if (match) {
+      let amount = parseFloat(match[1]);
+      if (normalized.match(new RegExp(match[1] + "\\s*[kK]"))) {
+        amount *= 1000;
+      }
+      // Sanity: monthly should be < 200k (reasonable range)
+      if (amount > 0 && amount < 200000) {
+        return amount * 12; // Convert to annual
+      }
+    }
+  }
+
+  // Check annual patterns
+  for (const pattern of annualPatterns) {
+    const match = normalized.match(pattern);
+    if (match) {
+      let amount = parseFloat(match[1]);
+      if (normalized.match(new RegExp(match[1] + "\\s*[kK]"))) {
+        amount *= 1000;
+      }
+      // Sanity: annual should be > 1000 (filter out band numbers like "19%")
+      if (amount >= 1000) {
+        return amount;
+      }
+    }
+  }
+
+  return null;
+}
+
+interface PreCalculatedTax {
+  grossIncome: number;
+  personalRelief: number;
+  chargeableIncome: number;
+  bands: { min: number; max: number; rate: number; taxable: number; tax: number }[];
+  totalTax: number;
+  rebate: number;
+  finalTax: number;
+  isMonthly: boolean; // whether user asked in monthly terms
+  monthlyAmount?: number;
+}
+
+/** Deterministic tax calculation using the rule engine */
+function preCalculateTax(annualIncome: number, originalMessage: string): PreCalculatedTax {
+  const personalRelief = 9000; // automatic individual relief
+  const chargeableIncome = Math.max(0, annualIncome - personalRelief);
+
+  const bands: PreCalculatedTax["bands"] = [];
+  let remaining = chargeableIncome;
+
+  for (const band of TAX_RATES_YA2025) {
+    if (remaining <= 0) break;
+    const bandWidth = band.max === Infinity ? remaining : band.max - band.min;
+    const taxable = Math.min(remaining, bandWidth);
+    const tax = Math.round(taxable * band.rate * 100) / 100;
+    bands.push({
+      min: band.min,
+      max: band.max === Infinity ? chargeableIncome : band.max,
+      rate: band.rate,
+      taxable,
+      tax,
+    });
+    remaining -= taxable;
+  }
+
+  const totalTax = bands.reduce((sum, b) => sum + b.tax, 0);
+
+  // Rebate: RM400 if chargeable income <= RM35,000
+  const rebate = chargeableIncome <= 35000 ? 400 : 0;
+  const finalTax = Math.max(0, totalTax - rebate);
+
+  // Detect if user asked in monthly terms
+  const isMonthly = /月|month|bulan|gaji/i.test(originalMessage);
+
+  return {
+    grossIncome: annualIncome,
+    personalRelief,
+    chargeableIncome,
+    bands,
+    totalTax,
+    rebate,
+    finalTax,
+    isMonthly,
+    monthlyAmount: isMonthly ? annualIncome / 12 : undefined,
+  };
+}
+
+/** Format pre-calculated tax into injection text for system prompt */
+function formatPreCalculation(calc: PreCalculatedTax): string {
+  const incomeLabel = calc.isMonthly
+    ? `RM${calc.monthlyAmount!.toLocaleString()} per month (= RM${calc.grossIncome.toLocaleString()} per year)`
+    : `RM${calc.grossIncome.toLocaleString()} per year`;
+
+  let text = `\n\n--- PRE-CALCULATED TAX RESULT (use these EXACT numbers) ---\n`;
+  text += `User's income: ${incomeLabel}\n`;
+  text += `Personal relief: RM${calc.personalRelief.toLocaleString()}\n`;
+  text += `Chargeable income: RM${calc.grossIncome.toLocaleString()} - RM${calc.personalRelief.toLocaleString()} = RM${calc.chargeableIncome.toLocaleString()}\n\n`;
+  text += `Tax bands applied to chargeable income RM${calc.chargeableIncome.toLocaleString()}:\n`;
+
+  let cumulative = 0;
+  for (const band of calc.bands) {
+    cumulative += band.tax;
+    const ratePercent = (band.rate * 100).toFixed(0);
+    const maxLabel = band.max >= 2000000 ? "above" : `${band.min.toLocaleString()}-${band.max.toLocaleString()}`;
+    text += `  ${maxLabel}: ${ratePercent}% on RM${band.taxable.toLocaleString()} = RM${band.tax.toLocaleString()} (cumulative: RM${cumulative.toLocaleString()})\n`;
+  }
+
+  text += `\nTotal tax before rebate: RM${calc.totalTax.toLocaleString()}\n`;
+  if (calc.rebate > 0) {
+    text += `Rebate: -RM${calc.rebate.toLocaleString()} (chargeable income ≤ RM35,000)\n`;
+  }
+  text += `FINAL TAX PAYABLE: RM${calc.finalTax.toLocaleString()}\n`;
+  text += `--- END PRE-CALCULATED RESULT ---\n`;
+  text += `IMPORTANT: Present these EXACT numbers to the user. Do NOT recalculate. Just format and explain them clearly in the user's language.\n`;
+
+  return text;
+}
+
 const SYSTEM_PROMPT = `You are MYTax AI — a Malaysia tax expert assistant. You answer questions about Malaysian taxation accurately and concisely.
 
 Your knowledge covers:
@@ -99,18 +249,29 @@ export async function POST(request: NextRequest) {
   try {
     const { messages, locale } = await request.json();
 
-    // Get the latest user message for RAG retrieval
+    // Get the latest user message for RAG retrieval + pre-calculation
     const lastUserMsg = [...messages].reverse().find(
       (m: { role: string }) => m.role === "user"
     );
-    const ragContext = lastUserMsg
-      ? await retrieveContext(lastUserMsg.content)
-      : "";
+    const userMessage = lastUserMsg?.content || "";
+    const ragContext = userMessage ? await retrieveContext(userMessage) : "";
 
-    // Build system prompt with RAG context injected
-    const systemWithRag = ragContext
-      ? `${SYSTEM_PROMPT}\n\nUse the following retrieved knowledge to enhance your answer. Prioritize this information over your general knowledge when answering:${ragContext}`
-      : SYSTEM_PROMPT;
+    // Pre-calculate tax if user mentions an income amount
+    let preCalcContext = "";
+    const detectedIncome = extractIncomeAmount(userMessage);
+    if (detectedIncome !== null) {
+      const calc = preCalculateTax(detectedIncome, userMessage);
+      preCalcContext = formatPreCalculation(calc);
+    }
+
+    // Build system prompt with RAG context + pre-calculated tax injected
+    let systemWithRag = SYSTEM_PROMPT;
+    if (preCalcContext) {
+      systemWithRag += preCalcContext;
+    }
+    if (ragContext) {
+      systemWithRag += `\n\nUse the following retrieved knowledge to enhance your answer. Prioritize this information over your general knowledge when answering:${ragContext}`;
+    }
 
     // Build the message array with system prompt
     const ollamaMessages = [
