@@ -245,12 +245,74 @@ Key reliefs (YA2025):
 - Lifestyle: max RM2,500
 - Parents medical: max RM8,000`;
 
+// ─── Rate limiter (in-memory, per-IP, sliding window) ───
+const RATE_LIMIT_WINDOW_MS = 60_000; // 1 minute
+const RATE_LIMIT_MAX = 10; // max 10 requests per minute per IP
+const rateLimitMap = new Map<string, number[]>();
+
+function isRateLimited(ip: string): boolean {
+  const now = Date.now();
+  const timestamps = rateLimitMap.get(ip) || [];
+  // Remove expired entries
+  const valid = timestamps.filter((t) => now - t < RATE_LIMIT_WINDOW_MS);
+  if (valid.length >= RATE_LIMIT_MAX) {
+    rateLimitMap.set(ip, valid);
+    return true;
+  }
+  valid.push(now);
+  rateLimitMap.set(ip, valid);
+  return false;
+}
+
+// Clean up stale entries every 5 minutes
+setInterval(() => {
+  const now = Date.now();
+  for (const [ip, timestamps] of rateLimitMap) {
+    const valid = timestamps.filter((t) => now - t < RATE_LIMIT_WINDOW_MS);
+    if (valid.length === 0) rateLimitMap.delete(ip);
+    else rateLimitMap.set(ip, valid);
+  }
+}, 300_000);
+
+const MAX_MESSAGE_LENGTH = 500;
+const MAX_MESSAGES = 20;
+
 export async function POST(request: NextRequest) {
   try {
+    // Rate limiting
+    const ip = request.headers.get("x-forwarded-for")?.split(",")[0]?.trim()
+      || request.headers.get("x-real-ip")
+      || "unknown";
+    if (isRateLimited(ip)) {
+      return new Response(
+        JSON.stringify({ error: "Too many requests. Please wait a moment." }),
+        { status: 429, headers: { "Content-Type": "application/json" } }
+      );
+    }
+
     const { messages, locale } = await request.json();
 
+    // Input validation
+    if (!Array.isArray(messages) || messages.length === 0) {
+      return new Response(
+        JSON.stringify({ error: "Invalid messages format." }),
+        { status: 400, headers: { "Content-Type": "application/json" } }
+      );
+    }
+    if (messages.length > MAX_MESSAGES) {
+      return new Response(
+        JSON.stringify({ error: "Too many messages in conversation." }),
+        { status: 400, headers: { "Content-Type": "application/json" } }
+      );
+    }
+    // Sanitize: trim and cap each message length
+    const sanitizedMessages = messages.map((m: { role: string; content: string }) => ({
+      role: m.role === "assistant" ? "assistant" : "user",
+      content: typeof m.content === "string" ? m.content.slice(0, MAX_MESSAGE_LENGTH) : "",
+    }));
+
     // Get the latest user message for RAG retrieval + pre-calculation
-    const lastUserMsg = [...messages].reverse().find(
+    const lastUserMsg = [...sanitizedMessages].reverse().find(
       (m: { role: string }) => m.role === "user"
     );
     const userMessage = lastUserMsg?.content || "";
@@ -276,10 +338,7 @@ export async function POST(request: NextRequest) {
     // Build the message array with system prompt
     const ollamaMessages = [
       { role: "system", content: systemWithRag },
-      ...messages.map((m: { role: string; content: string }) => ({
-        role: m.role,
-        content: m.content,
-      })),
+      ...sanitizedMessages,
     ];
 
     // Stream from Ollama
