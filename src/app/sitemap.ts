@@ -11,6 +11,7 @@ const pages = [
   { path: "/employer", priority: 0.8, changeFrequency: "monthly" as const },
   { path: "/sst", priority: 0.8, changeFrequency: "monthly" as const },
   { path: "/e-invoice", priority: 0.9, changeFrequency: "monthly" as const },
+  { path: "/corporate-tools", priority: 0.9, changeFrequency: "monthly" as const },
   { path: "/ai-tax", priority: 0.7, changeFrequency: "weekly" as const },
   { path: "/privacy", priority: 0.3, changeFrequency: "yearly" as const },
   { path: "/terms", priority: 0.3, changeFrequency: "yearly" as const },

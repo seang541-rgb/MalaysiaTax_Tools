@@ -19,6 +19,7 @@ export function Header() {
     { href: "/employer", label: t("employer") },
     { href: "/sst", label: t("sst") },
     { href: "/e-invoice", label: t("einvoice") },
+    { href: "/corporate-tools", label: t("corpTools") },
     { href: "/ai-tax", label: t("aiTax") },
   ];
 
