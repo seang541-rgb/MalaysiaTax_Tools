@@ -18,9 +18,10 @@ const BASE_URL =
   process.env.LLM_BASE_URL || "https://integrate.api.nvidia.com/v1";
 const API_KEY = process.env.LLM_API_KEY || "";
 const CHAT_MODEL = process.env.LLM_CHAT_MODEL || "meta/llama-3.3-70b-instruct";
-const EMBED_MODEL =
-  process.env.LLM_EMBED_MODEL || "nvidia/llama-3.2-nv-embedqa-1b-v2";
-const EMBED_DIMENSIONS = Number(process.env.LLM_EMBED_DIMENSIONS || "768");
+const EMBED_MODEL = process.env.LLM_EMBED_MODEL || "baai/bge-m3";
+// Only sent when > 0. Matryoshka models (e.g. nv-embedqa) accept it; fixed-size
+// models like bge-m3 (1024) reject it, so leave at 0 for those.
+const EMBED_DIMENSIONS = Number(process.env.LLM_EMBED_DIMENSIONS || "0");
 
 export interface ChatMessage {
   role: "system" | "user" | "assistant";

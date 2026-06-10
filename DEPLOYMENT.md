@@ -38,28 +38,35 @@ In `.env.local` (local) and in your host's env settings (production):
 LLM_BASE_URL=https://integrate.api.nvidia.com/v1
 LLM_API_KEY=nvapi-xxxxxxxx
 LLM_CHAT_MODEL=meta/llama-3.3-70b-instruct
-LLM_EMBED_MODEL=nvidia/llama-3.2-nv-embedqa-1b-v2
-LLM_EMBED_DIMENSIONS=768
+LLM_EMBED_MODEL=baai/bge-m3
+LLM_EMBED_DIMENSIONS=0
 ```
 
-`LLM_EMBED_DIMENSIONS=768` keeps embeddings the same size as the existing Supabase
-`vector(768)` column, so **no DB schema change is needed**.
+`baai/bge-m3` is a strong multilingual (EN/ZH/MS) embedding model, **1024 dims**.
+`LLM_EMBED_DIMENSIONS=0` means "don't send a dimensions param" (bge-m3 is fixed-size).
 
-## Step 3 — Re-embed the knowledge base (required once)
+## Step 3 — Migrate the Supabase vector column (once)
 
-The stored RAG chunks were embedded with the old model. The query path now uses the
-NVIDIA embedding model, so the stored vectors must be regenerated with the **same**
-model or retrieval breaks.
+The old chunks were 768-dim (nomic). bge-m3 is 1024-dim, so resize the column and
+recreate the search function. In the Supabase dashboard → **SQL Editor**, run:
+
+```
+supabase/migrate-embeddings-1024.sql
+```
+
+(It truncates old chunks, alters `tax_chunks.embedding` to `vector(1024)`, recreates
+`match_tax_chunks` at 1024 dims, and rebuilds the HNSW index.)
+
+## Step 4 — Re-embed the knowledge base (required once)
 
 ```powershell
 $env:PYTHONIOENCODING = "utf-8"
 python training-data/scripts/embed-and-upload.py
 ```
 
-The script reads `LLM_*` from `.env.local`, smoke-tests the embedding endpoint, and
-re-embeds all docs at 768 dims. If it warns that the returned dimension ≠ 768, either
-set `LLM_EMBED_DIMENSIONS` to the returned value **and** alter the Supabase column to
-match, or keep a model that supports 768.
+The script reads `LLM_*` from `.env.local`, smoke-tests the embedding endpoint
+(should print "returned 1024 dims"), and re-embeds all docs. If the returned
+dimension differs, set the Supabase column and migration to match.
 
 ## Step 4 — Test locally
 

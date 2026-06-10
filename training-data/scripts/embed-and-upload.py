@@ -27,8 +27,8 @@ RAW_DIR = os.path.join(BASE, "raw")
 # --- Config (OpenAI-compatible LLM provider; defaults to NVIDIA NIM) ---
 LLM_BASE_URL = os.environ.get("LLM_BASE_URL", "https://integrate.api.nvidia.com/v1")
 LLM_API_KEY = os.environ.get("LLM_API_KEY", "")
-EMBED_MODEL = os.environ.get("LLM_EMBED_MODEL", "nvidia/llama-3.2-nv-embedqa-1b-v2")
-EMBED_DIMENSIONS = int(os.environ.get("LLM_EMBED_DIMENSIONS", "768"))
+EMBED_MODEL = os.environ.get("LLM_EMBED_MODEL", "baai/bge-m3")
+EMBED_DIMENSIONS = int(os.environ.get("LLM_EMBED_DIMENSIONS", "0"))
 SUPABASE_URL = os.environ.get("NEXT_PUBLIC_SUPABASE_URL", "")
 SUPABASE_KEY = os.environ.get("NEXT_PUBLIC_SUPABASE_ANON_KEY", "")
 CHUNK_SIZE = 500      # target chars per chunk
