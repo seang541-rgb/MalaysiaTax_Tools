@@ -250,7 +250,18 @@
     "sst": "SST",
     "einvoice": "e-Invoice",
     "corpTools": "Corp Tools",
-    "aiTax": "AI Assistant"
+    "aiTax": "AI Assistant",
+    "blog": "Guides"
+  },
+  "blog": {
+    "title": "Tax Guides & Updates",
+    "description": "Practical guides on Malaysian personal tax, corporate tax, SST and e-Invoice — written in plain language and kept up to date.",
+    "empty": "No articles yet. Check back soon.",
+    "backToList": "All guides",
+    "ctaTitle": "Put this into numbers",
+    "ctaDesc": "MYTax's free calculators turn these rules into your actual figures in seconds.",
+    "ctaButton": "Try the calculators",
+    "disclaimer": "This article is general information, not professional tax advice. Rules may change — verify with LHDN or a licensed tax agent before acting."
   },
   "einvoice": {
     "title": "e-Invoice Compliance Checker",

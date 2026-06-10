@@ -380,7 +380,18 @@
     "sst": "SST",
     "einvoice": "e-Invois",
     "corpTools": "Alat Korporat",
-    "aiTax": "Pembantu AI"
+    "aiTax": "Pembantu AI",
+    "blog": "Panduan"
+  },
+  "blog": {
+    "title": "Panduan & Berita Cukai",
+    "description": "Panduan praktikal cukai peribadi, cukai korporat, SST dan e-Invois Malaysia — ditulis dalam bahasa mudah dan sentiasa dikemas kini.",
+    "empty": "Tiada artikel lagi. Sila kembali nanti.",
+    "backToList": "Semua panduan",
+    "ctaTitle": "Tukar peraturan kepada angka anda",
+    "ctaDesc": "Kalkulator percuma MYTax mengira jumlah sebenar anda dalam beberapa saat.",
+    "ctaButton": "Cuba kalkulator",
+    "disclaimer": "Artikel ini adalah maklumat umum, bukan nasihat cukai profesional. Peraturan mungkin berubah — sahkan dengan LHDN atau ejen cukai berlesen sebelum bertindak."
   },
   "aiTax": {
     "pageTitle": "Pembantu Cukai AI",

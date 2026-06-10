@@ -21,6 +21,7 @@ export function Header() {
     { href: "/e-invoice", label: t("einvoice") },
     { href: "/corporate-tools", label: t("corpTools") },
     { href: "/ai-tax", label: t("aiTax") },
+    { href: "/blog", label: t("blog") },
   ];
 
   return (

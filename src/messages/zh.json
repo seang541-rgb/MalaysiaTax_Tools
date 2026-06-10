@@ -250,7 +250,18 @@
     "sst": "SST",
     "einvoice": "电子发票",
     "corpTools": "企业工具",
-    "aiTax": "AI 助手"
+    "aiTax": "AI 助手",
+    "blog": "税务指南"
+  },
+  "blog": {
+    "title": "税务指南与最新动态",
+    "description": "用大白话讲清楚马来西亚个人税、企业税、SST 和电子发票——持续更新。",
+    "empty": "暂无文章，敬请期待。",
+    "backToList": "全部指南",
+    "ctaTitle": "把规则变成你的数字",
+    "ctaDesc": "MYTax 的免费计算器几秒钟内帮你算出实际金额。",
+    "ctaButton": "试试计算器",
+    "disclaimer": "本文为一般资讯，不构成专业税务建议。法规可能变动，行动前请向 LHDN 或持牌税务代理核实。"
   },
   "einvoice": {
     "title": "电子发票合规检查器",

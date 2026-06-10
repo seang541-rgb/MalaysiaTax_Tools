@@ -1,4 +1,5 @@
 import type { MetadataRoute } from "next";
+import { getAllSlugs } from "@/lib/blog";
 
 const BASE_URL = "https://mytax.my";
 
@@ -13,6 +14,7 @@ const pages = [
   { path: "/e-invoice", priority: 0.9, changeFrequency: "monthly" as const },
   { path: "/corporate-tools", priority: 0.9, changeFrequency: "monthly" as const },
   { path: "/ai-tax", priority: 0.7, changeFrequency: "weekly" as const },
+  { path: "/blog", priority: 0.8, changeFrequency: "weekly" as const },
   { path: "/privacy", priority: 0.3, changeFrequency: "yearly" as const },
   { path: "/terms", priority: 0.3, changeFrequency: "yearly" as const },
 ];
@@ -30,6 +32,24 @@ export default function sitemap(): MetadataRoute.Sitemap {
         alternates: {
           languages: Object.fromEntries(
             locales.map((l) => [l, `${BASE_URL}/${l}${page.path}`])
+          ),
+        },
+      });
+    }
+  }
+
+  // Blog articles — same slug exists per locale, so alternates map cleanly
+  const slugSet = new Set(getAllSlugs().map(({ slug }) => slug));
+  for (const slug of slugSet) {
+    for (const locale of locales) {
+      entries.push({
+        url: `${BASE_URL}/${locale}/blog/${slug}`,
+        lastModified: new Date(),
+        changeFrequency: "monthly",
+        priority: 0.7,
+        alternates: {
+          languages: Object.fromEntries(
+            locales.map((l) => [l, `${BASE_URL}/${l}/blog/${slug}`])
           ),
         },
       });
