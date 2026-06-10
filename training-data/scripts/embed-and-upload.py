@@ -1,5 +1,6 @@
 """
-Embedding pipeline: chunk raw knowledge docs → generate embeddings via Ollama nomic-embed-text → upload to Supabase tax_chunks.
+Embedding pipeline: chunk raw knowledge docs → generate embeddings via the
+OpenAI-compatible LLM provider (NVIDIA NIM by default) → upload to Supabase tax_chunks.
 
 Usage:
   $env:PYTHONIOENCODING = "utf-8"
@@ -23,9 +24,11 @@ except ImportError:
 BASE = os.path.join(os.path.dirname(__file__), "..")
 RAW_DIR = os.path.join(BASE, "raw")
 
-# --- Config ---
-OLLAMA_URL = os.environ.get("OLLAMA_BASE_URL", "http://localhost:11434")
-EMBED_MODEL = "nomic-embed-text"
+# --- Config (OpenAI-compatible LLM provider; defaults to NVIDIA NIM) ---
+LLM_BASE_URL = os.environ.get("LLM_BASE_URL", "https://integrate.api.nvidia.com/v1")
+LLM_API_KEY = os.environ.get("LLM_API_KEY", "")
+EMBED_MODEL = os.environ.get("LLM_EMBED_MODEL", "nvidia/llama-3.2-nv-embedqa-1b-v2")
+EMBED_DIMENSIONS = int(os.environ.get("LLM_EMBED_DIMENSIONS", "768"))
 SUPABASE_URL = os.environ.get("NEXT_PUBLIC_SUPABASE_URL", "")
 SUPABASE_KEY = os.environ.get("NEXT_PUBLIC_SUPABASE_ANON_KEY", "")
 CHUNK_SIZE = 500      # target chars per chunk
@@ -33,7 +36,7 @@ CHUNK_OVERLAP = 50    # overlap between chunks
 
 # --- Load env from .env.local if not set ---
 def load_env():
-    global SUPABASE_URL, SUPABASE_KEY
+    global SUPABASE_URL, SUPABASE_KEY, LLM_BASE_URL, LLM_API_KEY, EMBED_MODEL, EMBED_DIMENSIONS
     env_path = os.path.join(BASE, "..", ".env.local")
     if os.path.exists(env_path):
         with open(env_path, "r", encoding="utf-8") as f:
@@ -47,6 +50,14 @@ def load_env():
                         SUPABASE_URL = val
                     elif key == "NEXT_PUBLIC_SUPABASE_ANON_KEY" and not SUPABASE_KEY:
                         SUPABASE_KEY = val
+                    elif key == "LLM_BASE_URL" and val:
+                        LLM_BASE_URL = val
+                    elif key == "LLM_API_KEY" and val:
+                        LLM_API_KEY = val
+                    elif key == "LLM_EMBED_MODEL" and val:
+                        EMBED_MODEL = val
+                    elif key == "LLM_EMBED_DIMENSIONS" and val:
+                        EMBED_DIMENSIONS = int(val)
 
 load_env()
 
@@ -96,16 +107,32 @@ def chunk_text(text: str, source: str) -> list[dict]:
 
 
 def get_embedding(text: str, client: httpx.Client) -> list[float]:
-    """Get embedding vector from Ollama nomic-embed-text."""
+    """Get embedding vector via the OpenAI-compatible /embeddings endpoint.
+
+    Uses input_type="passage" for stored documents (the query path in the app
+    uses "query"). dimensions is pinned so vectors match the Supabase column.
+    """
+    body = {
+        "model": EMBED_MODEL,
+        "input": [text],
+        "encoding_format": "float",
+        "input_type": "passage",
+    }
+    if EMBED_DIMENSIONS > 0:
+        body["dimensions"] = EMBED_DIMENSIONS
+    headers = {"Content-Type": "application/json"}
+    if LLM_API_KEY:
+        headers["Authorization"] = f"Bearer {LLM_API_KEY}"
     resp = client.post(
-        f"{OLLAMA_URL}/api/embed",
-        json={"model": EMBED_MODEL, "input": text},
+        f"{LLM_BASE_URL}/embeddings",
+        json=body,
+        headers=headers,
         timeout=60.0,
     )
     resp.raise_for_status()
     data = resp.json()
-    # Ollama returns {"embeddings": [[...]], ...}
-    return data["embeddings"][0]
+    # OpenAI-compatible: {"data": [{"embedding": [...]}], ...}
+    return data["data"][0]["embedding"]
 
 
 def upsert_document(client: httpx.Client, filename: str, title: str, content_length: int) -> str:
@@ -182,28 +209,26 @@ def main():
     print("=" * 60)
     print("MYTax Embedding Pipeline")
     print("=" * 60)
-    print(f"Ollama:    {OLLAMA_URL}")
-    print(f"Model:     {EMBED_MODEL}")
+    print(f"Provider:  {LLM_BASE_URL}")
+    print(f"Model:     {EMBED_MODEL} ({EMBED_DIMENSIONS} dims)")
     print(f"Supabase:  {SUPABASE_URL}")
     print(f"Chunk:     {CHUNK_SIZE} chars, {CHUNK_OVERLAP} overlap")
     print()
 
-    # Check Ollama is running
+    if not LLM_API_KEY and "localhost" not in LLM_BASE_URL and "127.0.0.1" not in LLM_BASE_URL:
+        print("ERROR: LLM_API_KEY not set. Get a free key at https://build.nvidia.com")
+        sys.exit(1)
+
+    # Smoke-test the embedding endpoint before processing all files
     with httpx.Client() as client:
         try:
-            resp = client.get(f"{OLLAMA_URL}/api/tags", timeout=10.0)
-            models = [m["name"] for m in resp.json().get("models", [])]
-            if not any(EMBED_MODEL in m for m in models):
-                print(f"Pulling {EMBED_MODEL}...")
-                pull_resp = client.post(
-                    f"{OLLAMA_URL}/api/pull",
-                    json={"name": EMBED_MODEL},
-                    timeout=300.0,
-                )
-                print(f"  Pull complete")
+            vec = get_embedding("test", client)
+            print(f"Embedding endpoint OK — returned {len(vec)} dims")
+            if EMBED_DIMENSIONS and len(vec) != EMBED_DIMENSIONS:
+                print(f"WARNING: got {len(vec)} dims but expected {EMBED_DIMENSIONS}. "
+                      f"The Supabase vector column must match the returned dimension.")
         except Exception as e:
-            print(f"ERROR: Cannot connect to Ollama at {OLLAMA_URL}: {e}")
-            print("Make sure Ollama is running: ollama serve")
+            print(f"ERROR: embedding endpoint failed: {e}")
             sys.exit(1)
 
     # Process each raw file

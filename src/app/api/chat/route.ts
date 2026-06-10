@@ -2,10 +2,7 @@ import { NextRequest } from "next/server";
 import { createClient } from "@supabase/supabase-js";
 import { TAX_RATES_YA2025 } from "@/engine/tax-rates";
 import { TaxBand } from "@/engine/types";
-
-const OLLAMA_BASE = process.env.OLLAMA_BASE_URL || "http://localhost:11434";
-const MODEL = process.env.OLLAMA_MODEL || "mytax-gemma4";
-const EMBED_MODEL = "nomic-embed-text";
+import { embed, chatStream, llmConfigured, llmInfo } from "@/lib/llm";
 
 // Supabase client for RAG
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || "";
@@ -14,24 +11,12 @@ const supabase = supabaseUrl && supabaseKey
   ? createClient(supabaseUrl, supabaseKey)
   : null;
 
-/** Get embedding from Ollama nomic-embed-text */
-async function getEmbedding(text: string): Promise<number[]> {
-  const res = await fetch(`${OLLAMA_BASE}/api/embed`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ model: EMBED_MODEL, input: text }),
-  });
-  if (!res.ok) throw new Error(`Embedding failed: ${res.status}`);
-  const data = await res.json();
-  return data.embeddings[0];
-}
-
 /** Retrieve relevant tax knowledge chunks via vector similarity */
 async function retrieveContext(query: string): Promise<string> {
   if (!supabase) return "";
 
   try {
-    const embedding = await getEmbedding(query);
+    const embedding = await embed(query, "query");
 
     const { data, error } = await supabase.rpc("match_tax_chunks", {
       query_embedding: embedding,
@@ -336,36 +321,30 @@ export async function POST(request: NextRequest) {
     }
 
     // Build the message array with system prompt
-    const ollamaMessages = [
-      { role: "system", content: systemWithRag },
-      ...sanitizedMessages,
+    const llmMessages = [
+      { role: "system" as const, content: systemWithRag },
+      ...sanitizedMessages.map((m) => ({
+        role: m.role as "user" | "assistant",
+        content: m.content,
+      })),
     ];
 
-    // Stream from Ollama
-    const ollamaRes = await fetch(`${OLLAMA_BASE}/api/chat`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        model: MODEL,
-        messages: ollamaMessages,
-        stream: true,
-        think: false,
-      }),
-    });
+    // Stream from the configured OpenAI-compatible provider
+    const llmRes = await chatStream(llmMessages);
 
-    if (!ollamaRes.ok) {
-      const errText = await ollamaRes.text();
+    if (!llmRes.ok || !llmRes.body) {
+      const errText = await llmRes.text().catch(() => "");
       return new Response(
         JSON.stringify({
-          error: `Ollama error: ${ollamaRes.status}`,
+          error: `LLM error: ${llmRes.status}`,
           detail: errText,
         }),
         { status: 502, headers: { "Content-Type": "application/json" } }
       );
     }
 
-    // Transform Ollama's NDJSON stream → text/event-stream
-    const reader = ollamaRes.body!.getReader();
+    // Transform the provider's OpenAI-style SSE → our client SSE (data: {token})
+    const reader = llmRes.body.getReader();
     const decoder = new TextDecoder();
 
     const stream = new ReadableStream({
@@ -382,23 +361,28 @@ export async function POST(request: NextRequest) {
             const lines = buffer.split("\n");
             buffer = lines.pop() || "";
 
-            for (const line of lines) {
-              if (!line.trim()) continue;
+            for (const rawLine of lines) {
+              const line = rawLine.trim();
+              if (!line || !line.startsWith("data:")) continue;
+              const payload = line.slice(5).trim();
+              if (payload === "[DONE]") {
+                controller.enqueue(encoder.encode("data: [DONE]\n\n"));
+                continue;
+              }
               try {
-                const json = JSON.parse(line);
-                if (json.message?.content) {
+                const json = JSON.parse(payload);
+                const token = json.choices?.[0]?.delta?.content;
+                if (token) {
                   controller.enqueue(
-                    encoder.encode(`data: ${JSON.stringify({ token: json.message.content })}\n\n`)
+                    encoder.encode(`data: ${JSON.stringify({ token })}\n\n`)
                   );
-                }
-                if (json.done) {
-                  controller.enqueue(encoder.encode("data: [DONE]\n\n"));
                 }
               } catch {
                 // skip malformed lines
               }
             }
           }
+          controller.enqueue(encoder.encode("data: [DONE]\n\n"));
         } catch (err) {
           controller.error(err);
         } finally {
@@ -414,31 +398,26 @@ export async function POST(request: NextRequest) {
         Connection: "keep-alive",
       },
     });
-  } catch (err) {
+  } catch {
     return new Response(
-      JSON.stringify({ error: "Failed to connect to Ollama. Is it running?" }),
+      JSON.stringify({ error: "Failed to reach the LLM provider." }),
       { status: 500, headers: { "Content-Type": "application/json" } }
     );
   }
 }
 
-/** GET /api/chat — lightweight health check (no LLM call) */
+/** GET /api/chat — lightweight health check (no LLM/credit usage) */
 export async function GET() {
-  try {
-    const res = await fetch(`${OLLAMA_BASE}/api/tags`, {
-      signal: AbortSignal.timeout(5000),
-    });
-    if (!res.ok) {
-      return new Response(JSON.stringify({ status: "error" }), { status: 502 });
+  const ok = llmConfigured();
+  return new Response(
+    JSON.stringify({
+      status: ok ? "ok" : "error",
+      model: llmInfo.CHAT_MODEL,
+      configured: ok,
+    }),
+    {
+      status: ok ? 200 : 503,
+      headers: { "Content-Type": "application/json" },
     }
-    const data = await res.json();
-    const models = data.models?.map((m: { name: string }) => m.name) || [];
-    const hasModel = models.some((n: string) => n.includes(MODEL.split(":")[0]));
-    return new Response(
-      JSON.stringify({ status: "ok", model: MODEL, available: hasModel }),
-      { headers: { "Content-Type": "application/json" } }
-    );
-  } catch {
-    return new Response(JSON.stringify({ status: "error" }), { status: 500 });
-  }
+  );
 }
