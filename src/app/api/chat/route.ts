@@ -205,19 +205,6 @@ Rules:
 5. IMPORTANT: Match the user's language — if user writes in Chinese (中文), reply in Chinese; if English, reply in English; if Malay, reply in Malay
 6. Add a disclaimer that your answers are for reference only
 7. When appropriate, suggest the user try the calculator tools on MYTax website
-8. CRITICAL: When calculating tax, you MUST apply EVERY tax band separately. Do NOT skip or merge the 0%, 1%, 3% bands. The first RM5,000 is 0%, next RM15,000 is 1% (=RM150), next RM15,000 is 3% (=RM450). The cumulative tax at RM35,000 is RM600, NOT RM0.
-
-Key tax bands (YA2025, resident individual) — APPLY EACH BAND:
-- 0 – 5,000: 0% (cumulative: RM0)
-- 5,001 – 20,000: 1% on RM15,000 = RM150 (cumulative: RM150)
-- 20,001 – 35,000: 3% on RM15,000 = RM450 (cumulative: RM600)
-- 35,001 – 50,000: 6% on RM15,000 = RM900 (cumulative: RM1,500)
-- 50,001 – 70,000: 11% on RM20,000 = RM2,200 (cumulative: RM3,700)
-- 70,001 – 100,000: 19% on RM30,000 = RM5,700 (cumulative: RM9,400)
-- 100,001 – 400,000: 25%
-- 400,001 – 600,000: 26%
-- 600,001 – 2,000,000: 28%
-- Above 2,000,000: 30%
 
 Key reliefs (YA2025):
 - Individual: RM9,000 (auto)
@@ -229,6 +216,29 @@ Key reliefs (YA2025):
 - Education (self): max RM7,000
 - Lifestyle: max RM2,500
 - Parents medical: max RM8,000`;
+
+/**
+ * Manual band-calculation guidance. Appended ONLY when there is no
+ * deterministic pre-calculation — otherwise it conflicts with the injected
+ * exact result and tempts the model to recalculate (often on the wrong,
+ * un-annualised income). When pre-calc fires, the injected numbers win.
+ */
+const CALC_GUIDE = `
+
+When calculating personal tax yourself, you MUST apply EVERY tax band separately. Do NOT skip or merge the 0%, 1%, 3% bands.
+
+Tax bands (YA2025, resident individual) — APPLY EACH BAND to chargeable income:
+- 0 – 5,000: 0% (cumulative: RM0)
+- 5,001 – 20,000: 1% on RM15,000 = RM150 (cumulative: RM150)
+- 20,001 – 35,000: 3% on RM15,000 = RM450 (cumulative: RM600)
+- 35,001 – 50,000: 6% on RM15,000 = RM900 (cumulative: RM1,500)
+- 50,001 – 70,000: 11% on RM20,000 = RM2,200 (cumulative: RM3,700)
+- 70,001 – 100,000: 19% on RM30,000 = RM5,700 (cumulative: RM9,400)
+- 100,001 – 400,000: 25%
+- 400,001 – 600,000: 26%
+- 600,001 – 2,000,000: 28%
+- Above 2,000,000: 30%
+Remember: a monthly salary must be multiplied by 12 to get annual income before applying bands.`;
 
 // ─── Rate limiter (in-memory, per-IP, sliding window) ───
 const RATE_LIMIT_WINDOW_MS = 60_000; // 1 minute
@@ -311,10 +321,14 @@ export async function POST(request: NextRequest) {
       preCalcContext = formatPreCalculation(calc);
     }
 
-    // Build system prompt with RAG context + pre-calculated tax injected
+    // Build system prompt. When we have a deterministic pre-calculation,
+    // inject it and SKIP the manual band guide (which would invite the model
+    // to recalculate on the wrong income). Otherwise include the band guide.
     let systemWithRag = SYSTEM_PROMPT;
     if (preCalcContext) {
       systemWithRag += preCalcContext;
+    } else {
+      systemWithRag += CALC_GUIDE;
     }
     if (ragContext) {
       systemWithRag += `\n\nUse the following retrieved knowledge to enhance your answer. Prioritize this information over your general knowledge when answering:${ragContext}`;
