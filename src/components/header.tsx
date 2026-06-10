@@ -34,7 +34,7 @@ export function Header() {
         </div>
         <div className="flex items-center gap-4">
           {/* Desktop nav */}
-          <nav className="hidden md:flex gap-1">
+          <nav className="hidden lg:flex gap-1">
             {navItems.map((item) => {
               const isActive =
                 item.href === "/"
@@ -59,7 +59,7 @@ export function Header() {
           <LocaleSwitcher />
           {/* Mobile hamburger */}
           <button
-            className="md:hidden p-2 rounded-md hover:bg-muted transition-colors"
+            className="lg:hidden p-2 rounded-md hover:bg-muted transition-colors"
             onClick={() => setMobileOpen(!mobileOpen)}
             aria-label="Toggle menu"
             aria-expanded={mobileOpen}
@@ -71,7 +71,7 @@ export function Header() {
 
       {/* Mobile nav dropdown */}
       {mobileOpen && (
-        <nav className="md:hidden border-t bg-white dark:bg-zinc-900 absolute left-0 right-0 z-50 shadow-lg">
+        <nav className="lg:hidden border-t bg-white dark:bg-zinc-900 absolute left-0 right-0 z-50 shadow-lg">
           <div className="container mx-auto px-4 py-2 flex flex-col gap-1">
             {navItems.map((item) => {
               const isActive =

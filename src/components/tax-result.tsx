@@ -7,6 +7,7 @@ import { TaxCalculationResult } from "@/engine/types";
 import { Printer, Share2, Check } from "lucide-react";
 import { useState } from "react";
 import { TaxCalculationInput } from "@/engine/types";
+import { EfilingGuide } from "./efiling-guide";
 
 function formatRM(amount: number): string {
   return `RM ${amount.toLocaleString("en-MY", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
@@ -119,6 +120,8 @@ export function TaxResult({ result, input }: TaxResultProps) {
             />
           </div>
         )}
+
+        {input && <EfilingGuide result={result} input={input} />}
 
         <p className="text-xs text-muted-foreground mt-4 p-3 bg-muted rounded-md">
           {t("disclaimer")}
