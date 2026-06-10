@@ -7,8 +7,9 @@ import { Cp204Calculator } from "./cp204-calculator";
 import { CapitalAllowanceCalculator } from "./capital-allowance-calculator";
 import { IncentivesWizard } from "./incentives-wizard";
 import { TaxComputationCalculator } from "./tax-computation-calculator";
+import { WithholdingTaxCalculator } from "./withholding-tax-calculator";
 
-type Tool = "taxcomp" | "cp204" | "capalw" | "incentives";
+type Tool = "taxcomp" | "cp204" | "capalw" | "wht" | "incentives";
 
 export function CorporateToolsTabs() {
   const t = useTranslations("corptools");
@@ -17,10 +18,11 @@ export function CorporateToolsTabs() {
   return (
     <div className="space-y-6">
       <Tabs value={tool} onValueChange={(v) => setTool(v as Tool)}>
-        <TabsList className="grid w-full grid-cols-2 sm:grid-cols-4 h-auto">
+        <TabsList className="grid w-full grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 h-auto">
           <TabsTrigger value="taxcomp">{t("tabTaxcomp")}</TabsTrigger>
           <TabsTrigger value="cp204">{t("tabCp204")}</TabsTrigger>
           <TabsTrigger value="capalw">{t("tabCapalw")}</TabsTrigger>
+          <TabsTrigger value="wht">{t("tabWht")}</TabsTrigger>
           <TabsTrigger value="incentives">{t("tabIncentives")}</TabsTrigger>
         </TabsList>
       </Tabs>
@@ -28,6 +30,7 @@ export function CorporateToolsTabs() {
       {tool === "taxcomp" && <TaxComputationCalculator />}
       {tool === "cp204" && <Cp204Calculator />}
       {tool === "capalw" && <CapitalAllowanceCalculator />}
+      {tool === "wht" && <WithholdingTaxCalculator />}
       {tool === "incentives" && <IncentivesWizard />}
     </div>
   );
