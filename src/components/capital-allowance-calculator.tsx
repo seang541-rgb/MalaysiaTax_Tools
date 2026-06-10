@@ -10,6 +10,7 @@ import {
   calculateCapitalAllowance,
   CapitalAssetType,
 } from "@/engine/capital-allowance";
+import { SourceNote } from "./source-note";
 
 const ASSET_TYPES: CapitalAssetType[] = [
   "general_pm",
@@ -191,6 +192,8 @@ export function CapitalAllowanceCalculator() {
           </CardContent>
         </Card>
       )}
+
+      <SourceNote topic="capalw" />
     </div>
   );
 }

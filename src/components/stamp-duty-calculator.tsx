@@ -8,6 +8,7 @@ import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { calculateStampDuty, StampBuyerType } from "@/engine/stamp-duty";
+import { SourceNote } from "./source-note";
 
 function formatRM(amount: number): string {
   return `RM ${amount.toLocaleString("en-MY", {
@@ -147,6 +148,8 @@ export function StampDutyCalculator() {
           </CardContent>
         </Card>
       )}
+
+      <SourceNote topic="stampduty" />
     </div>
   );
 }

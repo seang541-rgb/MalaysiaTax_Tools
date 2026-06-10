@@ -1,6 +1,7 @@
 import { useTranslations } from "next-intl";
 import { getTranslations } from "next-intl/server";
 import { IncomeForm } from "@/components/income-form";
+import { SourceNote } from "@/components/source-note";
 
 export async function generateMetadata({
   params,
@@ -59,6 +60,7 @@ export default function HomePage() {
         <p className="text-muted-foreground">{t("subtitle")}</p>
       </div>
       <IncomeForm />
+      <SourceNote topic="personal" />
     </div>
   );
 }

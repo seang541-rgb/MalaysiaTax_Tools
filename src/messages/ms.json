@@ -387,6 +387,10 @@
     "blog": "Panduan",
     "property": "Hartanah"
   },
+  "sourceNote": {
+    "verified": "Kadar disahkan setakat {date}",
+    "sourceLabel": "Sumber"
+  },
   "property": {
     "title": "Alat Cukai Hartanah",
     "subtitle": "RPGT semasa jual, duti setem semasa beli — untuk hartanah Malaysia",

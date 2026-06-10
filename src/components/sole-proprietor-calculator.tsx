@@ -8,6 +8,7 @@ import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { calculateSoleProprietorTax } from "@/engine/sole-proprietor";
+import { SourceNote } from "./source-note";
 
 function formatRM(amount: number): string {
   return `RM ${amount.toLocaleString("en-MY", {
@@ -127,6 +128,8 @@ export function SoleProprietorCalculator() {
           </CardContent>
         </Card>
       )}
+
+      <SourceNote topic="soleprop" />
     </div>
   );
 }

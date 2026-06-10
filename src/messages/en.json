@@ -254,6 +254,10 @@
     "blog": "Guides",
     "property": "Property"
   },
+  "sourceNote": {
+    "verified": "Rates verified as of {date}",
+    "sourceLabel": "Source"
+  },
   "property": {
     "title": "Property Tax Tools",
     "subtitle": "RPGT when you sell, stamp duty when you buy — for Malaysian property",

@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { calculateSst, SERVICE_TAX_CATEGORIES } from "@/engine/sst";
 import { SstInput, ServiceTaxCategory } from "@/engine/types";
+import { SourceNote } from "./source-note";
 
 const SERVICE_CATEGORIES = Object.keys(SERVICE_TAX_CATEGORIES) as ServiceTaxCategory[];
 
@@ -237,6 +238,8 @@ export function SstForm() {
           </p>
         </CardContent>
       </Card>
+
+      <SourceNote topic="sst" />
     </div>
   );
 }

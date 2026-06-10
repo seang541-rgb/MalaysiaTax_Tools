@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { checkEInvoicePhase } from "@/engine/e-invoice";
 import { CheckCircle2, AlertTriangle, CalendarClock, FileText } from "lucide-react";
+import { SourceNote } from "./source-note";
 
 function formatDate(iso: string, locale: string): string {
   return new Date(iso + "T00:00:00").toLocaleDateString(
@@ -204,6 +205,8 @@ export function EInvoiceChecker() {
           </p>
         </CardContent>
       </Card>
+
+      <SourceNote topic="einvoice" />
     </div>
   );
 }

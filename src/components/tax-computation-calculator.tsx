@@ -8,6 +8,7 @@ import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { calculateTaxComputation } from "@/engine/tax-computation";
+import { SourceNote } from "./source-note";
 
 function formatRM(amount: number): string {
   return `RM ${amount.toLocaleString("en-MY", {
@@ -296,6 +297,8 @@ export function TaxComputationCalculator() {
           </CardContent>
         </Card>
       )}
+
+      <SourceNote topic="corporate" />
     </div>
   );
 }

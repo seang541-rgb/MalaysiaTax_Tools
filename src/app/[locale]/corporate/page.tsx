@@ -1,6 +1,7 @@
 import { useTranslations } from "next-intl";
 import { getTranslations } from "next-intl/server";
 import { CorporateTaxForm } from "@/components/corporate-tax-form";
+import { SourceNote } from "@/components/source-note";
 
 export async function generateMetadata({
   params,
@@ -26,6 +27,7 @@ export default function CorporateTaxPage() {
         <p className="text-muted-foreground">{t("subtitle")}</p>
       </div>
       <CorporateTaxForm />
+      <SourceNote topic="corporate" />
     </div>
   );
 }

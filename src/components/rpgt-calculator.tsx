@@ -8,6 +8,7 @@ import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { calculateRpgt, RpgtDisposerType } from "@/engine/rpgt";
+import { SourceNote } from "./source-note";
 
 function formatRM(amount: number): string {
   return `RM ${amount.toLocaleString("en-MY", {
@@ -154,6 +155,8 @@ export function RpgtCalculator() {
           </CardContent>
         </Card>
       )}
+
+      <SourceNote topic="rpgt" />
     </div>
   );
 }

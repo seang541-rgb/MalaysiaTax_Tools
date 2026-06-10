@@ -8,6 +8,7 @@ import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { calculateCp204 } from "@/engine/cp204";
+import { SourceNote } from "./source-note";
 
 function formatRM(amount: number): string {
   return `RM ${amount.toLocaleString("en-MY", {
@@ -196,6 +197,8 @@ export function Cp204Calculator() {
           </CardContent>
         </Card>
       )}
+
+      <SourceNote topic="cp204" />
     </div>
   );
 }

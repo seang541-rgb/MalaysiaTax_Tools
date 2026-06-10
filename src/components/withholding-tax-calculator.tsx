@@ -8,6 +8,7 @@ import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { calculateWithholdingTax, WhtPaymentType } from "@/engine/withholding-tax";
+import { SourceNote } from "./source-note";
 
 function formatRM(amount: number): string {
   return `RM ${amount.toLocaleString("en-MY", {
@@ -164,6 +165,8 @@ export function WithholdingTaxCalculator() {
           </CardContent>
         </Card>
       )}
+
+      <SourceNote topic="wht" />
     </div>
   );
 }

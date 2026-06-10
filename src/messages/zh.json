@@ -254,6 +254,10 @@
     "blog": "税务指南",
     "property": "产业税"
   },
+  "sourceNote": {
+    "verified": "税率核实于 {date}",
+    "sourceLabel": "来源"
+  },
   "property": {
     "title": "产业税工具",
     "subtitle": "卖房算 RPGT、买房算印花税 — 马来西亚产业专用",
