@@ -53,6 +53,7 @@ C16_MSGS=[
 
 print(f"Running {len(CUST)} customer-style questions\n"+"="*80, flush=True)
 for cid,loc,q in CUST:
+    time.sleep(2.5)  # pace requests to stay under provider rate limits
     if cid.startswith("C16"):
         a,dt=ask(C16_MSGS, "zh")
         shown="[multi-turn] 月薪6000 -> 追问:有两个小孩呢?"
