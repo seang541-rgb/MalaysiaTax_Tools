@@ -24,9 +24,10 @@ except ImportError:
 BASE = os.path.join(os.path.dirname(__file__), "..")
 RAW_DIR = os.path.join(BASE, "raw")
 
-# --- Config (OpenAI-compatible LLM provider; defaults to NVIDIA NIM) ---
-LLM_BASE_URL = os.environ.get("LLM_BASE_URL", "https://integrate.api.nvidia.com/v1")
-LLM_API_KEY = os.environ.get("LLM_API_KEY", "")
+# --- Config (embeddings via OpenAI-compatible provider; defaults to NVIDIA NIM) ---
+# Prefer the dedicated embedding vars, fall back to the shared LLM_* ones.
+LLM_BASE_URL = os.environ.get("LLM_EMBED_BASE_URL") or os.environ.get("LLM_BASE_URL", "https://integrate.api.nvidia.com/v1")
+LLM_API_KEY = os.environ.get("LLM_EMBED_API_KEY") or os.environ.get("LLM_API_KEY", "")
 EMBED_MODEL = os.environ.get("LLM_EMBED_MODEL", "baai/bge-m3")
 EMBED_DIMENSIONS = int(os.environ.get("LLM_EMBED_DIMENSIONS", "0"))
 SUPABASE_URL = os.environ.get("NEXT_PUBLIC_SUPABASE_URL", "")
@@ -50,9 +51,9 @@ def load_env():
                         SUPABASE_URL = val
                     elif key == "NEXT_PUBLIC_SUPABASE_ANON_KEY" and not SUPABASE_KEY:
                         SUPABASE_KEY = val
-                    elif key == "LLM_BASE_URL" and val:
+                    elif key in ("LLM_EMBED_BASE_URL", "LLM_BASE_URL") and val:
                         LLM_BASE_URL = val
-                    elif key == "LLM_API_KEY" and val:
+                    elif key in ("LLM_EMBED_API_KEY", "LLM_API_KEY") and val:
                         LLM_API_KEY = val
                     elif key == "LLM_EMBED_MODEL" and val:
                         EMBED_MODEL = val

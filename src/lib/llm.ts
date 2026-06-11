@@ -1,26 +1,39 @@
 /**
  * Provider-agnostic LLM client (OpenAI-compatible).
  *
- * Works with any OpenAI-compatible endpoint by changing env vars only:
- *   - NVIDIA NIM (production):  https://integrate.api.nvidia.com/v1
- *   - Ollama (local dev):       http://localhost:11434/v1
- *   - Any paid provider later:  just swap LLM_BASE_URL / LLM_API_KEY / model
+ * Chat and embeddings are configured INDEPENDENTLY, so you can mix providers
+ * (e.g. chat on DeepSeek, embeddings on NVIDIA — DeepSeek has no embedding API).
  *
- * Env:
- *   LLM_BASE_URL          default https://integrate.api.nvidia.com/v1
- *   LLM_API_KEY           required for hosted providers (nvapi-... for NVIDIA)
- *   LLM_CHAT_MODEL        e.g. meta/llama-3.3-70b-instruct, qwen/qwen3-...
- *   LLM_EMBED_MODEL       e.g. nvidia/llama-3.2-nv-embedqa-1b-v2
- *   LLM_EMBED_DIMENSIONS  default 768 (must match the Supabase vector column)
+ * Each side falls back to the shared LLM_BASE_URL / LLM_API_KEY if its
+ * dedicated vars aren't set, so simple single-provider setups still work.
+ *
+ * Chat env:
+ *   LLM_CHAT_BASE_URL   (or LLM_BASE_URL)   e.g. https://api.deepseek.com
+ *   LLM_CHAT_API_KEY    (or LLM_API_KEY)
+ *   LLM_CHAT_MODEL                          e.g. deepseek-v4-flash
+ * Embedding env:
+ *   LLM_EMBED_BASE_URL  (or LLM_BASE_URL)   e.g. https://integrate.api.nvidia.com/v1
+ *   LLM_EMBED_API_KEY   (or LLM_API_KEY)
+ *   LLM_EMBED_MODEL                         e.g. baai/bge-m3
+ *   LLM_EMBED_DIMENSIONS  (0 = don't send a dimensions param)
  */
 
-const BASE_URL =
-  process.env.LLM_BASE_URL || "https://integrate.api.nvidia.com/v1";
-const API_KEY = process.env.LLM_API_KEY || "";
-const CHAT_MODEL = process.env.LLM_CHAT_MODEL || "meta/llama-3.3-70b-instruct";
+const SHARED_BASE = process.env.LLM_BASE_URL || "";
+const SHARED_KEY = process.env.LLM_API_KEY || "";
+
+const CHAT_BASE = (
+  process.env.LLM_CHAT_BASE_URL || SHARED_BASE || "https://api.deepseek.com"
+).replace(/\/$/, "");
+const CHAT_KEY = process.env.LLM_CHAT_API_KEY || SHARED_KEY;
+const CHAT_MODEL = process.env.LLM_CHAT_MODEL || "deepseek-v4-flash";
+
+const EMBED_BASE = (
+  process.env.LLM_EMBED_BASE_URL || SHARED_BASE || "https://integrate.api.nvidia.com/v1"
+).replace(/\/$/, "");
+const EMBED_KEY = process.env.LLM_EMBED_API_KEY || SHARED_KEY;
 const EMBED_MODEL = process.env.LLM_EMBED_MODEL || "baai/bge-m3";
-// Only sent when > 0. Matryoshka models (e.g. nv-embedqa) accept it; fixed-size
-// models like bge-m3 (1024) reject it, so leave at 0 for those.
+// Only sent when > 0. Matryoshka models accept it; fixed-size models like
+// bge-m3 (1024) reject it, so leave at 0 for those.
 const EMBED_DIMENSIONS = Number(process.env.LLM_EMBED_DIMENSIONS || "0");
 
 export interface ChatMessage {
@@ -28,23 +41,25 @@ export interface ChatMessage {
   content: string;
 }
 
-export function llmConfigured(): boolean {
-  // Local Ollama needs no key; hosted providers do. Treat a localhost base
-  // URL as always-configured so local dev works without a key.
-  if (/localhost|127\.0\.0\.1/.test(BASE_URL)) return true;
-  return API_KEY.length > 0;
+function isLocal(url: string): boolean {
+  return /localhost|127\.0\.0\.1/.test(url);
 }
 
-function authHeaders(): Record<string, string> {
+export function llmConfigured(): boolean {
+  // Chat is the user-facing path; consider the service "configured" when chat
+  // is reachable (local providers need no key).
+  return isLocal(CHAT_BASE) || CHAT_KEY.length > 0;
+}
+
+function headers(key: string): Record<string, string> {
   const h: Record<string, string> = { "Content-Type": "application/json" };
-  if (API_KEY) h["Authorization"] = `Bearer ${API_KEY}`;
+  if (key) h["Authorization"] = `Bearer ${key}`;
   return h;
 }
 
 /**
  * Embed a single text. `inputType` distinguishes query vs passage for
- * retrieval-optimized models (NVIDIA NeMo Retriever); ignored by models
- * that don't support it.
+ * retrieval-optimized models; ignored by models that don't support it.
  */
 export async function embed(
   text: string,
@@ -58,9 +73,9 @@ export async function embed(
   };
   if (EMBED_DIMENSIONS > 0) body.dimensions = EMBED_DIMENSIONS;
 
-  const res = await fetch(`${BASE_URL}/embeddings`, {
+  const res = await fetch(`${EMBED_BASE}/embeddings`, {
     method: "POST",
-    headers: authHeaders(),
+    headers: headers(EMBED_KEY),
     body: JSON.stringify(body),
   });
   if (!res.ok) {
@@ -75,9 +90,9 @@ export async function embed(
  * body is an OpenAI-style SSE stream (`data: {choices:[{delta:{content}}]}`).
  */
 export async function chatStream(messages: ChatMessage[]): Promise<Response> {
-  return fetch(`${BASE_URL}/chat/completions`, {
+  return fetch(`${CHAT_BASE}/chat/completions`, {
     method: "POST",
-    headers: authHeaders(),
+    headers: headers(CHAT_KEY),
     body: JSON.stringify({
       model: CHAT_MODEL,
       messages,
@@ -89,4 +104,10 @@ export async function chatStream(messages: ChatMessage[]): Promise<Response> {
   });
 }
 
-export const llmInfo = { BASE_URL, CHAT_MODEL, EMBED_MODEL, EMBED_DIMENSIONS };
+export const llmInfo = {
+  CHAT_BASE,
+  CHAT_MODEL,
+  EMBED_BASE,
+  EMBED_MODEL,
+  EMBED_DIMENSIONS,
+};
