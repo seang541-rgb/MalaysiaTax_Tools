@@ -17,33 +17,38 @@ Browser ──▶ /api/chat (Next.js)
 Only the LLM calls changed. Supabase RAG, pre-calculation injection, rate limiting
 and the client-facing SSE format are untouched.
 
-## Step 1 — Get a free NVIDIA NIM API key
+## Step 1 — Get API keys
 
-1. Sign up (no credit card) at <https://build.nvidia.com>.
-2. Generate an API key — it starts with `nvapi-`.
-3. Pick a chat model from the catalog. Use an **instruct** model (not a reasoning
-   model) so tokens stream in `content`. Good multilingual picks:
-   - `meta/llama-3.3-70b-instruct` (default)
-   - `qwen/qwen3-...-instruct` (stronger Chinese)
+Chat and embeddings use **separate** providers (DeepSeek has no embeddings API):
 
-> Free tier: ~40 requests/min and a credit cap — fine for launch/low traffic.
-> When you outgrow it, change `LLM_BASE_URL`/`LLM_API_KEY`/`LLM_CHAT_MODEL` to a
-> paid provider; no code change.
+- **Chat — DeepSeek** (<https://platform.deepseek.com>): create a key (`sk-...`).
+  Default model `deepseek-v4-flash` (scored 4/4 on the tax accuracy benchmark,
+  ~40% faster than `deepseek-v4-pro`). Switch to `deepseek-v4-pro` for heavier
+  reasoning if ever needed.
+- **Embeddings — NVIDIA NIM** (<https://build.nvidia.com>, free, no card): key
+  starts with `nvapi-`. Model `baai/bge-m3` (multilingual EN/ZH/MS, 1024 dims).
+
+> NVIDIA free tier: ~40 req/min + credit cap — fine for launch traffic. Both
+> sides are OpenAI-compatible, so swapping either to a paid provider is an env
+> change, no code.
 
 ## Step 2 — Configure env vars
 
 In `.env.local` (local) and in your host's env settings (production):
 
 ```
-LLM_BASE_URL=https://integrate.api.nvidia.com/v1
-LLM_API_KEY=nvapi-xxxxxxxx
-LLM_CHAT_MODEL=meta/llama-3.3-70b-instruct
+# Chat — DeepSeek
+LLM_CHAT_BASE_URL=https://api.deepseek.com
+LLM_CHAT_API_KEY=sk-xxxxxxxx
+LLM_CHAT_MODEL=deepseek-v4-flash
+# Embeddings — NVIDIA
+LLM_EMBED_BASE_URL=https://integrate.api.nvidia.com/v1
+LLM_EMBED_API_KEY=nvapi-xxxxxxxx
 LLM_EMBED_MODEL=baai/bge-m3
 LLM_EMBED_DIMENSIONS=0
 ```
 
-`baai/bge-m3` is a strong multilingual (EN/ZH/MS) embedding model, **1024 dims**.
-`LLM_EMBED_DIMENSIONS=0` means "don't send a dimensions param" (bge-m3 is fixed-size).
+`LLM_EMBED_DIMENSIONS=0` means "don't send a dimensions param" (bge-m3 is fixed 1024).
 
 ## Step 3 — Migrate the Supabase vector column (once)
 
