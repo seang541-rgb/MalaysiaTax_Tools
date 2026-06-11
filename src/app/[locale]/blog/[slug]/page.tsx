@@ -4,7 +4,7 @@ import { Link } from "@/i18n/navigation";
 import { getPost, getAllSlugs } from "@/lib/blog";
 import { ArrowLeft, CalendarDays } from "lucide-react";
 
-const BASE_URL = "https://mytax.my";
+import { SITE_URL as BASE_URL } from "@/lib/site";
 
 export function generateStaticParams() {
   return getAllSlugs().map(({ locale, slug }) => ({ locale, slug }));

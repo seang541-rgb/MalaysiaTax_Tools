@@ -2,6 +2,7 @@ import { useTranslations } from "next-intl";
 import { getTranslations } from "next-intl/server";
 import { IncomeForm } from "@/components/income-form";
 import { SourceNote } from "@/components/source-note";
+import { SITE_URL } from "@/lib/site";
 
 export async function generateMetadata({
   params,
@@ -28,7 +29,7 @@ const jsonLd = {
   "@context": "https://schema.org",
   "@type": "WebApplication",
   name: "MYTax - Malaysia Tax Calculator",
-  url: "https://mytax.my",
+  url: SITE_URL,
   applicationCategory: "FinanceApplication",
   operatingSystem: "All",
   offers: {
@@ -42,7 +43,7 @@ const jsonLd = {
   creator: {
     "@type": "Organization",
     name: "MYTax",
-    url: "https://mytax.my",
+    url: SITE_URL,
   },
 };
 

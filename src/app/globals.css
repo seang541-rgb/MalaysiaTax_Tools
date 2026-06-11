@@ -245,7 +245,7 @@
 
   /* Add site title for printed pages */
   body::before {
-    content: "MYTax Calculator — mytax.my";
+    content: "MYTax Calculator — mytaxs.online";
     display: block;
     text-align: center;
     font-size: 10pt;

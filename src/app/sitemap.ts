@@ -1,7 +1,6 @@
 import type { MetadataRoute } from "next";
 import { getAllSlugs } from "@/lib/blog";
-
-const BASE_URL = "https://mytax.my";
+import { SITE_URL as BASE_URL } from "@/lib/site";
 
 const locales = ["en", "zh", "ms"];
 

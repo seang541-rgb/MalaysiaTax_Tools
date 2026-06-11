@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import "./globals.css";
+import { SITE_URL } from "@/lib/site";
 
 export const metadata: Metadata = {
   title: {
@@ -22,12 +23,12 @@ export const metadata: Metadata = {
   ],
   authors: [{ name: "MYTax" }],
   creator: "MYTax",
-  metadataBase: new URL("https://mytax.my"),
+  metadataBase: new URL(SITE_URL),
   openGraph: {
     type: "website",
     locale: "en_MY",
     alternateLocale: ["zh_CN", "ms_MY"],
-    url: "https://mytax.my",
+    url: SITE_URL,
     siteName: "MYTax",
     title: "MYTax - Free Malaysia Tax Calculator",
     description:

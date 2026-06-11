@@ -124,7 +124,7 @@ export default function OGImage({ params }: { params: { locale: string } }) {
             gap: 8,
           }}
         >
-          <span style={{ fontSize: 20, color: "#71717a" }}>mytax.my</span>
+          <span style={{ fontSize: 20, color: "#71717a" }}>mytaxs.online</span>
         </div>
       </div>
     ),
