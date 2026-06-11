@@ -90,17 +90,25 @@ export async function embed(
  * body is an OpenAI-style SSE stream (`data: {choices:[{delta:{content}}]}`).
  */
 export async function chatStream(messages: ChatMessage[]): Promise<Response> {
+  const body: Record<string, unknown> = {
+    model: CHAT_MODEL,
+    messages,
+    stream: true,
+    temperature: 0.3,
+    top_p: 0.9,
+    max_tokens: 2048,
+  };
+  // DeepSeek V4 is a hybrid "thinking" model: on ambiguous prompts it can spend
+  // the whole token budget on reasoning and emit empty content. Disable thinking
+  // (the benchmark showed full accuracy without it) — answers are faster and
+  // content always streams. DeepSeek-specific param, so gate it by base URL.
+  if (/deepseek/i.test(CHAT_BASE)) {
+    body.thinking = { type: "disabled" };
+  }
   return fetch(`${CHAT_BASE}/chat/completions`, {
     method: "POST",
     headers: headers(CHAT_KEY),
-    body: JSON.stringify({
-      model: CHAT_MODEL,
-      messages,
-      stream: true,
-      temperature: 0.3,
-      top_p: 0.9,
-      max_tokens: 1024,
-    }),
+    body: JSON.stringify(body),
   });
 }
 
