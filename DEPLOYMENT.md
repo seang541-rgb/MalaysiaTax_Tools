@@ -136,3 +136,8 @@ Listen for:
 The personal income tax calculator remains free. The first paid gate is
 `POST /api/chat`, which requires a signed-in Supabase user and consumes 1 credit
 before calling the LLM provider.
+
+For local setup on Windows, run `npm run billing:env`. The script prompts for
+Supabase and Stripe keys, writes `.env.local`, can create the three one-time
+Stripe prices, and can register the `checkout.session.completed` webhook
+endpoint automatically.

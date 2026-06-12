@@ -7,6 +7,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
+    "billing:env": "powershell -ExecutionPolicy Bypass -File scripts/configure-billing-env.ps1",
     "test": "vitest run",
     "test:watch": "vitest"
   },
