@@ -15,6 +15,8 @@ function isMaintenanceEnabled(request: NextRequest): boolean {
   return isProductionMaintenanceHost({
     host: request.headers.get("host"),
     vercelEnv: process.env.VERCEL_ENV,
+    maintenanceMode: process.env.MAINTENANCE_MODE,
+    pathname: request.nextUrl.pathname,
   });
 }
 

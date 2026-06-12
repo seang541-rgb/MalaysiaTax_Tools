@@ -100,4 +100,37 @@ describe("AI chat billing gate", () => {
     expect(embedMock).not.toHaveBeenCalled();
     expect(chatStreamMock).not.toHaveBeenCalled();
   });
+
+  it("rejects malformed JSON before charging credits", async () => {
+    getUserMock.mockResolvedValue({
+      data: { user: { id: "user-1", email: "user@example.com" } },
+    });
+    const { POST } = await import("@/app/api/chat/route");
+
+    const res = await POST(
+      new Request("http://localhost/api/chat", {
+        method: "POST",
+        body: "{bad json",
+      }) as never
+    );
+
+    expect(res.status).toBe(400);
+    expect(consumeCreditsMock).not.toHaveBeenCalled();
+    expect(embedMock).not.toHaveBeenCalled();
+    expect(chatStreamMock).not.toHaveBeenCalled();
+  });
+
+  it("reports provider availability without charging credits", async () => {
+    const { GET } = await import("@/app/api/chat/route");
+
+    const res = await GET();
+
+    expect(res.status).toBe(200);
+    await expect(res.json()).resolves.toMatchObject({
+      status: "ok",
+      configured: true,
+      available: true,
+    });
+    expect(consumeCreditsMock).not.toHaveBeenCalled();
+  });
 });

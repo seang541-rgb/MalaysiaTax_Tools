@@ -5,7 +5,7 @@ import { useTranslations } from "next-intl";
 import { LogIn, LogOut, X } from "lucide-react";
 import { createSupabaseBrowserClient } from "@/lib/supabase/browser";
 
-type AuthMode = "signIn" | "signUp";
+type AuthMode = "signIn" | "signUp" | "forgotPassword";
 
 export function AuthButton() {
   const t = useTranslations("auth");
@@ -45,6 +45,22 @@ export function AuthButton() {
     }
 
     return message || t("authError");
+  }
+
+  async function emailAlreadyRegistered(email: string): Promise<boolean> {
+    const response = await fetch("/api/auth/email-status", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ email }),
+    });
+
+    if (!response.ok) return false;
+
+    const data = (await response.json().catch(() => null)) as {
+      registered?: unknown;
+    } | null;
+
+    return data?.registered === true;
   }
 
   useEffect(() => {
@@ -92,7 +108,7 @@ export function AuthButton() {
       return;
     }
 
-    if (!password) {
+    if (mode !== "forgotPassword" && !password) {
       setError(t("passwordRequired"));
       return;
     }
@@ -100,6 +116,31 @@ export function AuthButton() {
     setSubmitting(true);
     setError(null);
     setMessage(null);
+
+    if (mode === "forgotPassword") {
+      const locale = window.location.pathname.split("/")[1] || "en";
+      const nextPath = `/${locale}/account?reset_password=1`;
+      const result = await supabase.auth.resetPasswordForEmail(nextEmail, {
+        redirectTo: `${window.location.origin}/auth/callback?next=${encodeURIComponent(nextPath)}`,
+      });
+
+      setSubmitting(false);
+
+      if (result.error) {
+        setError(authErrorMessage(result.error.message));
+        return;
+      }
+
+      setMessage(t("resetPasswordSent"));
+      return;
+    }
+
+    if (mode === "signUp" && (await emailAlreadyRegistered(nextEmail))) {
+      setSubmitting(false);
+      setMode("signIn");
+      setError(t("emailRegistered"));
+      return;
+    }
 
     const result =
       mode === "signIn"
@@ -177,7 +218,9 @@ export function AuthButton() {
               <h2 id="auth-dialog-title" className="text-base font-semibold">
                 {mode === "signIn"
                   ? t("dialogTitleSignIn")
-                  : t("dialogTitleSignUp")}
+                  : mode === "signUp"
+                    ? t("dialogTitleSignUp")
+                    : t("resetPasswordTitle")}
               </h2>
               <button
                 type="button"
@@ -190,6 +233,12 @@ export function AuthButton() {
             </div>
 
             <form className="space-y-4" onSubmit={submitAuth}>
+              {mode === "forgotPassword" ? (
+                <p className="text-sm text-muted-foreground">
+                  {t("resetPasswordDesc")}
+                </p>
+              ) : null}
+
               <div className="space-y-2">
                 <label htmlFor="auth-email" className="text-sm font-medium">
                   {t("email")}
@@ -205,28 +254,33 @@ export function AuthButton() {
                 />
               </div>
 
-              <div className="space-y-2">
-                <label htmlFor="auth-password" className="text-sm font-medium">
-                  {t("password")}
-                </label>
-                <input
-                  id="auth-password"
-                  type="password"
-                  autoComplete={
-                    mode === "signIn" ? "current-password" : "new-password"
-                  }
-                  value={password}
-                  onChange={(event) => setPassword(event.target.value)}
-                  className="h-10 w-full rounded-md border bg-background px-3 text-sm outline-none focus:ring-2 focus:ring-ring"
-                  minLength={6}
-                  required
-                />
-                {mode === "signUp" ? (
-                  <p className="text-xs text-muted-foreground">
-                    {t("passwordHint")}
-                  </p>
-                ) : null}
-              </div>
+              {mode !== "forgotPassword" ? (
+                <div className="space-y-2">
+                  <label
+                    htmlFor="auth-password"
+                    className="text-sm font-medium"
+                  >
+                    {t("password")}
+                  </label>
+                  <input
+                    id="auth-password"
+                    type="password"
+                    autoComplete={
+                      mode === "signIn" ? "current-password" : "new-password"
+                    }
+                    value={password}
+                    onChange={(event) => setPassword(event.target.value)}
+                    className="h-10 w-full rounded-md border bg-background px-3 text-sm outline-none focus:ring-2 focus:ring-ring"
+                    minLength={6}
+                    required
+                  />
+                  {mode === "signUp" ? (
+                    <p className="text-xs text-muted-foreground">
+                      {t("passwordHint")}
+                    </p>
+                  ) : null}
+                </div>
+              ) : null}
 
               {error ? (
                 <p className="rounded-md border border-destructive/30 bg-destructive/10 px-3 py-2 text-sm text-destructive">
@@ -245,21 +299,40 @@ export function AuthButton() {
                 disabled={submitting}
                 className="inline-flex h-10 w-full items-center justify-center rounded-md bg-primary px-4 text-sm font-medium text-primary-foreground hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-60"
               >
-                {mode === "signIn" ? t("submitSignIn") : t("submitSignUp")}
+                {mode === "signIn"
+                  ? t("submitSignIn")
+                  : mode === "signUp"
+                    ? t("submitSignUp")
+                    : t("resetPasswordSubmit")}
               </button>
             </form>
+
+            {mode === "signIn" ? (
+              <button
+                type="button"
+                onClick={() => {
+                  setMode("forgotPassword");
+                  setError(null);
+                  setMessage(null);
+                  setPassword("");
+                }}
+                className="mt-3 w-full rounded-md px-3 py-2 text-sm text-muted-foreground hover:bg-muted hover:text-foreground"
+              >
+                {t("forgotPassword")}
+              </button>
+            ) : null}
 
             <button
               type="button"
               onClick={() => {
-                setMode(mode === "signIn" ? "signUp" : "signIn");
+                setMode(mode === "signUp" ? "signIn" : "signUp");
                 setError(null);
                 setMessage(null);
                 setPassword("");
               }}
               className="mt-4 w-full rounded-md px-3 py-2 text-sm text-muted-foreground hover:bg-muted hover:text-foreground"
             >
-              {mode === "signIn" ? t("switchToSignUp") : t("switchToSignIn")}
+              {mode === "signUp" ? t("switchToSignIn") : t("switchToSignUp")}
             </button>
           </div>
         </div>

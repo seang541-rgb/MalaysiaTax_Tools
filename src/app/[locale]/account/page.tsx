@@ -2,13 +2,17 @@ import { getTranslations } from "next-intl/server";
 import { redirect } from "next/navigation";
 import { getBalance } from "@/lib/billing/credits";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
+import { ChangePasswordForm } from "@/components/change-password-form";
 
 export default async function AccountPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ locale: string }>;
+  searchParams: Promise<{ reset_password?: string }>;
 }) {
   const { locale } = await params;
+  const { reset_password: resetPassword } = await searchParams;
   const t = await getTranslations({ locale, namespace: "account" });
   const supabase = await createSupabaseServerClient();
   const {
@@ -58,6 +62,7 @@ export default async function AccountPage({
           )}
         </div>
       </section>
+      <ChangePasswordForm resetMode={resetPassword === "1"} />
     </div>
   );
 }

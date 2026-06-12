@@ -2,6 +2,14 @@ import { billingErrorResponse } from "@/lib/billing/errors";
 import { getBillingPack } from "@/lib/billing/plans";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 
+const SUPPORTED_LOCALES = new Set(["en", "zh", "ms"]);
+
+function safeLocale(value: unknown): string {
+  return typeof value === "string" && SUPPORTED_LOCALES.has(value)
+    ? value
+    : "en";
+}
+
 export async function POST(request: Request) {
   const supabase = await createSupabaseServerClient();
   const {
@@ -16,7 +24,17 @@ export async function POST(request: Request) {
     );
   }
 
-  const { packId, locale = "en", returnTo } = await request.json();
+  const body = (await request.json().catch(() => null)) as Record<
+    string,
+    unknown
+  > | null;
+
+  if (!body) {
+    return billingErrorResponse("INVALID_PACK", 400, "Invalid checkout request.");
+  }
+
+  const { packId, returnTo } = body;
+  const locale = safeLocale(body.locale);
   const pack = getBillingPack(String(packId));
 
   if (!pack) {
@@ -59,11 +77,13 @@ export async function POST(request: Request) {
     });
     customerId = customer.id;
 
-    await admin.from("profiles").upsert({
+    const { error: upsertError } = await admin.from("profiles").upsert({
       id: user.id,
       email: user.email,
       stripe_customer_id: customerId,
     });
+
+    if (upsertError) throw new Error(upsertError.message);
   }
 
   const successUrl = new URL(`/${locale}/billing/success`, appUrl);

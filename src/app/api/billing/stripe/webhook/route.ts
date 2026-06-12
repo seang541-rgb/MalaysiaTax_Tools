@@ -64,11 +64,15 @@ export async function POST(request: Request) {
     });
   }
 
-  await admin.from("stripe_events").insert({
+  const { error: insertError } = await admin.from("stripe_events").insert({
     id: event.id,
     type: event.type,
     payload: event as unknown as Record<string, unknown>,
   });
+
+  if (insertError) {
+    throw new Error(insertError.message);
+  }
 
   return Response.json({ received: true });
 }

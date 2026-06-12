@@ -279,6 +279,13 @@ setInterval(() => {
 const MAX_MESSAGE_LENGTH = 500;
 const MAX_MESSAGES = 20;
 
+function isChatMessage(value: unknown): value is {
+  role?: unknown;
+  content?: unknown;
+} {
+  return typeof value === "object" && value !== null;
+}
+
 export async function POST(request: NextRequest) {
   let chargedAiCredit = false;
   let chargedUserId: string | null = null;
@@ -309,7 +316,10 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const { messages } = await request.json();
+    const body = (await request.json().catch(() => null)) as {
+      messages?: unknown;
+    } | null;
+    const messages = body?.messages;
 
     // Input validation
     if (!Array.isArray(messages) || messages.length === 0) {
@@ -325,9 +335,12 @@ export async function POST(request: NextRequest) {
       );
     }
     // Sanitize: trim and cap each message length
-    const sanitizedMessages = messages.map((m: { role: string; content: string }) => ({
-      role: m.role === "assistant" ? "assistant" : "user",
-      content: typeof m.content === "string" ? m.content.slice(0, MAX_MESSAGE_LENGTH) : "",
+    const sanitizedMessages = messages.map((m) => ({
+      role: isChatMessage(m) && m.role === "assistant" ? "assistant" : "user",
+      content:
+        isChatMessage(m) && typeof m.content === "string"
+          ? m.content.slice(0, MAX_MESSAGE_LENGTH)
+          : "",
     }));
 
     // Get the latest user message for RAG retrieval + pre-calculation
@@ -500,6 +513,7 @@ export async function GET() {
       status: ok ? "ok" : "error",
       model: llmInfo.CHAT_MODEL,
       configured: ok,
+      available: ok,
     }),
     {
       status: ok ? 200 : 503,
