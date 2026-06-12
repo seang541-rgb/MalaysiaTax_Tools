@@ -120,6 +120,116 @@ describe("AI chat billing gate", () => {
     expect(chatStreamMock).not.toHaveBeenCalled();
   });
 
+  it("injects the calculator-aligned monthly salary pre-calculation", async () => {
+    getUserMock.mockResolvedValue({
+      data: { user: { id: "user-1", email: "user@example.com" } },
+    });
+    consumeCreditsMock.mockResolvedValue({ balance: 9 });
+    embedMock.mockRejectedValue(new Error("skip rag"));
+    chatStreamMock.mockResolvedValue(
+      new Response('data: {"choices":[{"delta":{"content":"ok"}}]}\n\ndata: [DONE]\n\n')
+    );
+    const { POST } = await import("@/app/api/chat/route");
+
+    const res = await POST(
+      new Request("http://localhost/api/chat", {
+        method: "POST",
+        body: JSON.stringify({
+          messages: [
+            { role: "user", content: "monthly salary RM5000 single" },
+          ],
+        }),
+      }) as never
+    );
+
+    expect(res.status).toBe(200);
+    expect(chatStreamMock).toHaveBeenCalledOnce();
+    const messages = chatStreamMock.mock.calls[0][0] as Array<{
+      role: string;
+      content: string;
+    }>;
+    expect(messages[0].content).toContain(
+      "Estimated EPF employee relief: RM4,000"
+    );
+    expect(messages[0].content).toContain("Estimated SOCSO/EIS relief: RM350");
+    expect(messages[0].content).toContain("FINAL TAX PAYABLE: RM1,299");
+  });
+
+  it("injects exact SST threshold facts for revenue questions", async () => {
+    getUserMock.mockResolvedValue({
+      data: { user: { id: "user-1", email: "user@example.com" } },
+    });
+    consumeCreditsMock.mockResolvedValue({ balance: 9 });
+    embedMock.mockRejectedValue(new Error("skip rag"));
+    chatStreamMock.mockResolvedValue(
+      new Response('data: {"choices":[{"delta":{"content":"ok"}}]}\n\ndata: [DONE]\n\n')
+    );
+    const { POST } = await import("@/app/api/chat/route");
+
+    const res = await POST(
+      new Request("http://localhost/api/chat", {
+        method: "POST",
+        body: JSON.stringify({
+          locale: "en",
+          messages: [
+            {
+              role: "user",
+              content:
+                "Do I need to register SST if taxable service revenue is RM480,000?",
+            },
+          ],
+        }),
+      }) as never
+    );
+
+    expect(res.status).toBe(200);
+    const messages = chatStreamMock.mock.calls[0][0] as Array<{
+      role: string;
+      content: string;
+    }>;
+    expect(messages[0].content).toContain("EXACT MYTAX FACTS (SST)");
+    expect(messages[0].content).toContain("Reply language: English");
+    expect(messages[0].content).toContain(
+      "Conclusion: registration is not required."
+    );
+  });
+
+  it("does not inject personal tax pre-calculation into corporate questions", async () => {
+    getUserMock.mockResolvedValue({
+      data: { user: { id: "user-1", email: "user@example.com" } },
+    });
+    consumeCreditsMock.mockResolvedValue({ balance: 9 });
+    embedMock.mockRejectedValue(new Error("skip rag"));
+    chatStreamMock.mockResolvedValue(
+      new Response('data: {"choices":[{"delta":{"content":"ok"}}]}\n\ndata: [DONE]\n\n')
+    );
+    const { POST } = await import("@/app/api/chat/route");
+
+    const res = await POST(
+      new Request("http://localhost/api/chat", {
+        method: "POST",
+        body: JSON.stringify({
+          messages: [
+            {
+              role: "user",
+              content:
+                "My SME company chargeable income is RM800,000. Calculate corporate tax.",
+            },
+          ],
+        }),
+      }) as never
+    );
+
+    expect(res.status).toBe(200);
+    const messages = chatStreamMock.mock.calls[0][0] as Array<{
+      role: string;
+      content: string;
+    }>;
+    expect(messages[0].content).not.toContain(
+      "PRE-CALCULATED TAX RESULT"
+    );
+  });
+
   it("reports provider availability without charging credits", async () => {
     const { GET } = await import("@/app/api/chat/route");
 

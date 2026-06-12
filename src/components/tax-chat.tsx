@@ -12,7 +12,6 @@ export function TaxChat() {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [input, setInput] = useState("");
   const [isTyping, setIsTyping] = useState(false);
-  const [llmAvailable, setLlmAvailable] = useState<boolean | null>(null); // null = not checked yet
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const abortRef = useRef<AbortController | null>(null);
@@ -21,16 +20,10 @@ export function TaxChat() {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
-  // Check if Ollama is reachable on mount (lightweight GET health check)
+  // Warm the chat endpoint on mount; request handling has its own fallback path.
   useEffect(() => {
     fetch("/api/chat", { signal: AbortSignal.timeout(8000) })
-      .then((res) => res.json())
-      .then((data) => {
-        setLlmAvailable(data.status === "ok" && data.available);
-      })
-      .catch(() => {
-        setLlmAvailable(false);
-      });
+      .catch(() => {});
   }, [locale]);
 
   // Auto-greet on mount
@@ -215,20 +208,11 @@ export function TaxChat() {
     });
   };
 
-  const modeLabel =
-    llmAvailable === null
-      ? "..."
-      : llmAvailable
-        ? "Gemma 4 12B"
-        : locale === "zh"
-          ? "规则引擎"
-          : "Rule Engine";
-
   return (
     <div className="flex flex-col h-[600px] max-w-2xl mx-auto border rounded-xl bg-white shadow-sm overflow-hidden">
       {/* Header */}
       <div className="px-4 py-3 border-b bg-primary/5">
-        <div className="flex items-center justify-between">
+        <div className="flex items-center gap-2">
           <div className="flex items-center gap-2">
             <span className="text-2xl">🤖</span>
             <div>
@@ -236,15 +220,6 @@ export function TaxChat() {
               <p className="text-xs text-muted-foreground">{t("subtitle")}</p>
             </div>
           </div>
-          <span
-            className={`text-[10px] px-2 py-0.5 rounded-full font-medium ${
-              llmAvailable
-                ? "bg-green-100 text-green-700"
-                : "bg-amber-100 text-amber-700"
-            }`}
-          >
-            {modeLabel}
-          </span>
         </div>
       </div>
 

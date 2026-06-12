@@ -16,7 +16,7 @@ export function isProductionMaintenanceHost(input: {
   pathname?: string | null;
 }): boolean {
   if (isLocalHost(input.host)) return false;
-  if (input.pathname === "/auth/callback") return false;
+  if (input.pathname?.startsWith("/auth/")) return false;
 
   const maintenanceMode = input.maintenanceMode?.trim().toLowerCase();
   if (["0", "false", "off", "no"].includes(maintenanceMode ?? "")) {

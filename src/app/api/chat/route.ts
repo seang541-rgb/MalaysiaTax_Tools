@@ -1,6 +1,8 @@
 import { NextRequest } from "next/server";
 import { createClient } from "@supabase/supabase-js";
 import { TAX_RATES_YA2025 } from "@/engine/tax-rates";
+import { checkEInvoicePhase } from "@/engine/e-invoice";
+import { calculateSst } from "@/engine/sst";
 import { embed, chatStream, llmConfigured, llmInfo } from "@/lib/llm";
 import { billingErrorResponse } from "@/lib/billing/errors";
 import {
@@ -105,9 +107,104 @@ function extractIncomeAmount(message: string): number | null {
   return null;
 }
 
+function extractMoneyAmount(message: string): number | null {
+  const normalized = message.replace(/,/g, "").replace(/\s+/g, " ");
+  const match = normalized.match(
+    /(?:RM|rm)?\s*(\d+(?:\.\d+)?)\s*(million|m|juta|k|K|ribu)?/i
+  );
+  if (!match) return null;
+
+  let amount = parseFloat(match[1]);
+  const suffix = match[2]?.toLowerCase();
+  if (suffix === "million" || suffix === "m" || suffix === "juta") {
+    amount *= 1000000;
+  } else if (suffix === "k" || suffix === "ribu") {
+    amount *= 1000;
+  }
+
+  return amount > 0 ? amount : null;
+}
+
+function isPersonalTaxQuestion(message: string): boolean {
+  const lower = message.toLowerCase();
+  const hasPersonalSignal =
+    /personal|individual|income tax|salary|monthly|month|gaji|月薪|个人所得税|个人税|所得税/.test(
+      lower
+    );
+  const hasOtherToolSignal =
+    /company|corporate|sme|sdn|sst|sales tax|service tax|e-?invoice|myinvois|rpgt|property|employer|epf|socso|eis|cp204|sole proprietor|self[- ]?employed|kerja sendiri/.test(
+      lower
+    );
+
+  return hasPersonalSignal && !hasOtherToolSignal;
+}
+
+function formatExactContext(title: string, lines: string[]): string {
+  return `\n\n--- EXACT MYTAX FACTS (${title}) ---\n${lines.join("\n")}\n--- END EXACT MYTAX FACTS ---\nIMPORTANT: Use these exact facts. Do not contradict them.\n`;
+}
+
+function getDeterministicContext(message: string): string {
+  const lower = message.toLowerCase();
+  const amount = extractMoneyAmount(message);
+
+  if (amount !== null && /e-?invoice|myinvois/.test(lower)) {
+    const result = checkEInvoicePhase({ annualRevenue: amount });
+    if (result.isExempt) {
+      return formatExactContext("e-Invoice", [
+        `Annual turnover/revenue: RM${amount.toLocaleString("en-MY")}.`,
+        `Conclusion: This is at or below RM${result.exemptionThreshold.toLocaleString("en-MY")}, so e-Invoice is exempt/voluntary under MYTax's current rules.`,
+      ]);
+    }
+
+    return formatExactContext("e-Invoice", [
+      `Annual turnover/revenue: RM${amount.toLocaleString("en-MY")}.`,
+      `Conclusion: Phase ${result.phase}, mandatory from ${result.mandatoryDate}.`,
+      result.relaxationEnd
+        ? `Relaxation period ends on ${result.relaxationEnd}.`
+        : "",
+    ].filter(Boolean));
+  }
+
+  if (amount !== null && /sst|service tax|sales tax|cukai perkhidmatan|cukai jualan/.test(lower)) {
+    const result = calculateSst({
+      taxableRevenue: amount,
+      taxType: /sales tax|cukai jualan/.test(lower) ? "sales" : "service",
+    });
+    const conclusion = result.isRegistrationRequired
+      ? "registration is required"
+      : "registration is not required";
+
+    return formatExactContext("SST", [
+      `Taxable revenue: RM${amount.toLocaleString("en-MY")}.`,
+      `Registration threshold used: RM${result.registrationThreshold.toLocaleString("en-MY")}.`,
+      `Conclusion: ${conclusion}.`,
+      `Estimated tax: RM${result.estimatedTax.toLocaleString("en-MY")} at ${result.taxRate}%.`,
+    ]);
+  }
+
+  return "";
+}
+
+function getLocaleInstruction(locale: unknown): string {
+  if (locale === "zh") {
+    return "\nReply language: Chinese. Use clear Simplified Chinese unless the user asks otherwise.\n";
+  }
+  if (locale === "ms") {
+    return "\nReply language: Bahasa Malaysia unless the user asks otherwise.\n";
+  }
+  if (locale === "en") {
+    return "\nReply language: English unless the user asks otherwise.\n";
+  }
+
+  return "";
+}
+
 interface PreCalculatedTax {
   grossIncome: number;
   personalRelief: number;
+  epfRelief: number;
+  socsoEisRelief: number;
+  totalReliefs: number;
   chargeableIncome: number;
   bands: { min: number; max: number; rate: number; taxable: number; tax: number }[];
   totalTax: number;
@@ -119,8 +216,12 @@ interface PreCalculatedTax {
 
 /** Deterministic tax calculation using the rule engine */
 function preCalculateTax(annualIncome: number, originalMessage: string): PreCalculatedTax {
+  const isMonthly = /月薪|monthly|month|bulan|gaji|salary/i.test(originalMessage);
   const personalRelief = 9000; // automatic individual relief
-  const chargeableIncome = Math.max(0, annualIncome - personalRelief);
+  const epfRelief = isMonthly ? Math.min(annualIncome * 0.11, 4000) : 0;
+  const socsoEisRelief = isMonthly ? 350 : 0;
+  const totalReliefs = personalRelief + epfRelief + socsoEisRelief;
+  const chargeableIncome = Math.max(0, annualIncome - totalReliefs);
 
   const bands: PreCalculatedTax["bands"] = [];
   let remaining = chargeableIncome;
@@ -147,11 +248,12 @@ function preCalculateTax(annualIncome: number, originalMessage: string): PreCalc
   const finalTax = Math.max(0, totalTax - rebate);
 
   // Detect if user asked in monthly terms
-  const isMonthly = /月|month|bulan|gaji/i.test(originalMessage);
-
   return {
     grossIncome: annualIncome,
     personalRelief,
+    epfRelief,
+    socsoEisRelief,
+    totalReliefs,
     chargeableIncome,
     bands,
     totalTax,
@@ -171,7 +273,14 @@ function formatPreCalculation(calc: PreCalculatedTax): string {
   let text = `\n\n--- PRE-CALCULATED TAX RESULT (use these EXACT numbers) ---\n`;
   text += `User's income: ${incomeLabel}\n`;
   text += `Personal relief: RM${calc.personalRelief.toLocaleString()}\n`;
-  text += `Chargeable income: RM${calc.grossIncome.toLocaleString()} - RM${calc.personalRelief.toLocaleString()} = RM${calc.chargeableIncome.toLocaleString()}\n\n`;
+  if (calc.epfRelief > 0) {
+    text += `Estimated EPF employee relief: RM${calc.epfRelief.toLocaleString()}\n`;
+  }
+  if (calc.socsoEisRelief > 0) {
+    text += `Estimated SOCSO/EIS relief: RM${calc.socsoEisRelief.toLocaleString()}\n`;
+  }
+  text += `Total reliefs used: RM${calc.totalReliefs.toLocaleString()}\n`;
+  text += `Chargeable income: RM${calc.grossIncome.toLocaleString()} - RM${calc.totalReliefs.toLocaleString()} = RM${calc.chargeableIncome.toLocaleString()}\n\n`;
   text += `Tax bands applied to chargeable income RM${calc.chargeableIncome.toLocaleString()}:\n`;
 
   let cumulative = 0;
@@ -203,6 +312,14 @@ Your knowledge covers:
 - EIS (SIP): 0.2% each, ceiling RM6k, below 60 only
 - SST: Service tax 8%, Sales tax 5%/10%, threshold RM500k
 - PCB (monthly tax deduction): Advance tax deducted by employer monthly
+
+Important fixed facts to use before general model knowledge:
+- SME corporate tax (YA2025): first RM150,000 at 15%, next RM450,000 at 17%, balance at 24%.
+- e-Invoice rollout: >RM100M from 1 Aug 2024; RM25M-RM100M from 1 Jan 2025; RM5M-RM25M from 1 Jul 2025; RM1M-RM5M from 1 Jan 2026; <=RM1M exempt/voluntary.
+- Most taxable services use the RM500,000 annual SST registration threshold unless a specific service category has a different rule.
+- Employer EPF is 13% for monthly wages up to RM5,000 and 12% above RM5,000; employee EPF is generally 11%.
+- SOCSO wage ceiling is RM6,000; EIS is 0.2% employee and 0.2% employer up to the applicable ceiling.
+- CP204 is the company's estimate of tax payable; underestimation can trigger penalties when the final tax exceeds the estimate beyond the allowed margin.
 
 Rules:
 1. Always cite specific rates, ceilings, and thresholds with numbers
@@ -318,8 +435,10 @@ export async function POST(request: NextRequest) {
 
     const body = (await request.json().catch(() => null)) as {
       messages?: unknown;
+      locale?: unknown;
     } | null;
     const messages = body?.messages;
+    const locale = body?.locale;
 
     // Input validation
     if (!Array.isArray(messages) || messages.length === 0) {
@@ -376,10 +495,14 @@ export async function POST(request: NextRequest) {
 
     const ragContext = userMessage ? await retrieveContext(userMessage) : "";
 
-    // Pre-calculate tax if user mentions an income amount
+    const deterministicContext = userMessage
+      ? getDeterministicContext(userMessage)
+      : "";
+
+    // Pre-calculate personal tax only for personal/salary questions.
     let preCalcContext = "";
     const detectedIncome = extractIncomeAmount(userMessage);
-    if (detectedIncome !== null) {
+    if (detectedIncome !== null && isPersonalTaxQuestion(userMessage)) {
       const calc = preCalculateTax(detectedIncome, userMessage);
       preCalcContext = formatPreCalculation(calc);
     }
@@ -388,6 +511,10 @@ export async function POST(request: NextRequest) {
     // inject it and SKIP the manual band guide (which would invite the model
     // to recalculate on the wrong income). Otherwise include the band guide.
     let systemWithRag = SYSTEM_PROMPT;
+    systemWithRag += getLocaleInstruction(locale);
+    if (deterministicContext) {
+      systemWithRag += deterministicContext;
+    }
     if (preCalcContext) {
       systemWithRag += preCalcContext;
     } else {

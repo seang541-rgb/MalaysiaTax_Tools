@@ -185,7 +185,7 @@ describe("AuthButton", () => {
       email: "new@example.com",
       password: "secret123",
       options: {
-        emailRedirectTo: `${window.location.origin}/auth/callback?next=%2Fen%2Fpricing`,
+        emailRedirectTo: `${window.location.origin}/auth/confirm?next=%2Fen%2Fpricing`,
       },
     });
     expect(
@@ -245,7 +245,7 @@ describe("AuthButton", () => {
       expect(resetPasswordForEmailMock).toHaveBeenCalledWith(
         "customer@example.com",
         {
-          redirectTo: `${window.location.origin}/auth/callback?next=%2Fen%2Faccount%3Freset_password%3D1`,
+          redirectTo: `${window.location.origin}/auth/confirm?next=%2Fen%2Faccount%3Freset_password%3D1`,
         }
       );
     });

@@ -122,7 +122,7 @@ export function AuthButton() {
       const locale = window.location.pathname.split("/")[1] || "en";
       const nextPath = `/${locale}/account?reset_password=1`;
       const result = await supabase.auth.resetPasswordForEmail(nextEmail, {
-        redirectTo: `${window.location.origin}/auth/callback?next=${encodeURIComponent(nextPath)}`,
+        redirectTo: `${window.location.origin}/auth/confirm?next=${encodeURIComponent(nextPath)}`,
       });
 
       setSubmitting(false);
@@ -153,7 +153,7 @@ export function AuthButton() {
             email: nextEmail,
             password,
             options: {
-              emailRedirectTo: `${window.location.origin}/auth/callback?next=${encodeURIComponent(window.location.pathname)}`,
+              emailRedirectTo: `${window.location.origin}/auth/confirm?next=${encodeURIComponent(window.location.pathname)}`,
             },
           });
 
