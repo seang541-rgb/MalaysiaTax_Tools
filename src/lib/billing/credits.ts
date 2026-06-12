@@ -70,7 +70,10 @@ export async function getBalanceWithClient(
 
 export async function getBalance(userId: string): Promise<number> {
   const { createSupabaseAdminClient } = await import("@/lib/supabase/admin");
-  return getBalanceWithClient(createSupabaseAdminClient(), userId);
+  return getBalanceWithClient(
+    createSupabaseAdminClient() as unknown as BalanceQueryClient,
+    userId
+  );
 }
 
 export async function grantCreditsWithClient(
@@ -103,7 +106,10 @@ export async function grantCredits(input: {
   metadata: Record<string, unknown>;
 }): Promise<number> {
   const { createSupabaseAdminClient } = await import("@/lib/supabase/admin");
-  return grantCreditsWithClient(createSupabaseAdminClient(), input);
+  return grantCreditsWithClient(
+    createSupabaseAdminClient() as unknown as RpcClient,
+    input
+  );
 }
 
 export async function consumeCreditsWithClient(
@@ -149,7 +155,10 @@ export async function consumeCredits(input: {
   requestSummary: Record<string, unknown>;
 }): Promise<{ balance: number; required: number }> {
   const { createSupabaseAdminClient } = await import("@/lib/supabase/admin");
-  return consumeCreditsWithClient(createSupabaseAdminClient(), input);
+  return consumeCreditsWithClient(
+    createSupabaseAdminClient() as unknown as RpcClient,
+    input
+  );
 }
 
 export async function refundCreditsWithClient(
@@ -182,5 +191,8 @@ export async function refundCredits(input: {
   metadata: Record<string, unknown>;
 }): Promise<number> {
   const { createSupabaseAdminClient } = await import("@/lib/supabase/admin");
-  return refundCreditsWithClient(createSupabaseAdminClient(), input);
+  return refundCreditsWithClient(
+    createSupabaseAdminClient() as unknown as RpcClient,
+    input
+  );
 }

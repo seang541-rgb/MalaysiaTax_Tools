@@ -261,6 +261,24 @@
     "emailPrompt": "Enter your email for a secure login link",
     "checkEmail": "Check your email for the login link."
   },
+  "pricing": {
+    "title": "Pricing",
+    "subtitle": "Buy credits for AI tax help and advanced business tools.",
+    "buy": "Buy credits",
+    "freeNote": "The personal income tax calculator remains free and does not require login."
+  },
+  "billing": {
+    "successTitle": "Payment received",
+    "successDesc": "Your credits will appear once Stripe confirms the payment. This usually takes a few seconds.",
+    "viewAccount": "View account",
+    "tryAi": "Try AI Tax"
+  },
+  "account": {
+    "title": "Account",
+    "creditBalance": "Credit balance",
+    "recentActivity": "Recent activity",
+    "noActivity": "No credit activity yet."
+  },
   "sourceNote": {
     "verified": "Rates verified as of {date}",
     "sourceLabel": "Source"

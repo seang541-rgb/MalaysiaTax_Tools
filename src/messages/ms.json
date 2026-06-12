@@ -394,6 +394,24 @@
     "emailPrompt": "Masukkan emel anda untuk pautan log masuk selamat",
     "checkEmail": "Semak emel anda untuk pautan log masuk."
   },
+  "pricing": {
+    "title": "Harga",
+    "subtitle": "Beli credits untuk bantuan cukai AI dan alat perniagaan lanjutan.",
+    "buy": "Beli credits",
+    "freeNote": "Kalkulator cukai pendapatan peribadi kekal percuma dan tidak memerlukan log masuk."
+  },
+  "billing": {
+    "successTitle": "Bayaran diterima",
+    "successDesc": "Credits anda akan muncul selepas Stripe mengesahkan bayaran. Biasanya hanya beberapa saat.",
+    "viewAccount": "Lihat akaun",
+    "tryAi": "Cuba AI Tax"
+  },
+  "account": {
+    "title": "Akaun",
+    "creditBalance": "Baki credit",
+    "recentActivity": "Aktiviti terkini",
+    "noActivity": "Tiada aktiviti credit lagi."
+  },
   "sourceNote": {
     "verified": "Kadar disahkan setakat {date}",
     "sourceLabel": "Sumber"
