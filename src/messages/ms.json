@@ -650,7 +650,9 @@
     "subtitle": "Dikuasakan oleh Gemma 4 12B LLM tempatan",
     "placeholder": "Tanya soalan cukai...",
     "send": "Hantar",
-    "disclaimer": "Jawapan adalah untuk rujukan sahaja. Rujuk LHDN atau perunding cukai untuk nasihat rasmi."
+    "disclaimer": "Jawapan adalah untuk rujukan sahaja. Rujuk LHDN atau perunding cukai untuk nasihat rasmi.",
+    "authRequired": "Sila log masuk untuk menggunakan MYTax AI.",
+    "insufficientCredits": "Credits tidak mencukupi. Sila beli credits di halaman Harga."
   },
   "common": {
     "rm": "RM",

@@ -4,6 +4,8 @@ import { useState, useRef, useEffect, useCallback } from "react";
 import { useTranslations, useLocale } from "next-intl";
 import { ChatMessage, getTaxAssistantResponse } from "@/engine/tax-assistant";
 
+class ChatBillingError extends Error {}
+
 export function TaxChat() {
   const t = useTranslations("aiTax");
   const locale = useLocale();
@@ -59,7 +61,19 @@ export function TaxChat() {
           signal: controller.signal,
         });
 
-        if (!res.ok) throw new Error("LLM request failed");
+        if (!res.ok) {
+          const data = await res.json().catch(() => null);
+          const code = data?.error?.code;
+
+          if (code === "AUTH_REQUIRED") {
+            throw new ChatBillingError(t("authRequired"));
+          }
+          if (code === "INSUFFICIENT_CREDITS") {
+            throw new ChatBillingError(t("insufficientCredits"));
+          }
+
+          throw new Error(data?.error?.message ?? "LLM request failed");
+        }
 
         const reader = res.body!.getReader();
         const decoder = new TextDecoder();
@@ -98,6 +112,18 @@ export function TaxChat() {
         }
       } catch (err: unknown) {
         if (err instanceof Error && err.name === "AbortError") return;
+        if (err instanceof ChatBillingError) {
+          setMessages((prev) => {
+            const updated = [...prev];
+            updated[updated.length - 1] = {
+              role: "assistant",
+              content: err.message,
+            };
+            return updated;
+          });
+          return;
+        }
+
         // Fallback to rule engine on LLM failure
         const lastUser = allMessages[allMessages.length - 1];
         const fallback = getTaxAssistantResponse(lastUser.content, locale);
@@ -111,7 +137,7 @@ export function TaxChat() {
         abortRef.current = null;
       }
     },
-    [locale]
+    [locale, t]
   );
 
   const handleSend = () => {

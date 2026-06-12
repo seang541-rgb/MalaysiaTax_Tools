@@ -650,7 +650,9 @@
     "subtitle": "Powered by Gemma 4 12B local LLM",
     "placeholder": "Ask a tax question...",
     "send": "Send",
-    "disclaimer": "Answers are for reference only. Consult LHDN or a tax professional for official advice."
+    "disclaimer": "Answers are for reference only. Consult LHDN or a tax professional for official advice.",
+    "authRequired": "Please sign in to use MYTax AI.",
+    "insufficientCredits": "Not enough credits. Please buy credits from Pricing."
   },
   "common": {
     "rm": "RM",

@@ -650,7 +650,9 @@
     "subtitle": "由本地 Gemma 4 12B 大模型驱动",
     "placeholder": "输入税务问题...",
     "send": "发送",
-    "disclaimer": "回答仅供参考。请咨询 LHDN 或税务顾问获取正式建议。"
+    "disclaimer": "回答仅供参考。请咨询 LHDN 或税务顾问获取正式建议。",
+    "authRequired": "请先登录才能使用 MYTax AI。",
+    "insufficientCredits": "Credit 不足。请前往收费页面购买 credits。"
   },
   "common": {
     "rm": "RM",
