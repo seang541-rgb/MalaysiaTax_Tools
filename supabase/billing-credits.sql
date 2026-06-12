@@ -269,10 +269,10 @@ begin
     return;
   end if;
 
-  update public.credit_balances
-  set balance = balance - p_amount
-  where user_id = p_user_id
-  returning credit_balances.balance into v_balance;
+  update public.credit_balances cb
+  set balance = cb.balance - p_amount
+  where cb.user_id = p_user_id
+  returning cb.balance into v_balance;
 
   insert into public.credit_transactions (
     user_id,
