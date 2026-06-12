@@ -1,5 +1,6 @@
 import { useTranslations } from "next-intl";
 import { getTranslations } from "next-intl/server";
+import { PaidFeatureGate } from "@/components/paid-feature-gate";
 import { SstForm } from "@/components/sst-form";
 
 export async function generateMetadata({
@@ -25,7 +26,9 @@ export default function SstPage() {
         <h1 className="text-3xl font-bold mb-2">{t("title")}</h1>
         <p className="text-muted-foreground">{t("subtitle")}</p>
       </div>
-      <SstForm />
+      <PaidFeatureGate>
+        <SstForm />
+      </PaidFeatureGate>
     </div>
   );
 }

@@ -1,4 +1,5 @@
 import { useTranslations } from "next-intl";
+import { PaidFeatureGate } from "@/components/paid-feature-gate";
 import { TaxChat } from "@/components/tax-chat";
 
 export default function AiTaxPage() {
@@ -10,7 +11,9 @@ export default function AiTaxPage() {
         <h1 className="text-3xl font-bold tracking-tight">{t("pageTitle")}</h1>
         <p className="text-muted-foreground mt-2">{t("pageSubtitle")}</p>
       </div>
-      <TaxChat />
+      <PaidFeatureGate>
+        <TaxChat />
+      </PaidFeatureGate>
     </div>
   );
 }

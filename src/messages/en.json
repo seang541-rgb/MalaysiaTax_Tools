@@ -292,6 +292,16 @@
     "recentActivity": "Recent activity",
     "noActivity": "No credit activity yet."
   },
+  "paidGate": {
+    "checkingTitle": "Checking credits",
+    "checkingDesc": "Please wait a moment.",
+    "authTitle": "Sign in required",
+    "authDesc": "This tool uses credits. Sign in before using paid MYTax tools.",
+    "noCreditsTitle": "Credits required",
+    "noCreditsDesc": "This tool is available after you buy credits. The personal tax calculator remains free.",
+    "buyCredits": "Buy credits",
+    "retry": "Check again"
+  },
   "sourceNote": {
     "verified": "Rates verified as of {date}",
     "sourceLabel": "Source"

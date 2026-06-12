@@ -1,6 +1,7 @@
 import { useTranslations } from "next-intl";
 import { getTranslations } from "next-intl/server";
 import { EmployerForm } from "@/components/employer-form";
+import { PaidFeatureGate } from "@/components/paid-feature-gate";
 import { SourceNote } from "@/components/source-note";
 
 export async function generateMetadata({
@@ -26,8 +27,10 @@ export default function EmployerPage() {
         <h1 className="text-3xl font-bold mb-2">{t("title")}</h1>
         <p className="text-muted-foreground">{t("subtitle")}</p>
       </div>
-      <EmployerForm />
-      <SourceNote topic="employer" />
+      <PaidFeatureGate>
+        <EmployerForm />
+        <SourceNote topic="employer" />
+      </PaidFeatureGate>
     </div>
   );
 }

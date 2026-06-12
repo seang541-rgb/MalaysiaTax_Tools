@@ -292,6 +292,16 @@
     "recentActivity": "最近记录",
     "noActivity": "暂无 credit 记录。"
   },
+  "paidGate": {
+    "checkingTitle": "正在检查 credits",
+    "checkingDesc": "请稍等。",
+    "authTitle": "需要先登录",
+    "authDesc": "这个工具需要使用 credits。请先登录，才可以使用 MYTax 付费工具。",
+    "noCreditsTitle": "需要 credits",
+    "noCreditsDesc": "购买 credits 后才可以使用这个工具。个人所得税计算器继续免费。",
+    "buyCredits": "购买 credits",
+    "retry": "重新检查"
+  },
   "sourceNote": {
     "verified": "税率核实于 {date}",
     "sourceLabel": "来源"

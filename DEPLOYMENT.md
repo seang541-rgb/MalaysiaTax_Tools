@@ -133,8 +133,9 @@ Listen for:
 
 - `checkout.session.completed`
 
-The personal income tax calculator remains free. The first paid gate is
-`POST /api/chat`, which requires a signed-in Supabase user and consumes 1 credit
+The personal income tax calculator remains free. Other tools are behind a
+credit gate: users must sign in and have at least 1 credit before the tool UI is
+available. `POST /api/chat` additionally consumes 1 credit per AI question
 before calling the LLM provider.
 
 For local setup on Windows, run `npm run billing:env`. The script prompts for

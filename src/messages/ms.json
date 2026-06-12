@@ -425,6 +425,16 @@
     "recentActivity": "Aktiviti terkini",
     "noActivity": "Tiada aktiviti credit lagi."
   },
+  "paidGate": {
+    "checkingTitle": "Menyemak credits",
+    "checkingDesc": "Sila tunggu sebentar.",
+    "authTitle": "Log masuk diperlukan",
+    "authDesc": "Alat ini menggunakan credits. Sila log masuk sebelum menggunakan alat berbayar MYTax.",
+    "noCreditsTitle": "Credits diperlukan",
+    "noCreditsDesc": "Alat ini tersedia selepas anda membeli credits. Kalkulator cukai peribadi kekal percuma.",
+    "buyCredits": "Beli credits",
+    "retry": "Semak semula"
+  },
   "sourceNote": {
     "verified": "Kadar disahkan setakat {date}",
     "sourceLabel": "Sumber"

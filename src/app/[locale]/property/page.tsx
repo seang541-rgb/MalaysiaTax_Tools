@@ -1,5 +1,6 @@
 import { useTranslations } from "next-intl";
 import { getTranslations } from "next-intl/server";
+import { PaidFeatureGate } from "@/components/paid-feature-gate";
 import { PropertyToolsTabs } from "@/components/property-tools-tabs";
 
 export async function generateMetadata({
@@ -25,7 +26,9 @@ export default function PropertyPage() {
         <h1 className="text-3xl font-bold mb-2">{t("title")}</h1>
         <p className="text-muted-foreground">{t("subtitle")}</p>
       </div>
-      <PropertyToolsTabs />
+      <PaidFeatureGate>
+        <PropertyToolsTabs />
+      </PaidFeatureGate>
     </div>
   );
 }
