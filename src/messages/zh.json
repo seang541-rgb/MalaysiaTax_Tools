@@ -252,7 +252,14 @@
     "corpTools": "企业工具",
     "aiTax": "AI 助手",
     "blog": "税务指南",
-    "property": "产业税"
+    "property": "产业税",
+    "pricing": "收费"
+  },
+  "auth": {
+    "signIn": "登录",
+    "signOut": "登出",
+    "emailPrompt": "输入你的邮箱以接收安全登录链接",
+    "checkEmail": "请查看邮箱中的登录链接。"
   },
   "sourceNote": {
     "verified": "税率核实于 {date}",

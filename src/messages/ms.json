@@ -385,7 +385,14 @@
     "corpTools": "Alat Korporat",
     "aiTax": "Pembantu AI",
     "blog": "Panduan",
-    "property": "Hartanah"
+    "property": "Hartanah",
+    "pricing": "Harga"
+  },
+  "auth": {
+    "signIn": "Log masuk",
+    "signOut": "Log keluar",
+    "emailPrompt": "Masukkan emel anda untuk pautan log masuk selamat",
+    "checkEmail": "Semak emel anda untuk pautan log masuk."
   },
   "sourceNote": {
     "verified": "Kadar disahkan setakat {date}",

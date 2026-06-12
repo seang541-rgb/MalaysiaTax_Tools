@@ -5,6 +5,8 @@ import { useTranslations } from "next-intl";
 import { Link, usePathname } from "@/i18n/navigation";
 import { LocaleSwitcher } from "./locale-switcher";
 import { ThemeToggle } from "./theme-toggle";
+import { AuthButton } from "./auth-button";
+import { CreditBalance } from "./credit-balance";
 import { Menu, X } from "lucide-react";
 
 export function Header() {
@@ -23,6 +25,7 @@ export function Header() {
     { href: "/corporate-tools", label: t("corpTools") },
     { href: "/ai-tax", label: t("aiTax") },
     { href: "/blog", label: t("blog") },
+    { href: "/pricing", label: t("pricing") },
   ];
 
   return (
@@ -56,6 +59,8 @@ export function Header() {
               );
             })}
           </nav>
+          <CreditBalance />
+          <AuthButton />
           <ThemeToggle />
           <LocaleSwitcher />
           {/* Mobile hamburger */}

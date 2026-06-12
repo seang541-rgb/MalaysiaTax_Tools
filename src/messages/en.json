@@ -252,7 +252,14 @@
     "corpTools": "Corp Tools",
     "aiTax": "AI Assistant",
     "blog": "Guides",
-    "property": "Property"
+    "property": "Property",
+    "pricing": "Pricing"
+  },
+  "auth": {
+    "signIn": "Sign in",
+    "signOut": "Sign out",
+    "emailPrompt": "Enter your email for a secure login link",
+    "checkEmail": "Check your email for the login link."
   },
   "sourceNote": {
     "verified": "Rates verified as of {date}",
