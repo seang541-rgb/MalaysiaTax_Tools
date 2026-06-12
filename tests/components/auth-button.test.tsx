@@ -17,6 +17,9 @@ const authMessages: Record<string, string> = {
   dialogTitleSignIn: "Sign in",
   dialogTitleSignUp: "Create account",
   email: "Email",
+  invalidCredentials: "The email or password is incorrect.",
+  invalidEmail: "Use a real email address.",
+  rateLimited: "Too many attempts. Please wait a few minutes and try again.",
   password: "Password",
   passwordHint: "Use at least 6 characters.",
   signIn: "Sign in",
@@ -75,6 +78,8 @@ describe("AuthButton", () => {
         signOut: signOutMock,
       },
     } as never);
+
+    window.history.replaceState({}, "", "/en/pricing");
   });
 
   it("signs in with email and password", async () => {
@@ -98,6 +103,36 @@ describe("AuthButton", () => {
     });
   });
 
+  it("exposes a visible accessible sign-in control", async () => {
+    render(<AuthButton />);
+
+    expect(
+      await screen.findByRole("button", { name: /^sign in$/i })
+    ).toBeInTheDocument();
+  });
+
+  it("shows friendly invalid credential errors", async () => {
+    signInWithPasswordMock.mockResolvedValueOnce({
+      data: { user: null, session: null },
+      error: { message: "Invalid login credentials" },
+    });
+    render(<AuthButton />);
+
+    fireEvent.click(await screen.findByRole("button", { name: /^sign in$/i }));
+    const dialog = screen.getByRole("dialog", { name: /sign in/i });
+    fireEvent.change(screen.getByLabelText(/email/i), {
+      target: { value: "customer@example.com" },
+    });
+    fireEvent.change(screen.getByLabelText(/password/i), {
+      target: { value: "badpassword" },
+    });
+    fireEvent.click(within(dialog).getByRole("button", { name: /^sign in$/i }));
+
+    expect(
+      await screen.findByText("The email or password is incorrect.")
+    ).toBeInTheDocument();
+  });
+
   it("creates an account with email and password", async () => {
     render(<AuthButton />);
 
@@ -117,10 +152,14 @@ describe("AuthButton", () => {
     );
 
     await waitFor(() => {
-      expect(signUpMock).toHaveBeenCalledWith({
-        email: "new@example.com",
-        password: "secret123",
-      });
+      expect(signUpMock).toHaveBeenCalled();
+    });
+    expect(signUpMock.mock.calls[0][0]).toEqual({
+      email: "new@example.com",
+      password: "secret123",
+      options: {
+        emailRedirectTo: `${window.location.origin}/auth/callback?next=%2Fen%2Fpricing`,
+      },
     });
     expect(
       await screen.findByText("Account created. You can sign in now.")

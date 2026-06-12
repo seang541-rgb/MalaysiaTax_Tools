@@ -5,6 +5,7 @@ import { useTranslations } from "next-intl";
 import { Lock, ShoppingCart } from "lucide-react";
 import { Link } from "@/i18n/navigation";
 import { createSupabaseBrowserClient } from "@/lib/supabase/browser";
+import { AuthButton } from "./auth-button";
 
 type GateStatus = "checking" | "auth" | "noCredits" | "ready";
 
@@ -97,12 +98,18 @@ export function PaidFeatureGate({ children }: { children: ReactNode }) {
       </p>
       {status !== "checking" ? (
         <div className="mt-5 flex flex-col justify-center gap-2 sm:flex-row">
-          <Link
-            href="/pricing"
-            className="inline-flex items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90"
-          >
-            {t("buyCredits")}
-          </Link>
+          {status === "auth" ? (
+            <div className="inline-flex justify-center rounded-md border px-4 py-2">
+              <AuthButton />
+            </div>
+          ) : (
+            <Link
+              href="/pricing"
+              className="inline-flex items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90"
+            >
+              {t("buyCredits")}
+            </Link>
+          )}
           <button
             type="button"
             onClick={() => {

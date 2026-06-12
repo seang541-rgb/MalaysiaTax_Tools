@@ -5,14 +5,31 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { PaidFeatureGate } from "@/components/paid-feature-gate";
 
 const paidGateMessages: Record<string, string> = {
+  authError: "Authentication failed.",
   authDesc: "This tool uses credits.",
   authTitle: "Sign in required",
   buyCredits: "Buy credits",
   checkingDesc: "Please wait a moment.",
   checkingTitle: "Checking credits",
+  close: "Close",
+  dialogTitleSignIn: "Sign in",
+  dialogTitleSignUp: "Create account",
+  email: "Email",
+  emailRequired: "Enter your email.",
+  invalidCredentials: "The email or password is incorrect.",
+  invalidEmail: "Use a real email address.",
   noCreditsDesc: "This tool is available after you buy credits.",
   noCreditsTitle: "Credits required",
+  password: "Password",
+  passwordHint: "Use at least 6 characters.",
+  passwordRequired: "Enter your password.",
   retry: "Check again",
+  signIn: "Sign in",
+  signOut: "Sign out",
+  submitSignIn: "Sign in",
+  submitSignUp: "Create account",
+  switchToSignIn: "I already have an account",
+  switchToSignUp: "Create an account",
 };
 
 vi.mock("next-intl", () => ({
@@ -37,9 +54,13 @@ vi.mock("@/i18n/navigation", () => ({
 vi.mock("@/lib/supabase/browser", () => ({
   createSupabaseBrowserClient: vi.fn(() => ({
     auth: {
+      getUser: vi.fn(async () => ({ data: { user: null } })),
       onAuthStateChange: vi.fn(() => ({
         data: { subscription: { unsubscribe: vi.fn() } },
       })),
+      signInWithPassword: vi.fn(),
+      signOut: vi.fn(),
+      signUp: vi.fn(),
     },
   })),
 }));

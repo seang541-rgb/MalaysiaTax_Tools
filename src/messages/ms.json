@@ -403,8 +403,11 @@
     "switchToSignUp": "Daftar akaun baharu",
     "switchToSignIn": "Saya sudah ada akaun",
     "passwordHint": "Gunakan sekurang-kurangnya 6 aksara.",
-    "accountCreated": "Jika ini emel baharu, akaun anda telah dibuat dengan 5 starter credits. Jika sudah berdaftar, sila log masuk.",
+    "accountCreated": "Sahkan akaun melalui emel anda, kemudian log masuk. 5 starter credits sudah dikaitkan dengan akaun baharu.",
     "authError": "Pengesahan gagal. Sila cuba lagi.",
+    "invalidCredentials": "Emel atau kata laluan tidak betul.",
+    "invalidEmail": "Gunakan alamat emel sebenar seperti Gmail, Outlook, atau emel perniagaan anda.",
+    "rateLimited": "Terlalu banyak percubaan. Sila tunggu beberapa minit dan cuba lagi.",
     "emailRequired": "Masukkan emel anda.",
     "passwordRequired": "Masukkan kata laluan anda.",
     "close": "Tutup"

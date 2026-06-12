@@ -269,8 +269,11 @@
     "switchToSignUp": "Create an account",
     "switchToSignIn": "I already have an account",
     "passwordHint": "Use at least 6 characters.",
-    "accountCreated": "If this is a new email, your account has been created with 5 starter credits. If you already registered, sign in instead.",
+    "accountCreated": "Check your email to confirm your account, then sign in. Your 5 starter credits are already attached to the new account.",
     "authError": "Authentication failed. Please try again.",
+    "invalidCredentials": "The email or password is incorrect.",
+    "invalidEmail": "Use a real email address, such as Gmail, Outlook, or your business email.",
+    "rateLimited": "Too many attempts. Please wait a few minutes and try again.",
     "emailRequired": "Enter your email.",
     "passwordRequired": "Enter your password.",
     "close": "Close"

@@ -29,6 +29,24 @@ export function AuthButton() {
   const [message, setMessage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
+  function authErrorMessage(message?: string): string {
+    const lowerMessage = message?.toLowerCase() ?? "";
+
+    if (lowerMessage.includes("invalid login credentials")) {
+      return t("invalidCredentials");
+    }
+
+    if (lowerMessage.includes("email") && lowerMessage.includes("invalid")) {
+      return t("invalidEmail");
+    }
+
+    if (lowerMessage.includes("rate limit")) {
+      return t("rateLimited");
+    }
+
+    return message || t("authError");
+  }
+
   useEffect(() => {
     if (!supabase) {
       queueMicrotask(() => setLoading(false));
@@ -92,12 +110,15 @@ export function AuthButton() {
         : await supabase.auth.signUp({
             email: nextEmail,
             password,
+            options: {
+              emailRedirectTo: `${window.location.origin}/auth/callback?next=${encodeURIComponent(window.location.pathname)}`,
+            },
           });
 
     setSubmitting(false);
 
     if (result.error) {
-      setError(result.error.message || t("authError"));
+      setError(authErrorMessage(result.error.message));
       return;
     }
 
@@ -126,9 +147,10 @@ export function AuthButton() {
       onClick={signOut}
       className="inline-flex items-center gap-1 rounded-md px-2 py-2 text-sm text-muted-foreground hover:bg-muted hover:text-foreground"
       title={email}
+      aria-label={t("signOut")}
     >
       <LogOut className="h-4 w-4" />
-      <span className="hidden xl:inline">{t("signOut")}</span>
+      <span className="hidden sm:inline">{t("signOut")}</span>
     </button>
   ) : (
     <>
@@ -136,9 +158,11 @@ export function AuthButton() {
         type="button"
         onClick={() => openAuthModal("signIn")}
         className="inline-flex items-center gap-1 rounded-md px-2 py-2 text-sm text-muted-foreground hover:bg-muted hover:text-foreground"
+        title={t("signIn")}
+        aria-label={t("signIn")}
       >
         <LogIn className="h-4 w-4" />
-        <span className="hidden xl:inline">{t("signIn")}</span>
+        <span className="hidden sm:inline">{t("signIn")}</span>
       </button>
 
       {modalOpen ? (

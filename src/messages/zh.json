@@ -269,8 +269,11 @@
     "switchToSignUp": "注册新账户",
     "switchToSignIn": "我已经有账户",
     "passwordHint": "至少使用 6 个字符。",
-    "accountCreated": "如果这是新邮箱，账户已创建并获得 5 个 starter credits。如果已经注册过，请直接登录。",
+    "accountCreated": "请先到邮箱确认账户，然后再登入。5 个 starter credits 已经绑定到新账户。",
     "authError": "验证失败，请再试一次。",
+    "invalidCredentials": "邮箱或密码不正确。",
+    "invalidEmail": "请使用真实邮箱，例如 Gmail、Outlook 或公司邮箱。",
+    "rateLimited": "尝试次数太多，请等几分钟后再试。",
     "emailRequired": "请输入邮箱。",
     "passwordRequired": "请输入密码。",
     "close": "关闭"
