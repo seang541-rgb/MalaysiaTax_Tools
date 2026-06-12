@@ -141,7 +141,8 @@
     "sme_tier3": "超过 RM600,000",
     "standard": "全部应税收入",
     "disclaimer": "此计算仅供参考。请咨询持牌税务顾问以获取正式企业税评估。",
-    "reset": "重置"
+    "reset": "重置",
+    "calculate": "计算"
   },
   "batchPcb": {
     "title": "批量员工 PCB 计算器",
@@ -301,6 +302,14 @@
     "noCreditsDesc": "购买 credits 后才可以使用这个工具。个人所得税计算器继续免费。",
     "buyCredits": "购买 credits",
     "retry": "重新检查"
+  },
+  "creditUse": {
+    "unlockTitle": "需要 credits",
+    "useCredits": "使用 {credits} credits",
+    "processing": "正在扣除 credits...",
+    "authRequired": "请先登录，才能使用这个工具。",
+    "insufficientCredits": "Credit 不足，请先购买更多 credits。",
+    "failed": "无法扣除 credits，请再试一次。"
   },
   "sourceNote": {
     "verified": "税率核实于 {date}",
@@ -540,6 +549,7 @@
     "annualRevenue": "年营业额 / 营收 (RM)",
     "revenueBasis": "以 2022 财政年度经审计财务报表为准；新企业按 LHDN 规定的年营收计算。",
     "reset": "重置",
+    "calculate": "检查状态",
     "results": "您的电子发票状态",
     "exemptTitle": "永久豁免",
     "exemptDesc": "年营业额 RM100万 或以下的企业豁免强制电子发票（豁免门槛已从 RM50万 上调，2026年1月1日生效）。您仍可自愿采用电子发票。",

@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
+import { CreditChargeButton } from "@/components/credit-charge-button";
 import { calculateCorporateTax } from "@/engine/corporate";
 import { CorporateTaxInput } from "@/engine/types";
 
@@ -28,6 +29,16 @@ export function CorporateTaxForm() {
   const [annualRevenue, setAnnualRevenue] = useState(5000000);
   const [isSubsidiary, setIsSubsidiary] = useState(false);
   const [foreignOwned, setForeignOwned] = useState(false);
+  const [chargedInputKey, setChargedInputKey] = useState<string | null>(null);
+
+  const inputKey = JSON.stringify({
+    chargeableIncome,
+    isSme,
+    paidUpCapital,
+    annualRevenue,
+    isSubsidiary,
+    foreignOwned,
+  });
 
   const result = useMemo(() => {
     if (chargeableIncome <= 0) return null;
@@ -50,6 +61,7 @@ export function CorporateTaxForm() {
     setAnnualRevenue(5000000);
     setIsSubsidiary(false);
     setForeignOwned(false);
+    setChargedInputKey(null);
   }
 
   return (
@@ -189,12 +201,20 @@ export function CorporateTaxForm() {
       </Card>
 
       <div className="flex gap-4">
+        <CreditChargeButton
+          feature="corporate_tax_calculation"
+          disabled={!result}
+          requestSummary={{ chargeableIncome, isSme }}
+          onCharged={() => setChargedInputKey(inputKey)}
+        >
+          {t("calculate")}
+        </CreditChargeButton>
         <Button size="lg" variant="outline" onClick={handleReset}>
           {t("reset")}
         </Button>
       </div>
 
-      {result && (
+      {result && chargedInputKey === inputKey && (
         <>
           <Separator />
           <Card>

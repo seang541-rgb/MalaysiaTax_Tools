@@ -3,6 +3,8 @@
 import { useState } from "react";
 import { useTranslations } from "next-intl";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { CreditChargeButton } from "@/components/credit-charge-button";
 import { Cp204Calculator } from "./cp204-calculator";
 import { CapitalAllowanceCalculator } from "./capital-allowance-calculator";
 import { IncentivesWizard } from "./incentives-wizard";
@@ -14,7 +16,15 @@ type Tool = "taxcomp" | "soleprop" | "cp204" | "capalw" | "wht" | "incentives";
 
 export function CorporateToolsTabs() {
   const t = useTranslations("corptools");
+  const creditT = useTranslations("creditUse");
   const [tool, setTool] = useState<Tool>("taxcomp");
+  const [unlockedTools, setUnlockedTools] = useState<Set<Tool>>(new Set());
+
+  function unlockCurrentTool() {
+    setUnlockedTools((prev) => new Set(prev).add(tool));
+  }
+
+  const isUnlocked = unlockedTools.has(tool);
 
   return (
     <div className="space-y-6">
@@ -29,12 +39,27 @@ export function CorporateToolsTabs() {
         </TabsList>
       </Tabs>
 
-      {tool === "taxcomp" && <TaxComputationCalculator />}
-      {tool === "soleprop" && <SoleProprietorCalculator />}
-      {tool === "cp204" && <Cp204Calculator />}
-      {tool === "capalw" && <CapitalAllowanceCalculator />}
-      {tool === "wht" && <WithholdingTaxCalculator />}
-      {tool === "incentives" && <IncentivesWizard />}
+      {!isUnlocked && (
+        <Card>
+          <CardHeader>
+            <CardTitle>{creditT("unlockTitle")}</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <CreditChargeButton
+              feature="corporate_tools_run"
+              requestSummary={{ tool }}
+              onCharged={unlockCurrentTool}
+            />
+          </CardContent>
+        </Card>
+      )}
+
+      {isUnlocked && tool === "taxcomp" && <TaxComputationCalculator />}
+      {isUnlocked && tool === "soleprop" && <SoleProprietorCalculator />}
+      {isUnlocked && tool === "cp204" && <Cp204Calculator />}
+      {isUnlocked && tool === "capalw" && <CapitalAllowanceCalculator />}
+      {isUnlocked && tool === "wht" && <WithholdingTaxCalculator />}
+      {isUnlocked && tool === "incentives" && <IncentivesWizard />}
     </div>
   );
 }

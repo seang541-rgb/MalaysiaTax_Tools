@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
+import { CreditChargeButton } from "@/components/credit-charge-button";
 import { calculateSst, SERVICE_TAX_CATEGORIES } from "@/engine/sst";
 import { SstInput, ServiceTaxCategory } from "@/engine/types";
 import { SourceNote } from "./source-note";
@@ -27,6 +28,14 @@ export function SstForm() {
   const [salesTaxRate, setSalesTaxRate] = useState<5 | 10>(10);
   const [serviceCategory, setServiceCategory] = useState<ServiceTaxCategory>("general");
   const [taxableRevenue, setTaxableRevenue] = useState(0);
+  const [chargedInputKey, setChargedInputKey] = useState<string | null>(null);
+
+  const inputKey = JSON.stringify({
+    taxableRevenue,
+    taxType,
+    salesTaxRate,
+    serviceCategory,
+  });
 
   const result = useMemo(() => {
     if (taxableRevenue <= 0) return null;
@@ -44,6 +53,7 @@ export function SstForm() {
     setSalesTaxRate(10);
     setServiceCategory("general");
     setTaxableRevenue(0);
+    setChargedInputKey(null);
   }
 
   const activeThreshold =
@@ -156,12 +166,20 @@ export function SstForm() {
       </Card>
 
       <div className="flex gap-4">
+        <CreditChargeButton
+          feature="sst_calculation"
+          disabled={!result}
+          requestSummary={{ taxableRevenue, taxType }}
+          onCharged={() => setChargedInputKey(inputKey)}
+        >
+          {t("calculate")}
+        </CreditChargeButton>
         <Button size="lg" variant="outline" onClick={handleReset}>
           {t("reset")}
         </Button>
       </div>
 
-      {result && (
+      {result && chargedInputKey === inputKey && (
         <>
           <Separator />
           <Card>

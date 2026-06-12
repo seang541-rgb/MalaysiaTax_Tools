@@ -54,4 +54,15 @@ describe("billing plans", () => {
   it("charges AI Tax one credit", () => {
     expect(BILLING_FEATURE_COSTS.ai_tax_question).toBe(1);
   });
+
+  it("uses the approved per-use credit charges", () => {
+    expect(BILLING_FEATURE_COSTS.ai_tax_question).toBe(1);
+    expect(BILLING_FEATURE_COSTS.corporate_tax_calculation).toBe(2);
+    expect(BILLING_FEATURE_COSTS.sst_calculation).toBe(2);
+    expect(BILLING_FEATURE_COSTS.employer_obligations_calculation).toBe(2);
+    expect(BILLING_FEATURE_COSTS.property_calculation).toBe(2);
+    expect(BILLING_FEATURE_COSTS.einvoice_check).toBe(2);
+    expect(BILLING_FEATURE_COSTS.corporate_tools_run).toBe(2);
+    expect(BILLING_FEATURE_COSTS.batch_pcb_run).toBe(5);
+  });
 });

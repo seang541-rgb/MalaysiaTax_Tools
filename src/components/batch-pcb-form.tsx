@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
+import { CreditChargeButton } from "@/components/credit-charge-button";
 import { calculateBatchPcb } from "@/engine/batch-pcb";
 import { BatchEmployeeInput, BatchPcbSummary } from "@/engine/types";
 
@@ -205,9 +206,17 @@ export function BatchPcbForm() {
         <Button variant="outline" onClick={addEmployee}>
           + {t("addEmployee")}
         </Button>
-        <Button size="lg" onClick={handleCalculate}>
+        <CreditChargeButton
+          feature="batch_pcb_run"
+          disabled={!employees.some((e) => e.monthlyGrossSalary > 0)}
+          requestSummary={{
+            employeeCount: employees.filter((e) => e.monthlyGrossSalary > 0)
+              .length,
+          }}
+          onCharged={handleCalculate}
+        >
           {t("calculate")}
-        </Button>
+        </CreditChargeButton>
         <Button size="lg" variant="outline" onClick={handleReset}>
           {t("reset")}
         </Button>

@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
+import { CreditChargeButton } from "@/components/credit-charge-button";
 import { checkEInvoicePhase } from "@/engine/e-invoice";
 import { CheckCircle2, AlertTriangle, CalendarClock, FileText } from "lucide-react";
 import { SourceNote } from "./source-note";
@@ -22,6 +23,8 @@ export function EInvoiceChecker() {
   const t = useTranslations("einvoice");
   const locale = useLocale();
   const [annualRevenue, setAnnualRevenue] = useState(0);
+  const [chargedInputKey, setChargedInputKey] = useState<string | null>(null);
+  const inputKey = JSON.stringify({ annualRevenue });
 
   const result = useMemo(() => {
     if (annualRevenue <= 0) return null;
@@ -60,18 +63,31 @@ export function EInvoiceChecker() {
             />
           </div>
           <p className="text-xs text-muted-foreground">{t("revenueBasis")}</p>
-          <Button
-            size="sm"
-            variant="outline"
-            className="mt-2"
-            onClick={() => setAnnualRevenue(0)}
-          >
-            {t("reset")}
-          </Button>
+          <div className="mt-2 flex flex-wrap gap-3">
+            <CreditChargeButton
+              feature="einvoice_check"
+              disabled={!result}
+              size="sm"
+              requestSummary={{ annualRevenue }}
+              onCharged={() => setChargedInputKey(inputKey)}
+            >
+              {t("calculate")}
+            </CreditChargeButton>
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={() => {
+                setAnnualRevenue(0);
+                setChargedInputKey(null);
+              }}
+            >
+              {t("reset")}
+            </Button>
+          </div>
         </CardContent>
       </Card>
 
-      {result && (
+      {result && chargedInputKey === inputKey && (
         <>
           <Separator />
           <Card role="region" aria-live="polite">

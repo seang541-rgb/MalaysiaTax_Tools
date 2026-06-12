@@ -141,7 +141,8 @@
     "sme_tier3": "Melebihi RM600,000",
     "standard": "Semua pendapatan bercukai",
     "disclaimer": "Pengiraan ini adalah untuk rujukan sahaja. Sila rujuk perunding cukai berlesen untuk taksiran cukai korporat rasmi.",
-    "reset": "Set Semula"
+    "reset": "Set Semula",
+    "calculate": "Kira"
   },
   "batchPcb": {
     "title": "Kalkulator PCB Pekerja Berkumpulan",
@@ -249,6 +250,7 @@
     "annualRevenue": "Perolehan / Hasil Tahunan (RM)",
     "revenueBasis": "Berdasarkan penyata kewangan beraudit TK2022, atau hasil tahunan seperti ditakrifkan oleh LHDN untuk perniagaan baharu.",
     "reset": "Set Semula",
+    "calculate": "Semak status",
     "results": "Status e-Invois Anda",
     "exemptTitle": "Dikecualikan Secara Kekal",
     "exemptDesc": "Perniagaan dengan perolehan tahunan RM1 juta atau ke bawah dikecualikan daripada e-invois wajib (ambang dinaikkan daripada RM500k, berkuat kuasa 1 Januari 2026). Anda masih boleh menggunakan e-invois secara sukarela.",
@@ -434,6 +436,14 @@
     "noCreditsDesc": "Alat ini tersedia selepas anda membeli credits. Kalkulator cukai peribadi kekal percuma.",
     "buyCredits": "Beli credits",
     "retry": "Semak semula"
+  },
+  "creditUse": {
+    "unlockTitle": "Credits diperlukan",
+    "useCredits": "Guna {credits} credits",
+    "processing": "Menolak credits...",
+    "authRequired": "Sila log masuk sebelum menggunakan alat ini.",
+    "insufficientCredits": "Credits tidak mencukupi. Sila beli credits tambahan.",
+    "failed": "Tidak dapat menolak credits. Sila cuba lagi."
   },
   "sourceNote": {
     "verified": "Kadar disahkan setakat {date}",

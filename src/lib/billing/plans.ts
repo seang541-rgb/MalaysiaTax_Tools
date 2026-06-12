@@ -38,8 +38,9 @@ export const BILLING_FEATURE_COSTS = {
   sst_calculation: 2,
   employer_obligations_calculation: 2,
   property_calculation: 2,
+  einvoice_check: 2,
   batch_pcb_run: 5,
-  corporate_tools_run: 5,
+  corporate_tools_run: 2,
 } as const;
 
 export type BillingFeature = keyof typeof BILLING_FEATURE_COSTS;

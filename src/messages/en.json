@@ -141,7 +141,8 @@
     "sme_tier3": "Above RM600,000",
     "standard": "All chargeable income",
     "disclaimer": "This calculation is for reference only. Please consult a licensed tax professional for official corporate tax assessment.",
-    "reset": "Reset"
+    "reset": "Reset",
+    "calculate": "Calculate"
   },
   "batchPcb": {
     "title": "Batch Employee PCB Calculator",
@@ -301,6 +302,14 @@
     "noCreditsDesc": "This tool is available after you buy credits. The personal tax calculator remains free.",
     "buyCredits": "Buy credits",
     "retry": "Check again"
+  },
+  "creditUse": {
+    "unlockTitle": "Credits required",
+    "useCredits": "Use {credits} credits",
+    "processing": "Deducting credits...",
+    "authRequired": "Please sign in before using this tool.",
+    "insufficientCredits": "Not enough credits. Please buy more credits.",
+    "failed": "Unable to deduct credits. Please try again."
   },
   "sourceNote": {
     "verified": "Rates verified as of {date}",
@@ -540,6 +549,7 @@
     "annualRevenue": "Annual Turnover / Revenue (RM)",
     "revenueBasis": "Based on your audited financial statements for FY2022, or annual revenue as defined by LHDN for newer businesses.",
     "reset": "Reset",
+    "calculate": "Check status",
     "results": "Your e-Invoice Status",
     "exemptTitle": "Permanently Exempt",
     "exemptDesc": "Businesses with annual turnover of RM1 million or below are exempt from mandatory e-invoicing (threshold raised from RM500k, effective 1 January 2026). You may still adopt e-invoicing voluntarily.",

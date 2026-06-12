@@ -3,6 +3,8 @@
 import { useState } from "react";
 import { useTranslations } from "next-intl";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { CreditChargeButton } from "@/components/credit-charge-button";
 import { RpgtCalculator } from "./rpgt-calculator";
 import { StampDutyCalculator } from "./stamp-duty-calculator";
 
@@ -10,7 +12,15 @@ type Tool = "rpgt" | "stampduty";
 
 export function PropertyToolsTabs() {
   const t = useTranslations("property");
+  const creditT = useTranslations("creditUse");
   const [tool, setTool] = useState<Tool>("rpgt");
+  const [unlockedTools, setUnlockedTools] = useState<Set<Tool>>(new Set());
+
+  function unlockCurrentTool() {
+    setUnlockedTools((prev) => new Set(prev).add(tool));
+  }
+
+  const isUnlocked = unlockedTools.has(tool);
 
   return (
     <div className="space-y-6">
@@ -21,8 +31,23 @@ export function PropertyToolsTabs() {
         </TabsList>
       </Tabs>
 
-      {tool === "rpgt" && <RpgtCalculator />}
-      {tool === "stampduty" && <StampDutyCalculator />}
+      {!isUnlocked && (
+        <Card>
+          <CardHeader>
+            <CardTitle>{creditT("unlockTitle")}</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <CreditChargeButton
+              feature="property_calculation"
+              requestSummary={{ tool }}
+              onCharged={unlockCurrentTool}
+            />
+          </CardContent>
+        </Card>
+      )}
+
+      {isUnlocked && tool === "rpgt" && <RpgtCalculator />}
+      {isUnlocked && tool === "stampduty" && <StampDutyCalculator />}
     </div>
   );
 }

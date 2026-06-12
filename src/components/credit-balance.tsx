@@ -21,6 +21,17 @@ export function CreditBalance() {
         if (typeof data?.balance === "number") setBalance(data.balance);
       })
       .catch(() => {});
+
+    function handleCreditsUpdated(event: Event) {
+      const balance = (event as CustomEvent<{ balance?: unknown }>).detail
+        ?.balance;
+      if (typeof balance === "number") setBalance(balance);
+    }
+
+    window.addEventListener("mytax:credits-updated", handleCreditsUpdated);
+    return () => {
+      window.removeEventListener("mytax:credits-updated", handleCreditsUpdated);
+    };
   }, []);
 
   if (balance === null) return null;
