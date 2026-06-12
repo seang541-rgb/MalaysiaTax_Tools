@@ -7,11 +7,25 @@ import { createSupabaseBrowserClient } from "@/lib/supabase/browser";
 
 export function AuthButton() {
   const t = useTranslations("auth");
-  const supabase = useMemo(() => createSupabaseBrowserClient(), []);
+  const supabase = useMemo(() => {
+    if (
+      !process.env.NEXT_PUBLIC_SUPABASE_URL ||
+      !process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+    ) {
+      return null;
+    }
+
+    return createSupabaseBrowserClient();
+  }, []);
   const [email, setEmail] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    if (!supabase) {
+      queueMicrotask(() => setLoading(false));
+      return;
+    }
+
     supabase.auth.getUser().then(({ data }) => {
       setEmail(data.user?.email ?? null);
       setLoading(false);
@@ -27,6 +41,8 @@ export function AuthButton() {
   }, [supabase]);
 
   async function signIn() {
+    if (!supabase) return;
+
     const nextEmail = window.prompt(t("emailPrompt"));
     if (!nextEmail) return;
 
@@ -38,6 +54,8 @@ export function AuthButton() {
   }
 
   async function signOut() {
+    if (!supabase) return;
+
     await supabase.auth.signOut();
     window.location.reload();
   }

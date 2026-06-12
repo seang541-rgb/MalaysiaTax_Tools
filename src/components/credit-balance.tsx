@@ -8,6 +8,13 @@ export function CreditBalance() {
   const [balance, setBalance] = useState<number | null>(null);
 
   useEffect(() => {
+    if (
+      !process.env.NEXT_PUBLIC_SUPABASE_URL ||
+      !process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+    ) {
+      return;
+    }
+
     fetch("/api/billing/balance")
       .then((res) => (res.ok ? res.json() : null))
       .then((data) => {
