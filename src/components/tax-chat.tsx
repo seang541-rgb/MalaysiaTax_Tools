@@ -150,17 +150,9 @@ export function TaxChat() {
     setInput("");
     setIsTyping(true);
 
-    if (llmAvailable) {
-      // Stream from Gemma 4 via Ollama
-      streamFromLLM(newMessages);
-    } else {
-      // Fallback: rule-based engine
-      setTimeout(() => {
-        const reply = getTaxAssistantResponse(trimmed, locale);
-        setMessages((prev) => [...prev, { role: "assistant", content: reply }]);
-        setIsTyping(false);
-      }, 300);
-    }
+    // Always pass through /api/chat first so auth and credit checks cannot be
+    // bypassed when the provider health check reports fallback mode.
+    streamFromLLM(newMessages);
   };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
