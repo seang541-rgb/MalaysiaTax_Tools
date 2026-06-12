@@ -252,7 +252,45 @@
     "corpTools": "Corp Tools",
     "aiTax": "AI Assistant",
     "blog": "Guides",
-    "property": "Property"
+    "property": "Property",
+    "pricing": "Pricing"
+  },
+  "auth": {
+    "signIn": "Sign in",
+    "signOut": "Sign out",
+    "createAccount": "Create account",
+    "dialogTitleSignIn": "Sign in",
+    "dialogTitleSignUp": "Create account",
+    "email": "Email",
+    "password": "Password",
+    "submitSignIn": "Sign in",
+    "submitSignUp": "Create account",
+    "switchToSignUp": "Create an account",
+    "switchToSignIn": "I already have an account",
+    "passwordHint": "Use at least 6 characters.",
+    "accountCreated": "Account created. You can sign in now.",
+    "authError": "Authentication failed. Please try again.",
+    "emailRequired": "Enter your email.",
+    "passwordRequired": "Enter your password.",
+    "close": "Close"
+  },
+  "pricing": {
+    "title": "Pricing",
+    "subtitle": "Buy credits for AI tax help and advanced business tools.",
+    "buy": "Buy credits",
+    "freeNote": "The personal income tax calculator remains free and does not require login."
+  },
+  "billing": {
+    "successTitle": "Payment received",
+    "successDesc": "Your credits will appear once Stripe confirms the payment. This usually takes a few seconds.",
+    "viewAccount": "View account",
+    "tryAi": "Try AI Tax"
+  },
+  "account": {
+    "title": "Account",
+    "creditBalance": "Credit balance",
+    "recentActivity": "Recent activity",
+    "noActivity": "No credit activity yet."
   },
   "sourceNote": {
     "verified": "Rates verified as of {date}",
@@ -625,7 +663,9 @@
     "subtitle": "Powered by Gemma 4 12B local LLM",
     "placeholder": "Ask a tax question...",
     "send": "Send",
-    "disclaimer": "Answers are for reference only. Consult LHDN or a tax professional for official advice."
+    "disclaimer": "Answers are for reference only. Consult LHDN or a tax professional for official advice.",
+    "authRequired": "Please sign in to use MYTax AI.",
+    "insufficientCredits": "Not enough credits. Please buy credits from Pricing."
   },
   "common": {
     "rm": "RM",

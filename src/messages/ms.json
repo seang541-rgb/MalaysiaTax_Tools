@@ -385,7 +385,45 @@
     "corpTools": "Alat Korporat",
     "aiTax": "Pembantu AI",
     "blog": "Panduan",
-    "property": "Hartanah"
+    "property": "Hartanah",
+    "pricing": "Harga"
+  },
+  "auth": {
+    "signIn": "Log masuk",
+    "signOut": "Log keluar",
+    "createAccount": "Daftar akaun",
+    "dialogTitleSignIn": "Log masuk",
+    "dialogTitleSignUp": "Daftar akaun",
+    "email": "Emel",
+    "password": "Kata laluan",
+    "submitSignIn": "Log masuk",
+    "submitSignUp": "Daftar akaun",
+    "switchToSignUp": "Daftar akaun baharu",
+    "switchToSignIn": "Saya sudah ada akaun",
+    "passwordHint": "Gunakan sekurang-kurangnya 6 aksara.",
+    "accountCreated": "Akaun telah dibuat. Anda boleh log masuk sekarang.",
+    "authError": "Pengesahan gagal. Sila cuba lagi.",
+    "emailRequired": "Masukkan emel anda.",
+    "passwordRequired": "Masukkan kata laluan anda.",
+    "close": "Tutup"
+  },
+  "pricing": {
+    "title": "Harga",
+    "subtitle": "Beli credits untuk bantuan cukai AI dan alat perniagaan lanjutan.",
+    "buy": "Beli credits",
+    "freeNote": "Kalkulator cukai pendapatan peribadi kekal percuma dan tidak memerlukan log masuk."
+  },
+  "billing": {
+    "successTitle": "Bayaran diterima",
+    "successDesc": "Credits anda akan muncul selepas Stripe mengesahkan bayaran. Biasanya hanya beberapa saat.",
+    "viewAccount": "Lihat akaun",
+    "tryAi": "Cuba AI Tax"
+  },
+  "account": {
+    "title": "Akaun",
+    "creditBalance": "Baki credit",
+    "recentActivity": "Aktiviti terkini",
+    "noActivity": "Tiada aktiviti credit lagi."
   },
   "sourceNote": {
     "verified": "Kadar disahkan setakat {date}",
@@ -625,7 +663,9 @@
     "subtitle": "Dikuasakan oleh Gemma 4 12B LLM tempatan",
     "placeholder": "Tanya soalan cukai...",
     "send": "Hantar",
-    "disclaimer": "Jawapan adalah untuk rujukan sahaja. Rujuk LHDN atau perunding cukai untuk nasihat rasmi."
+    "disclaimer": "Jawapan adalah untuk rujukan sahaja. Rujuk LHDN atau perunding cukai untuk nasihat rasmi.",
+    "authRequired": "Sila log masuk untuk menggunakan MYTax AI.",
+    "insufficientCredits": "Credits tidak mencukupi. Sila beli credits di halaman Harga."
   },
   "common": {
     "rm": "RM",

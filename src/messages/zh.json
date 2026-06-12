@@ -252,7 +252,45 @@
     "corpTools": "企业工具",
     "aiTax": "AI 助手",
     "blog": "税务指南",
-    "property": "产业税"
+    "property": "产业税",
+    "pricing": "收费"
+  },
+  "auth": {
+    "signIn": "登录",
+    "signOut": "登出",
+    "createAccount": "注册账户",
+    "dialogTitleSignIn": "登录",
+    "dialogTitleSignUp": "注册账户",
+    "email": "邮箱",
+    "password": "密码",
+    "submitSignIn": "登录",
+    "submitSignUp": "注册账户",
+    "switchToSignUp": "注册新账户",
+    "switchToSignIn": "我已经有账户",
+    "passwordHint": "至少使用 6 个字符。",
+    "accountCreated": "账户已创建。现在可以登录。",
+    "authError": "验证失败，请再试一次。",
+    "emailRequired": "请输入邮箱。",
+    "passwordRequired": "请输入密码。",
+    "close": "关闭"
+  },
+  "pricing": {
+    "title": "收费",
+    "subtitle": "购买 credits，用于 AI 税务助手和高级企业工具。",
+    "buy": "购买 credits",
+    "freeNote": "个人所得税计算器保持免费，不需要登录。"
+  },
+  "billing": {
+    "successTitle": "付款已收到",
+    "successDesc": "Stripe 确认付款后，credits 会自动加入账户，通常只需几秒钟。",
+    "viewAccount": "查看账户",
+    "tryAi": "使用 AI 助手"
+  },
+  "account": {
+    "title": "账户",
+    "creditBalance": "Credit 余额",
+    "recentActivity": "最近记录",
+    "noActivity": "暂无 credit 记录。"
   },
   "sourceNote": {
     "verified": "税率核实于 {date}",
@@ -625,7 +663,9 @@
     "subtitle": "由本地 Gemma 4 12B 大模型驱动",
     "placeholder": "输入税务问题...",
     "send": "发送",
-    "disclaimer": "回答仅供参考。请咨询 LHDN 或税务顾问获取正式建议。"
+    "disclaimer": "回答仅供参考。请咨询 LHDN 或税务顾问获取正式建议。",
+    "authRequired": "请先登录才能使用 MYTax AI。",
+    "insufficientCredits": "Credit 不足。请前往收费页面购买 credits。"
   },
   "common": {
     "rm": "RM",

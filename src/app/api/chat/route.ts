@@ -1,8 +1,15 @@
 import { NextRequest } from "next/server";
 import { createClient } from "@supabase/supabase-js";
 import { TAX_RATES_YA2025 } from "@/engine/tax-rates";
-import { TaxBand } from "@/engine/types";
 import { embed, chatStream, llmConfigured, llmInfo } from "@/lib/llm";
+import { billingErrorResponse } from "@/lib/billing/errors";
+import {
+  consumeCredits,
+  InsufficientCreditsError,
+  refundCredits,
+} from "@/lib/billing/credits";
+import { BILLING_FEATURE_COSTS } from "@/lib/billing/plans";
+import { createSupabaseServerClient } from "@/lib/supabase/server";
 
 // Supabase client for RAG
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || "";
@@ -273,7 +280,24 @@ const MAX_MESSAGE_LENGTH = 500;
 const MAX_MESSAGES = 20;
 
 export async function POST(request: NextRequest) {
+  let chargedAiCredit = false;
+  let chargedUserId: string | null = null;
+  const aiCreditCost = BILLING_FEATURE_COSTS.ai_tax_question;
+
   try {
+    const supabaseAuth = await createSupabaseServerClient();
+    const {
+      data: { user },
+    } = await supabaseAuth.auth.getUser();
+
+    if (!user) {
+      return billingErrorResponse(
+        "AUTH_REQUIRED",
+        401,
+        "Please sign in to use MYTax AI."
+      );
+    }
+
     // Rate limiting
     const ip = request.headers.get("x-forwarded-for")?.split(",")[0]?.trim()
       || request.headers.get("x-real-ip")
@@ -285,7 +309,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const { messages, locale } = await request.json();
+    const { messages } = await request.json();
 
     // Input validation
     if (!Array.isArray(messages) || messages.length === 0) {
@@ -311,6 +335,32 @@ export async function POST(request: NextRequest) {
       (m: { role: string }) => m.role === "user"
     );
     const userMessage = lastUserMsg?.content || "";
+
+    try {
+      await consumeCredits({
+        userId: user.id,
+        feature: "ai_tax_question",
+        amount: aiCreditCost,
+        requestSummary: {
+          route: "/api/chat",
+          messageCount: sanitizedMessages.length,
+          messageLength: userMessage.length,
+        },
+      });
+      chargedAiCredit = true;
+      chargedUserId = user.id;
+    } catch (error) {
+      if (error instanceof InsufficientCreditsError) {
+        return billingErrorResponse(
+          "INSUFFICIENT_CREDITS",
+          402,
+          "Not enough credits for MYTax AI.",
+          { balance: error.balance, requiredCredits: error.required }
+        );
+      }
+      throw error;
+    }
+
     const ragContext = userMessage ? await retrieveContext(userMessage) : "";
 
     // Pre-calculate tax if user mentions an income amount
@@ -348,12 +398,24 @@ export async function POST(request: NextRequest) {
 
     if (!llmRes.ok || !llmRes.body) {
       const errText = await llmRes.text().catch(() => "");
-      return new Response(
-        JSON.stringify({
-          error: `LLM error: ${llmRes.status}`,
+      await refundCredits({
+        userId: user.id,
+        feature: "ai_tax_question",
+        amount: aiCreditCost,
+        errorCode: "PROVIDER_FAILED_REFUNDED",
+        metadata: {
+          route: "/api/chat",
+          status: llmRes.status,
           detail: errText,
-        }),
-        { status: 502, headers: { "Content-Type": "application/json" } }
+        },
+      });
+      chargedAiCredit = false;
+
+      return billingErrorResponse(
+        "PROVIDER_FAILED_REFUNDED",
+        502,
+        `LLM error: ${llmRes.status}`,
+        { detail: errText }
       );
     }
 
@@ -413,6 +475,16 @@ export async function POST(request: NextRequest) {
       },
     });
   } catch {
+    if (chargedAiCredit && chargedUserId) {
+      await refundCredits({
+        userId: chargedUserId,
+        feature: "ai_tax_question",
+        amount: aiCreditCost,
+        errorCode: "PROVIDER_FAILED_REFUNDED",
+        metadata: { route: "/api/chat" },
+      }).catch(() => {});
+    }
+
     return new Response(
       JSON.stringify({ error: "Failed to reach the LLM provider." }),
       { status: 500, headers: { "Content-Type": "application/json" } }
