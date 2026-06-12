@@ -1,7 +1,7 @@
 {
   "meta": {
     "title": "马来西亚税务计算器 2026",
-    "description": "免费马来西亚个人所得税计算器。计算 YA2025 税务，包含所有 LHDN 减免项目。"
+    "description": "免费马来西亚个人所得税计算器。计算最新评估年度税务，包含所有 LHDN 减免项目。"
   },
   "nav": {
     "home": "首页",
@@ -10,7 +10,7 @@
   },
   "calculator": {
     "title": "个人所得税计算器",
-    "subtitle": "计算您的马来西亚 2025 评估年度所得税",
+    "subtitle": "计算您的马来西亚个人所得税",
     "yearOfAssessment": "评估年度",
     "incomeSection": "收入详情",
     "employment": "就业收入",
@@ -115,7 +115,7 @@
   },
   "corporate": {
     "title": "企业所得税计算器",
-    "subtitle": "计算马来西亚 2025 评估年度企业所得税",
+    "subtitle": "计算马来西亚企业所得税",
     "chargeableIncome": "应税收入 (RM)",
     "companyType": "公司类型",
     "sme": "中小企业（优惠税率）",

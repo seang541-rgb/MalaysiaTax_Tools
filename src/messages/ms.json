@@ -1,7 +1,7 @@
 {
   "meta": {
     "title": "Kalkulator Cukai Malaysia 2026",
-    "description": "Kalkulator cukai pendapatan peribadi Malaysia percuma. Kira cukai YA2025 anda dengan semua pelepasan dan potongan LHDN."
+    "description": "Kalkulator cukai pendapatan peribadi Malaysia percuma. Kira cukai tahun taksiran terkini anda dengan semua pelepasan dan potongan LHDN."
   },
   "nav": {
     "home": "Utama",
@@ -10,7 +10,7 @@
   },
   "calculator": {
     "title": "Kalkulator Cukai Pendapatan Peribadi",
-    "subtitle": "Kira cukai pendapatan Malaysia anda untuk Tahun Taksiran 2025",
+    "subtitle": "Kira cukai pendapatan peribadi Malaysia anda",
     "yearOfAssessment": "Tahun Taksiran",
     "incomeSection": "Butiran Pendapatan",
     "employment": "Pendapatan Penggajian",
@@ -115,7 +115,7 @@
   },
   "corporate": {
     "title": "Kalkulator Cukai Korporat",
-    "subtitle": "Kira cukai pendapatan korporat Malaysia untuk Tahun Taksiran 2025",
+    "subtitle": "Kira cukai pendapatan korporat Malaysia",
     "chargeableIncome": "Pendapatan Bercukai (RM)",
     "companyType": "Jenis Syarikat",
     "sme": "PKS (Kadar Keutamaan)",

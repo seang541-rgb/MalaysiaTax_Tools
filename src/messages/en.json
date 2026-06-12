@@ -1,7 +1,7 @@
 {
   "meta": {
     "title": "Malaysia Tax Calculator 2026",
-    "description": "Free Malaysia personal income tax calculator. Calculate your YA2025 tax with all LHDN reliefs and deductions."
+    "description": "Free Malaysia personal income tax calculator. Calculate your tax for the latest year of assessment with all LHDN reliefs and deductions."
   },
   "nav": {
     "home": "Home",
@@ -10,7 +10,7 @@
   },
   "calculator": {
     "title": "Personal Income Tax Calculator",
-    "subtitle": "Calculate your Malaysia income tax for Year of Assessment 2025",
+    "subtitle": "Calculate your Malaysia personal income tax",
     "yearOfAssessment": "Year of Assessment",
     "incomeSection": "Income Details",
     "employment": "Employment Income",
@@ -115,7 +115,7 @@
   },
   "corporate": {
     "title": "Corporate Income Tax Calculator",
-    "subtitle": "Calculate Malaysia corporate income tax for Year of Assessment 2025",
+    "subtitle": "Calculate Malaysia corporate income tax",
     "chargeableIncome": "Chargeable Income (RM)",
     "companyType": "Company Type",
     "sme": "SME (Preferential Rate)",
