@@ -1,4 +1,6 @@
 import { describe, expect, it } from "vitest";
+import { readFileSync } from "node:fs";
+import { join } from "node:path";
 import { isProductionMaintenanceHost } from "@/lib/maintenance";
 
 describe("production maintenance mode", () => {
@@ -39,6 +41,15 @@ describe("production maintenance mode", () => {
         pathname: "/auth/callback",
       })
     ).toBe(false);
+  });
+
+  it("keeps auth routes out of locale middleware redirects", () => {
+    const middlewareSource = readFileSync(
+      join(process.cwd(), "src", "middleware.ts"),
+      "utf8"
+    );
+
+    expect(middlewareSource).toContain("api|auth|_next|_vercel");
   });
 
   it("keeps local development available", () => {
