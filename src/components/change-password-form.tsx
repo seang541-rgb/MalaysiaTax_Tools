@@ -3,6 +3,7 @@
 import { FormEvent, useMemo, useState } from "react";
 import { useTranslations } from "next-intl";
 import { createSupabaseBrowserClient } from "@/lib/supabase/browser";
+import { PasswordInput } from "./password-input";
 
 export function ChangePasswordForm({ resetMode = false }: { resetMode?: boolean }) {
   const t = useTranslations("account");
@@ -61,15 +62,13 @@ export function ChangePasswordForm({ resetMode = false }: { resetMode?: boolean 
           <label htmlFor="account-new-password" className="text-sm font-medium">
             {t("newPassword")}
           </label>
-          <input
+          <PasswordInput
             id="account-new-password"
-            type="password"
             autoComplete="new-password"
             value={password}
             onChange={(event) => setPassword(event.target.value)}
             minLength={6}
             required
-            className="h-10 w-full rounded-md border bg-background px-3 text-sm outline-none focus:ring-2 focus:ring-ring"
           />
         </div>
         <div className="space-y-2">
@@ -79,15 +78,13 @@ export function ChangePasswordForm({ resetMode = false }: { resetMode?: boolean 
           >
             {t("confirmPassword")}
           </label>
-          <input
+          <PasswordInput
             id="account-confirm-password"
-            type="password"
             autoComplete="new-password"
             value={confirmPassword}
             onChange={(event) => setConfirmPassword(event.target.value)}
             minLength={6}
             required
-            className="h-10 w-full rounded-md border bg-background px-3 text-sm outline-none focus:ring-2 focus:ring-ring"
           />
         </div>
 

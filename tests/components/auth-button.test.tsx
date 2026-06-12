@@ -45,6 +45,10 @@ const signUpMock = vi.fn();
 const resetPasswordForEmailMock = vi.fn();
 const signOutMock = vi.fn();
 
+function getAuthPasswordInput() {
+  return document.querySelector<HTMLInputElement>("#auth-password")!;
+}
+
 vi.mock("next-intl", () => ({
   useTranslations: () => (key: string) => authMessages[key] ?? key,
 }));
@@ -106,7 +110,7 @@ describe("AuthButton", () => {
     fireEvent.change(screen.getByLabelText(/email/i), {
       target: { value: "customer@example.com" },
     });
-    fireEvent.change(screen.getByLabelText(/password/i), {
+    fireEvent.change(getAuthPasswordInput(), {
       target: { value: "secret123" },
     });
     fireEvent.click(within(dialog).getByRole("button", { name: /^sign in$/i }));
@@ -139,7 +143,7 @@ describe("AuthButton", () => {
     fireEvent.change(screen.getByLabelText(/email/i), {
       target: { value: "customer@example.com" },
     });
-    fireEvent.change(screen.getByLabelText(/password/i), {
+    fireEvent.change(getAuthPasswordInput(), {
       target: { value: "badpassword" },
     });
     fireEvent.click(within(dialog).getByRole("button", { name: /^sign in$/i }));
@@ -164,7 +168,7 @@ describe("AuthButton", () => {
     fireEvent.change(screen.getByLabelText(/email/i), {
       target: { value: "new@example.com" },
     });
-    fireEvent.change(screen.getByLabelText(/password/i), {
+    fireEvent.change(getAuthPasswordInput(), {
       target: { value: "secret123" },
     });
     fireEvent.click(
@@ -206,7 +210,7 @@ describe("AuthButton", () => {
     fireEvent.change(screen.getByLabelText(/email/i), {
       target: { value: "registered@example.com" },
     });
-    fireEvent.change(screen.getByLabelText(/password/i), {
+    fireEvent.change(getAuthPasswordInput(), {
       target: { value: "secret123" },
     });
     fireEvent.click(
@@ -250,5 +254,20 @@ describe("AuthButton", () => {
         "If this email has an account, a password reset link has been sent."
       )
     ).toBeInTheDocument();
+  });
+
+  it("can show and hide the password in the auth dialog", async () => {
+    render(<AuthButton />);
+
+    fireEvent.click(await screen.findByRole("button", { name: /sign in/i }));
+    const passwordInput = getAuthPasswordInput();
+
+    expect(passwordInput).toHaveAttribute("type", "password");
+
+    fireEvent.click(screen.getByRole("button", { name: /show password/i }));
+    expect(passwordInput).toHaveAttribute("type", "text");
+
+    fireEvent.click(screen.getByRole("button", { name: /hide password/i }));
+    expect(passwordInput).toHaveAttribute("type", "password");
   });
 });

@@ -71,4 +71,28 @@ describe("ChangePasswordForm", () => {
     expect(await screen.findByText("Passwords do not match.")).toBeInTheDocument();
     expect(updateUserMock).not.toHaveBeenCalled();
   });
+
+  it("can show and hide password fields", () => {
+    render(<ChangePasswordForm resetMode />);
+
+    const newPasswordInput = screen.getByLabelText("New password");
+    const confirmPasswordInput = screen.getByLabelText("Confirm password");
+
+    expect(newPasswordInput).toHaveAttribute("type", "password");
+    expect(confirmPasswordInput).toHaveAttribute("type", "password");
+
+    const showButtons = screen.getAllByRole("button", {
+      name: /show password/i,
+    });
+    fireEvent.click(showButtons[0]);
+    fireEvent.click(showButtons[1]);
+
+    expect(newPasswordInput).toHaveAttribute("type", "text");
+    expect(confirmPasswordInput).toHaveAttribute("type", "text");
+
+    fireEvent.click(
+      screen.getAllByRole("button", { name: /hide password/i })[0]
+    );
+    expect(newPasswordInput).toHaveAttribute("type", "password");
+  });
 });

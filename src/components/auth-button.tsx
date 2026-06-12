@@ -4,6 +4,7 @@ import { FormEvent, useEffect, useMemo, useState } from "react";
 import { useTranslations } from "next-intl";
 import { LogIn, LogOut, X } from "lucide-react";
 import { createSupabaseBrowserClient } from "@/lib/supabase/browser";
+import { PasswordInput } from "./password-input";
 
 type AuthMode = "signIn" | "signUp" | "forgotPassword";
 
@@ -262,15 +263,13 @@ export function AuthButton() {
                   >
                     {t("password")}
                   </label>
-                  <input
+                  <PasswordInput
                     id="auth-password"
-                    type="password"
                     autoComplete={
                       mode === "signIn" ? "current-password" : "new-password"
                     }
                     value={password}
                     onChange={(event) => setPassword(event.target.value)}
-                    className="h-10 w-full rounded-md border bg-background px-3 text-sm outline-none focus:ring-2 focus:ring-ring"
                     minLength={6}
                     required
                   />
