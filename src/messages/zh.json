@@ -258,8 +258,21 @@
   "auth": {
     "signIn": "登录",
     "signOut": "登出",
-    "emailPrompt": "输入你的邮箱以接收安全登录链接",
-    "checkEmail": "请查看邮箱中的登录链接。"
+    "createAccount": "注册账户",
+    "dialogTitleSignIn": "登录",
+    "dialogTitleSignUp": "注册账户",
+    "email": "邮箱",
+    "password": "密码",
+    "submitSignIn": "登录",
+    "submitSignUp": "注册账户",
+    "switchToSignUp": "注册新账户",
+    "switchToSignIn": "我已经有账户",
+    "passwordHint": "至少使用 6 个字符。",
+    "accountCreated": "账户已创建。现在可以登录。",
+    "authError": "验证失败，请再试一次。",
+    "emailRequired": "请输入邮箱。",
+    "passwordRequired": "请输入密码。",
+    "close": "关闭"
   },
   "pricing": {
     "title": "收费",

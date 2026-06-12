@@ -258,8 +258,21 @@
   "auth": {
     "signIn": "Sign in",
     "signOut": "Sign out",
-    "emailPrompt": "Enter your email for a secure login link",
-    "checkEmail": "Check your email for the login link."
+    "createAccount": "Create account",
+    "dialogTitleSignIn": "Sign in",
+    "dialogTitleSignUp": "Create account",
+    "email": "Email",
+    "password": "Password",
+    "submitSignIn": "Sign in",
+    "submitSignUp": "Create account",
+    "switchToSignUp": "Create an account",
+    "switchToSignIn": "I already have an account",
+    "passwordHint": "Use at least 6 characters.",
+    "accountCreated": "Account created. You can sign in now.",
+    "authError": "Authentication failed. Please try again.",
+    "emailRequired": "Enter your email.",
+    "passwordRequired": "Enter your password.",
+    "close": "Close"
   },
   "pricing": {
     "title": "Pricing",

@@ -391,8 +391,21 @@
   "auth": {
     "signIn": "Log masuk",
     "signOut": "Log keluar",
-    "emailPrompt": "Masukkan emel anda untuk pautan log masuk selamat",
-    "checkEmail": "Semak emel anda untuk pautan log masuk."
+    "createAccount": "Daftar akaun",
+    "dialogTitleSignIn": "Log masuk",
+    "dialogTitleSignUp": "Daftar akaun",
+    "email": "Emel",
+    "password": "Kata laluan",
+    "submitSignIn": "Log masuk",
+    "submitSignUp": "Daftar akaun",
+    "switchToSignUp": "Daftar akaun baharu",
+    "switchToSignIn": "Saya sudah ada akaun",
+    "passwordHint": "Gunakan sekurang-kurangnya 6 aksara.",
+    "accountCreated": "Akaun telah dibuat. Anda boleh log masuk sekarang.",
+    "authError": "Pengesahan gagal. Sila cuba lagi.",
+    "emailRequired": "Masukkan emel anda.",
+    "passwordRequired": "Masukkan kata laluan anda.",
+    "close": "Tutup"
   },
   "pricing": {
     "title": "Harga",
