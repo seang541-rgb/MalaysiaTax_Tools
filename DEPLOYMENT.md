@@ -103,3 +103,36 @@ LLM_EMBED_DIMENSIONS=<match the embed model; re-embed if it changes>
 ```
 
 If the embedding model or its dimension changes, re-run Step 3.
+
+## Billing and Credits
+
+MYTax paid features use Stripe Checkout and Supabase credits. Run
+`supabase/billing-credits.sql` in the Supabase SQL Editor before enabling
+billing routes.
+
+Required env vars:
+
+```env
+STRIPE_SECRET_KEY=sk_test_...
+NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=pk_test_...
+STRIPE_WEBHOOK_SECRET=whsec_...
+STRIPE_PRICE_STARTER=price_...
+STRIPE_PRICE_PRO=price_...
+STRIPE_PRICE_BUSINESS=price_...
+SUPABASE_SERVICE_ROLE_KEY=...
+NEXT_PUBLIC_APP_URL=https://your-domain.example
+```
+
+Stripe webhook endpoint:
+
+```text
+https://your-domain.example/api/billing/stripe/webhook
+```
+
+Listen for:
+
+- `checkout.session.completed`
+
+The personal income tax calculator remains free. The first paid gate is
+`POST /api/chat`, which requires a signed-in Supabase user and consumes 1 credit
+before calling the LLM provider.
