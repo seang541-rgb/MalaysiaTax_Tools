@@ -268,7 +268,7 @@
     "switchToSignUp": "Create an account",
     "switchToSignIn": "I already have an account",
     "passwordHint": "Use at least 6 characters.",
-    "accountCreated": "Account created. You can sign in now.",
+    "accountCreated": "If this is a new email, your account has been created with 5 starter credits. If you already registered, sign in instead.",
     "authError": "Authentication failed. Please try again.",
     "emailRequired": "Enter your email.",
     "passwordRequired": "Enter your password.",
@@ -278,7 +278,7 @@
     "title": "Pricing",
     "subtitle": "Buy credits for AI tax help and advanced business tools.",
     "buy": "Buy credits",
-    "freeNote": "The personal income tax calculator remains free and does not require login."
+    "freeNote": "The personal income tax calculator remains free. New accounts receive 5 starter credits."
   },
   "billing": {
     "successTitle": "Payment received",

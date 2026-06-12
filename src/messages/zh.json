@@ -268,7 +268,7 @@
     "switchToSignUp": "注册新账户",
     "switchToSignIn": "我已经有账户",
     "passwordHint": "至少使用 6 个字符。",
-    "accountCreated": "账户已创建。现在可以登录。",
+    "accountCreated": "如果这是新邮箱，账户已创建并获得 5 个 starter credits。如果已经注册过，请直接登录。",
     "authError": "验证失败，请再试一次。",
     "emailRequired": "请输入邮箱。",
     "passwordRequired": "请输入密码。",
@@ -278,7 +278,7 @@
     "title": "收费",
     "subtitle": "购买 credits，用于 AI 税务助手和高级企业工具。",
     "buy": "购买 credits",
-    "freeNote": "个人所得税计算器保持免费，不需要登录。"
+    "freeNote": "个人所得税计算器保持免费。新账户会获得 5 个 starter credits。"
   },
   "billing": {
     "successTitle": "付款已收到",

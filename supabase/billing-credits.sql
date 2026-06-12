@@ -35,6 +35,10 @@ create unique index if not exists credit_transactions_stripe_session_id_key
   on public.credit_transactions (stripe_session_id)
   where stripe_session_id is not null;
 
+create unique index if not exists credit_transactions_signup_bonus_key
+  on public.credit_transactions (user_id, feature)
+  where kind = 'adjustment' and feature = 'signup_bonus';
+
 create table if not exists public.usage_logs (
   id uuid primary key default gen_random_uuid(),
   user_id uuid references auth.users(id) on delete set null,
@@ -87,6 +91,32 @@ begin
   insert into public.credit_balances (user_id, balance)
   values (new.id, 0)
   on conflict (user_id) do nothing;
+
+  insert into public.credit_transactions (
+    user_id,
+    amount,
+    kind,
+    feature,
+    description,
+    metadata
+  )
+  values (
+    new.id,
+    5,
+    'adjustment',
+    'signup_bonus',
+    'New user signup bonus',
+    jsonb_build_object('source', 'auth.users trigger')
+  )
+  on conflict (user_id, feature)
+    where kind = 'adjustment' and feature = 'signup_bonus'
+    do nothing;
+
+  if found then
+    update public.credit_balances
+    set balance = balance + 5
+    where user_id = new.id;
+  end if;
 
   return new;
 end;

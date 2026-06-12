@@ -401,7 +401,7 @@
     "switchToSignUp": "Daftar akaun baharu",
     "switchToSignIn": "Saya sudah ada akaun",
     "passwordHint": "Gunakan sekurang-kurangnya 6 aksara.",
-    "accountCreated": "Akaun telah dibuat. Anda boleh log masuk sekarang.",
+    "accountCreated": "Jika ini emel baharu, akaun anda telah dibuat dengan 5 starter credits. Jika sudah berdaftar, sila log masuk.",
     "authError": "Pengesahan gagal. Sila cuba lagi.",
     "emailRequired": "Masukkan emel anda.",
     "passwordRequired": "Masukkan kata laluan anda.",
@@ -411,7 +411,7 @@
     "title": "Harga",
     "subtitle": "Beli credits untuk bantuan cukai AI dan alat perniagaan lanjutan.",
     "buy": "Beli credits",
-    "freeNote": "Kalkulator cukai pendapatan peribadi kekal percuma dan tidak memerlukan log masuk."
+    "freeNote": "Kalkulator cukai pendapatan peribadi kekal percuma. Akaun baharu menerima 5 starter credits."
   },
   "billing": {
     "successTitle": "Bayaran diterima",

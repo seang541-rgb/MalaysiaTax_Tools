@@ -133,7 +133,8 @@ Listen for:
 
 - `checkout.session.completed`
 
-The personal income tax calculator remains free. Other tools are behind a
+The personal income tax calculator remains free. New Supabase Auth users receive
+5 starter credits from the `auth.users` insert trigger. Other tools are behind a
 credit gate: users must sign in and have at least 1 credit before the tool UI is
 available. `POST /api/chat` additionally consumes 1 credit per AI question
 before calling the LLM provider.
