@@ -64,14 +64,16 @@ export function IncomeForm() {
     if (!d || shareLoaded) return;
     try {
       const data = JSON.parse(atob(d));
-      if (data.i) setIncome(data.i);
-      if (data.r) setReliefClaims(data.r);
-      if (data.m) setMaritalStatus(data.m);
-      if (data.s !== undefined) setSpouseHasIncome(data.s);
-      if (data.z) setZakatAmount(data.z);
-      if (data.p) setMonthlyPcb(data.p);
-      setMode("advanced");
-      setShareLoaded(true);
+      queueMicrotask(() => {
+        if (data.i) setIncome(data.i);
+        if (data.r) setReliefClaims(data.r);
+        if (data.m) setMaritalStatus(data.m);
+        if (data.s !== undefined) setSpouseHasIncome(data.s);
+        if (data.z) setZakatAmount(data.z);
+        if (data.p) setMonthlyPcb(data.p);
+        setMode("advanced");
+        setShareLoaded(true);
+      });
     } catch {
       // invalid share data, ignore
     }

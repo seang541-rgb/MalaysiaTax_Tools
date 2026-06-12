@@ -1,7 +1,6 @@
 import { NextRequest } from "next/server";
 import { createClient } from "@supabase/supabase-js";
 import { TAX_RATES_YA2025 } from "@/engine/tax-rates";
-import { TaxBand } from "@/engine/types";
 import { embed, chatStream, llmConfigured, llmInfo } from "@/lib/llm";
 
 // Supabase client for RAG
@@ -285,7 +284,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const { messages, locale } = await request.json();
+    const { messages } = await request.json();
 
     // Input validation
     if (!Array.isArray(messages) || messages.length === 0) {

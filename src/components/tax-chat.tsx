@@ -34,7 +34,9 @@ export function TaxChat() {
   // Auto-greet on mount
   useEffect(() => {
     const greeting = getTaxAssistantResponse("hi", locale);
-    setMessages([{ role: "assistant", content: greeting }]);
+    queueMicrotask(() => {
+      setMessages([{ role: "assistant", content: greeting }]);
+    });
   }, [locale]);
 
   // Stream response from Ollama

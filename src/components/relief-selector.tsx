@@ -110,7 +110,7 @@ export function ReliefSelector({
               onOpenChange={() => toggleCategory(cat)}
             >
               <CollapsibleTrigger className="flex w-full items-center justify-between rounded-md border px-4 py-3 text-sm font-medium hover:bg-muted transition-colors">
-                <span>{tCat(cat as any)}</span>
+                <span>{tCat(cat)}</span>
                 <span className="flex items-center gap-2 text-xs text-muted-foreground">
                   {checkedCount > 0 && (
                     <span className="rounded-full bg-primary px-2 py-0.5 text-xs text-primary-foreground">
@@ -141,7 +141,7 @@ export function ReliefSelector({
                         htmlFor={def.id}
                         className="flex-1 cursor-pointer text-sm"
                       >
-                        {t(def.id as any)}
+                        {t(def.id)}
                         <span className="ml-2 text-xs text-muted-foreground">
                           ({tCommon("max")} RM{def.maxAmount.toLocaleString()})
                         </span>
