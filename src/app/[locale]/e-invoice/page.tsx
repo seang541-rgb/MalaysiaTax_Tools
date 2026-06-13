@@ -2,6 +2,7 @@ import { useTranslations } from "next-intl";
 import { getTranslations } from "next-intl/server";
 import { EInvoiceChecker } from "@/components/e-invoice-checker";
 import { PaidFeatureGate } from "@/components/paid-feature-gate";
+import { FaqSection, FaqItem } from "@/components/faq-section";
 
 export async function generateMetadata({
   params,
@@ -19,6 +20,8 @@ export async function generateMetadata({
 
 export default function EInvoicePage() {
   const t = useTranslations("einvoice");
+  const faq = useTranslations("einvoiceFaq");
+  const faqItems = faq.raw("items") as FaqItem[];
 
   return (
     <div className="max-w-3xl mx-auto">
@@ -29,6 +32,7 @@ export default function EInvoicePage() {
       <PaidFeatureGate>
         <EInvoiceChecker />
       </PaidFeatureGate>
+      <FaqSection title={faq("title")} items={faqItems} />
     </div>
   );
 }

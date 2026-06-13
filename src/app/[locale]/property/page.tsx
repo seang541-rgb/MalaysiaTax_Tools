@@ -2,6 +2,7 @@ import { useTranslations } from "next-intl";
 import { getTranslations } from "next-intl/server";
 import { PaidFeatureGate } from "@/components/paid-feature-gate";
 import { PropertyToolsTabs } from "@/components/property-tools-tabs";
+import { FaqSection, FaqItem } from "@/components/faq-section";
 
 export async function generateMetadata({
   params,
@@ -19,6 +20,8 @@ export async function generateMetadata({
 
 export default function PropertyPage() {
   const t = useTranslations("property");
+  const faq = useTranslations("propertyFaq");
+  const faqItems = faq.raw("items") as FaqItem[];
 
   return (
     <div className="max-w-3xl mx-auto">
@@ -29,6 +32,7 @@ export default function PropertyPage() {
       <PaidFeatureGate>
         <PropertyToolsTabs />
       </PaidFeatureGate>
+      <FaqSection title={faq("title")} items={faqItems} />
     </div>
   );
 }
