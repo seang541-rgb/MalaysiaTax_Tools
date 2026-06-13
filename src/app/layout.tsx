@@ -45,6 +45,11 @@ export const metadata: Metadata = {
     icon: "/icons/icon.svg",
     apple: "/icons/icon.svg",
   },
+  verification: {
+    google:
+      process.env.NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION ||
+      "YAPi5jfisYhQh1qtyxGPPkoPdoGSGTSlvcF9JBZlBPE",
+  },
 };
 
 export default function RootLayout({
