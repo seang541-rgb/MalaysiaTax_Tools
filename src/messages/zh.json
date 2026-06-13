@@ -50,6 +50,11 @@
     "daysLeft": "还剩 {days} 天",
     "today": "今天截止",
     "nextYear": "明年",
+    "nextLabel": "下个截止",
+    "viewAll": "查看全部",
+    "collapse": "收起",
+    "einvoicePrompt": "不确定电子发票何时轮到你？",
+    "einvoiceLink": "点这里查",
     "note": "BE 表用于就业收入；B 表用于营业收入（独资）。公司须在财政年度结束后 7 个月内提交 C 表。"
   },
   "whoami": {

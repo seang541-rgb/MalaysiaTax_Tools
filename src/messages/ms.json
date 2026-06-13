@@ -50,6 +50,11 @@
     "daysLeft": "{days} hari lagi",
     "today": "Tamat hari ini",
     "nextYear": "tahun depan",
+    "nextLabel": "Tarikh akhir seterusnya",
+    "viewAll": "Lihat semua",
+    "collapse": "Tutup",
+    "einvoicePrompt": "Tak pasti bila e-Invois terpakai kepada anda?",
+    "einvoiceLink": "Semak di sini",
     "note": "Borang BE untuk pendapatan penggajian; Borang B untuk pendapatan perniagaan (milikan tunggal). Syarikat memfailkan Borang C dalam 7 bulan selepas akhir tahun kewangan."
   },
   "whoami": {

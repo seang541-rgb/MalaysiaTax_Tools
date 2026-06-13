@@ -69,11 +69,10 @@ export function WhoAmI() {
   const activePersona = PERSONAS.find((p) => p.id === active);
 
   return (
-    <section className="rounded-lg border bg-card p-5 my-8">
-      <h2 className="text-lg font-semibold mb-1">{t("title")}</h2>
-      <p className="text-sm text-muted-foreground mb-4">{t("subtitle")}</p>
+    <section className="rounded-lg border bg-card p-4 my-8">
+      <p className="text-sm font-medium mb-3">{t("title")}</p>
 
-      <div className="grid grid-cols-2 sm:grid-cols-5 gap-2">
+      <div className="flex flex-wrap gap-2">
         {PERSONAS.map((p) => {
           const Icon = p.icon;
           const selected = p.id === active;
@@ -82,41 +81,31 @@ export function WhoAmI() {
               key={p.id}
               type="button"
               onClick={() => setActive(selected ? null : p.id)}
-              className={`flex flex-col items-center gap-2 rounded-lg border px-2 py-3 text-center transition-colors ${
+              className={`inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs transition-colors ${
                 selected
-                  ? "border-primary bg-primary/5"
-                  : "hover:bg-muted/60"
+                  ? "border-primary bg-primary/10 text-primary font-medium"
+                  : "text-muted-foreground hover:bg-muted/60"
               }`}
             >
-              <Icon
-                className={`h-5 w-5 ${selected ? "text-primary" : "text-muted-foreground"}`}
-                aria-hidden="true"
-              />
-              <span className="text-xs font-medium leading-tight">
-                {t(`p_${p.id}`)}
-              </span>
+              <Icon className="h-3.5 w-3.5" aria-hidden="true" />
+              {t(`p_${p.id}`)}
             </button>
           );
         })}
       </div>
 
       {activePersona && (
-        <div className="mt-4 rounded-md bg-muted/40 p-4">
-          <p className="text-sm font-medium mb-3">
-            {t("recommendedFor", { persona: t(`p_${activePersona.id}`) })}
-          </p>
-          <div className="flex flex-col gap-2">
-            {activePersona.tools.map((tool) => (
-              <Link
-                key={tool.labelKey}
-                href={tool.href}
-                className="flex items-center justify-between rounded-md border bg-card px-3 py-2.5 text-sm hover:border-primary/50 hover:bg-primary/5 transition-colors"
-              >
-                <span className="font-medium">{t(tool.labelKey)}</span>
-                <ArrowRight className="h-4 w-4 text-muted-foreground shrink-0" aria-hidden="true" />
-              </Link>
-            ))}
-          </div>
+        <div className="mt-3 flex flex-col gap-1.5">
+          {activePersona.tools.map((tool) => (
+            <Link
+              key={tool.labelKey}
+              href={tool.href}
+              className="flex items-center justify-between rounded-md border px-3 py-2 text-sm hover:border-primary/50 hover:bg-primary/5 transition-colors"
+            >
+              <span className="font-medium">{t(tool.labelKey)}</span>
+              <ArrowRight className="h-4 w-4 text-muted-foreground shrink-0" aria-hidden="true" />
+            </Link>
+          ))}
         </div>
       )}
     </section>

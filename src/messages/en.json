@@ -50,6 +50,11 @@
     "daysLeft": "{days} days left",
     "today": "Due today",
     "nextYear": "next year",
+    "nextLabel": "Next deadline",
+    "viewAll": "View all",
+    "collapse": "Collapse",
+    "einvoicePrompt": "Not sure when e-Invoice applies to you?",
+    "einvoiceLink": "Check here",
     "note": "Form BE is for employment income; Form B is for business income (sole proprietor). Companies file Form C within 7 months of their financial year-end."
   },
   "whoami": {
