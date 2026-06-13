@@ -2,7 +2,10 @@
 
 import { useState, useRef, useEffect, useCallback } from "react";
 import { useTranslations, useLocale } from "next-intl";
+import { AlertTriangle } from "lucide-react";
 import { ChatMessage, getTaxAssistantResponse } from "@/engine/tax-assistant";
+
+const DISCLAIMER_ACK_KEY = "mytax.ai.disclaimerAck.v1";
 
 class ChatBillingError extends Error {}
 
@@ -12,9 +15,29 @@ export function TaxChat() {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [input, setInput] = useState("");
   const [isTyping, setIsTyping] = useState(false);
+  const [disclaimerAck, setDisclaimerAck] = useState(true);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const abortRef = useRef<AbortController | null>(null);
+
+  // First-time disclaimer banner: hidden after the user clicks acknowledge.
+  useEffect(() => {
+    try {
+      const ack = window.localStorage.getItem(DISCLAIMER_ACK_KEY);
+      setDisclaimerAck(ack === "1");
+    } catch {
+      setDisclaimerAck(false);
+    }
+  }, []);
+
+  function acknowledgeDisclaimer() {
+    setDisclaimerAck(true);
+    try {
+      window.localStorage.setItem(DISCLAIMER_ACK_KEY, "1");
+    } catch {
+      // ignore storage errors (private mode, etc.)
+    }
+  }
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -209,7 +232,36 @@ export function TaxChat() {
   };
 
   return (
-    <div className="flex flex-col h-[600px] max-w-2xl mx-auto border rounded-xl bg-white shadow-sm overflow-hidden">
+    <div className="max-w-2xl mx-auto space-y-3">
+      {!disclaimerAck && (
+        <div
+          role="alert"
+          className="rounded-lg border border-amber-200 bg-amber-50 dark:border-amber-900 dark:bg-amber-950/40 p-4"
+        >
+          <div className="flex items-start gap-3">
+            <AlertTriangle
+              className="h-5 w-5 mt-0.5 shrink-0 text-amber-700 dark:text-amber-400"
+              aria-hidden="true"
+            />
+            <div className="flex-1 space-y-2">
+              <p className="text-sm font-semibold text-amber-900 dark:text-amber-200">
+                {t("disclaimerNoticeTitle")}
+              </p>
+              <p className="text-sm text-amber-900/90 dark:text-amber-200/90 leading-relaxed">
+                {t("disclaimerNoticeBody")}
+              </p>
+              <button
+                onClick={acknowledgeDisclaimer}
+                className="text-xs font-medium px-3 py-1.5 rounded-md border border-amber-300 bg-white dark:bg-amber-950 dark:border-amber-800 text-amber-900 dark:text-amber-100 hover:bg-amber-100 dark:hover:bg-amber-900 transition-colors"
+              >
+                {t("disclaimerNoticeAck")}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+    <div className="flex flex-col h-[600px] border rounded-xl bg-white shadow-sm overflow-hidden">
       {/* Header */}
       <div className="px-4 py-3 border-b bg-primary/5">
         <div className="flex items-center gap-2">
@@ -302,6 +354,7 @@ export function TaxChat() {
           {t("disclaimer")}
         </p>
       </div>
+    </div>
     </div>
   );
 }

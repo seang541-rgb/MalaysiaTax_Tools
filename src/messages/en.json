@@ -287,6 +287,7 @@
   "pricing": {
     "title": "Pricing",
     "subtitle": "Buy credits for AI tax help and advanced business tools.",
+    "checkoutNotice": "By purchasing credits, you acknowledge that MYTax calculations and AI responses are for reference only and are not a substitute for professional tax advice. See the full disclaimer.",
     "buy": "Buy credits",
     "freeNote": "The personal income tax calculator remains free. New accounts receive 5 starter credits."
   },
@@ -696,6 +697,9 @@
   "aiTax": {
     "pageTitle": "AI Tax Assistant",
     "pageSubtitle": "Ask me anything about Malaysia taxes — personal, corporate, EPF, SOCSO, SST and more",
+    "disclaimerNoticeTitle": "Before you start",
+    "disclaimerNoticeBody": "MYTax AI gives general guidance based on LHDN documents. Answers can be wrong or outdated. Verify important figures with LHDN or a tax agent before acting.",
+    "disclaimerNoticeAck": "I understand",
     "title": "MYTax AI Assistant",
     "subtitle": "Instant Malaysia tax help",
     "placeholder": "Ask a tax question...",
@@ -748,6 +752,26 @@
   },
   "footer": {
     "privacy": "Privacy Policy",
-    "terms": "Terms of Service"
+    "terms": "Terms of Service",
+    "disclaimer": "Disclaimer",
+    "disclaimerNote": "MYTax calculations and AI responses are for reference only and do not constitute professional tax advice. Always verify with LHDN or a licensed tax agent."
+  },
+  "disclaimer": {
+    "title": "Disclaimer",
+    "lastUpdated": "Last updated: June 2026",
+    "s1Title": "1. Reference only",
+    "s1Desc": "MYTax provides tax calculators, content, and an AI assistant solely as informational tools to help you estimate your Malaysian tax position. None of the output constitutes professional tax advice, legal opinion, or accounting service.",
+    "s2Title": "2. Accuracy",
+    "s2Desc": "We update tax rates, thresholds and reliefs based on publicly available LHDN guidance, but Malaysian tax law changes frequently. We do not guarantee that any calculation reflects the latest position. Always verify against LHDN's official portal at hasil.gov.my before filing or making financial decisions.",
+    "s3Title": "3. AI content",
+    "s3Desc": "MYTax AI generates responses based on a knowledge base of LHDN public documents. AI models can produce errors, omissions or outdated information. You must not rely on AI answers as your sole basis for any tax decision. Treat AI output as a starting point for further research with LHDN or a licensed tax agent.",
+    "s4Title": "4. Limitation of liability",
+    "s4Desc": "To the maximum extent permitted by Malaysian law, MYTax, its owners and operators shall not be liable for any direct, indirect, incidental, consequential or punitive damages arising from your use of, or inability to use, the service — including but not limited to underpayment penalties, overpayment, missed deadlines or reliance on AI output. Your sole remedy is to discontinue use.",
+    "s5Title": "5. No professional relationship",
+    "s5Desc": "Using MYTax does not create a tax-agent, accountant, lawyer or fiduciary relationship between you and MYTax. For matters requiring a licensed professional opinion, please engage a qualified Malaysian tax agent or accountant.",
+    "s6Title": "6. Third-party links",
+    "s6Desc": "The site contains links to LHDN, KWSP, PERKESO, RMCD and other third-party resources for your convenience. We do not control these sites and are not responsible for their content or accuracy.",
+    "s7Title": "7. Changes",
+    "s7Desc": "We may update this Disclaimer at any time. Continued use after changes means you accept the updated version."
   }
 }

@@ -287,6 +287,7 @@
   "pricing": {
     "title": "收费",
     "subtitle": "购买 credits，用于 AI 税务助手和高级企业工具。",
+    "checkoutNotice": "购买积分即表示您理解 MYTax 的计算和 AI 回答仅供参考，不能替代专业税务建议。完整条款见免责声明。",
     "buy": "购买 credits",
     "freeNote": "个人所得税计算器保持免费。新账户会获得 5 个 starter credits。"
   },
@@ -696,6 +697,9 @@
   "aiTax": {
     "pageTitle": "AI 税务助手",
     "pageSubtitle": "问我任何关于马来西亚税务的问题 — 个人税、企业税、EPF、SOCSO、SST 等",
+    "disclaimerNoticeTitle": "使用前请知悉",
+    "disclaimerNoticeBody": "MYTax AI 基于 LHDN 文档提供一般指导。答案可能出错或过时，重要数字请向 LHDN 或税务代理核实后再做决定。",
+    "disclaimerNoticeAck": "我已知悉",
     "title": "MYTax AI 助手",
     "subtitle": "即时马来西亚税务问答",
     "placeholder": "输入税务问题...",
@@ -748,6 +752,26 @@
   },
   "footer": {
     "privacy": "隐私政策",
-    "terms": "使用条款"
+    "terms": "使用条款",
+    "disclaimer": "免责声明",
+    "disclaimerNote": "MYTax 的计算和 AI 回答仅供参考，不构成专业税务建议。请以 LHDN 或持牌税务代理为准。"
+  },
+  "disclaimer": {
+    "title": "免责声明",
+    "lastUpdated": "最后更新：2026 年 6 月",
+    "s1Title": "1. 仅供参考",
+    "s1Desc": "MYTax 提供的税务计算器、内容和 AI 助手仅作为信息工具，帮您估算马来西亚税务情况。所有输出均不构成专业税务建议、法律意见或会计服务。",
+    "s2Title": "2. 准确性",
+    "s2Desc": "我们根据 LHDN 公开指南更新税率、门槛和减免，但马来西亚税法经常变动。我们不保证任何计算反映最新情况。在报税或做出财务决定前，请向 LHDN 官方网站 hasil.gov.my 核实。",
+    "s3Title": "3. AI 内容",
+    "s3Desc": "MYTax AI 基于 LHDN 公开文档知识库生成回答。AI 模型可能产生错误、遗漏或过时信息。您不可将 AI 回答作为任何税务决定的唯一依据。请将 AI 输出视为进一步咨询 LHDN 或持牌税务代理的起点。",
+    "s4Title": "4. 责任限制",
+    "s4Desc": "在马来西亚法律允许的最大范围内，MYTax 及其所有者和运营者不对您使用或无法使用本服务而产生的任何直接、间接、附带、后果性或惩罚性损害承担责任 — 包括但不限于税款少缴罚款、多缴税款、错过截止日期或依赖 AI 输出造成的损失。您唯一的补救措施是停止使用。",
+    "s5Title": "5. 不构成代理关系",
+    "s5Desc": "使用 MYTax 不会在您和 MYTax 之间建立税务代理、会计师、律师或受托关系。对于需要持牌专业意见的事项，请聘请合格的马来西亚税务代理或会计师。",
+    "s6Title": "6. 第三方链接",
+    "s6Desc": "本站包含指向 LHDN、KWSP、PERKESO、RMCD 等第三方资源的链接，以方便您使用。我们不控制这些网站，也不对其内容或准确性负责。",
+    "s7Title": "7. 修改",
+    "s7Desc": "我们可能随时更新本免责声明。修改后继续使用即表示您接受更新版本。"
   }
 }

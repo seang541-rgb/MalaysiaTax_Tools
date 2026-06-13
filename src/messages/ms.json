@@ -421,6 +421,7 @@
   "pricing": {
     "title": "Harga",
     "subtitle": "Beli credits untuk bantuan cukai AI dan alat perniagaan lanjutan.",
+    "checkoutNotice": "Dengan membeli kredit, anda mengakui bahawa pengiraan MYTax dan jawapan AI adalah untuk rujukan sahaja dan bukan pengganti nasihat cukai profesional. Lihat Penafian penuh.",
     "buy": "Beli credits",
     "freeNote": "Kalkulator cukai pendapatan peribadi kekal percuma. Akaun baharu menerima 5 starter credits."
   },
@@ -696,6 +697,9 @@
   "aiTax": {
     "pageTitle": "Pembantu Cukai AI",
     "pageSubtitle": "Tanya saya apa sahaja tentang cukai Malaysia — peribadi, korporat, EPF, SOCSO, SST dan lain-lain",
+    "disclaimerNoticeTitle": "Sebelum anda mula",
+    "disclaimerNoticeBody": "MYTax AI memberi panduan umum berdasarkan dokumen LHDN. Jawapan boleh silap atau lapuk. Sahkan angka penting dengan LHDN atau ejen cukai sebelum bertindak.",
+    "disclaimerNoticeAck": "Saya faham",
     "title": "Pembantu AI MYTax",
     "subtitle": "Bantuan cukai Malaysia segera",
     "placeholder": "Tanya soalan cukai...",
@@ -748,6 +752,26 @@
   },
   "footer": {
     "privacy": "Dasar Privasi",
-    "terms": "Terma Perkhidmatan"
+    "terms": "Terma Perkhidmatan",
+    "disclaimer": "Penafian",
+    "disclaimerNote": "Pengiraan MYTax dan jawapan AI adalah untuk rujukan sahaja dan bukan nasihat cukai profesional. Sila sahkan dengan LHDN atau ejen cukai berlesen."
+  },
+  "disclaimer": {
+    "title": "Penafian",
+    "lastUpdated": "Kemaskini terakhir: Jun 2026",
+    "s1Title": "1. Untuk rujukan sahaja",
+    "s1Desc": "MYTax menyediakan kalkulator cukai, kandungan, dan pembantu AI semata-mata sebagai alat maklumat untuk membantu anda menganggar kedudukan cukai Malaysia anda. Tiada output yang merupakan nasihat cukai profesional, pendapat undang-undang, atau perkhidmatan perakaunan.",
+    "s2Title": "2. Ketepatan",
+    "s2Desc": "Kami mengemas kini kadar cukai, ambang, dan pelepasan berdasarkan panduan LHDN yang tersedia secara umum, tetapi undang-undang cukai Malaysia kerap berubah. Kami tidak menjamin sebarang pengiraan mencerminkan kedudukan terkini. Sentiasa sahkan dengan portal rasmi LHDN di hasil.gov.my sebelum memfailkan atau membuat keputusan kewangan.",
+    "s3Title": "3. Kandungan AI",
+    "s3Desc": "MYTax AI menjana jawapan berdasarkan pangkalan pengetahuan dokumen awam LHDN. Model AI boleh menghasilkan ralat, peninggalan, atau maklumat lapuk. Anda tidak boleh bergantung pada jawapan AI sebagai satu-satunya asas untuk sebarang keputusan cukai. Anggap output AI sebagai titik permulaan untuk penyelidikan lanjut dengan LHDN atau ejen cukai berlesen.",
+    "s4Title": "4. Had liabiliti",
+    "s4Desc": "Setakat maksimum yang dibenarkan oleh undang-undang Malaysia, MYTax, pemilik dan pengendalinya tidak bertanggungjawab atas sebarang kerosakan langsung, tidak langsung, sampingan, berbangkit, atau punitif yang timbul daripada penggunaan, atau ketidakupayaan untuk menggunakan, perkhidmatan ini — termasuk tetapi tidak terhad kepada penalti kurang bayar, terlebih bayar, terlepas tarikh akhir, atau pergantungan pada output AI. Remedi tunggal anda adalah menghentikan penggunaan.",
+    "s5Title": "5. Tiada hubungan profesional",
+    "s5Desc": "Menggunakan MYTax tidak mewujudkan hubungan ejen cukai, akauntan, peguam, atau fidusiari antara anda dan MYTax. Bagi perkara yang memerlukan pendapat profesional berlesen, sila lantik ejen cukai atau akauntan Malaysia yang berkelayakan.",
+    "s6Title": "6. Pautan pihak ketiga",
+    "s6Desc": "Laman ini mengandungi pautan ke LHDN, KWSP, PERKESO, RMCD, dan sumber pihak ketiga lain untuk kemudahan anda. Kami tidak mengawal laman-laman ini dan tidak bertanggungjawab atas kandungan atau ketepatannya.",
+    "s7Title": "7. Perubahan",
+    "s7Desc": "Kami boleh mengemas kini Penafian ini pada bila-bila masa. Penggunaan berterusan selepas perubahan bermakna anda menerima versi yang dikemas kini."
   }
 }
