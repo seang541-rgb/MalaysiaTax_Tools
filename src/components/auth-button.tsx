@@ -172,6 +172,10 @@ export function AuthButton() {
 
     setEmail(result.data.user?.email ?? nextEmail);
     closeAuthModal();
+
+    // Reload so the new Supabase session cookie reaches server routes
+    // (PaidFeatureGate, AI chat, etc.) without a stale 401 race.
+    window.location.reload();
   }
 
   async function signOut() {
