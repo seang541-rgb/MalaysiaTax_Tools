@@ -261,7 +261,7 @@ export function TaxChat() {
         </div>
       )}
 
-    <div className="flex flex-col h-[600px] border rounded-xl bg-white shadow-sm overflow-hidden">
+    <div className="flex flex-col h-[600px] border rounded-xl bg-white dark:bg-zinc-900 shadow-sm overflow-hidden">
       {/* Header */}
       <div className="px-4 py-3 border-b bg-primary/5">
         <div className="flex items-center gap-2">
@@ -330,7 +330,7 @@ export function TaxChat() {
       )}
 
       {/* Input */}
-      <div className="px-4 py-3 border-t bg-gray-50/50">
+      <div className="px-4 py-3 border-t bg-gray-50/50 dark:bg-zinc-800/40">
         <div className="flex gap-2">
           <input
             ref={inputRef}
@@ -339,7 +339,7 @@ export function TaxChat() {
             onChange={(e) => setInput(e.target.value)}
             onKeyDown={handleKeyDown}
             placeholder={t("placeholder")}
-            className="flex-1 px-4 py-2 border rounded-full text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 bg-white"
+            className="flex-1 px-4 py-2 border rounded-full text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 bg-background text-foreground placeholder:text-muted-foreground"
             disabled={isTyping}
           />
           <button
