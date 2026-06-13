@@ -39,6 +39,39 @@
     "estimatedAnnualTax": "Estimated Annual Tax",
     "perMonth": "month"
   },
+  "deadlines": {
+    "title": "Tax filing deadlines",
+    "items": {
+      "bePaper": "Form BE — paper filing (employment income)",
+      "beEfiling": "Form BE — e-Filing (employment income)",
+      "bPaper": "Form B — paper filing (business income)",
+      "bEfiling": "Form B — e-Filing (business income)"
+    },
+    "daysLeft": "{days} days left",
+    "today": "Due today",
+    "nextYear": "next year",
+    "note": "Form BE is for employment income; Form B is for business income (sole proprietor). Companies file Form C within 7 months of their financial year-end."
+  },
+  "whoami": {
+    "title": "Not sure where to start?",
+    "subtitle": "Tell us who you are and we'll point you to the right tools.",
+    "p_employee": "Employee",
+    "p_soleprop": "Self-employed",
+    "p_company": "Company owner",
+    "p_employer": "Employer",
+    "p_property": "Buying/selling property",
+    "recommendedFor": "Recommended for {persona}",
+    "t_personal": "Personal income tax calculator",
+    "t_ai": "AI tax assistant",
+    "t_soleprop": "Sole proprietor tax (Form B)",
+    "t_sst": "SST calculator",
+    "t_einvoice": "e-Invoice readiness check",
+    "t_corporate": "Corporate tax calculator",
+    "t_corptools": "Corporate tools (CP204, capital allowance, WHT, incentives)",
+    "t_employer": "Employer contributions (EPF/SOCSO/EIS)",
+    "t_batchpcb": "Batch PCB calculator",
+    "t_property": "Property tax (RPGT & stamp duty)"
+  },
   "categories": {
     "personal": "Personal",
     "family": "Family",

@@ -39,6 +39,39 @@
     "estimatedAnnualTax": "预估年度应缴税额",
     "perMonth": "月"
   },
+  "deadlines": {
+    "title": "报税截止日倒计时",
+    "items": {
+      "bePaper": "BE 表 — 纸本报税（就业收入）",
+      "beEfiling": "BE 表 — 电子报税（就业收入）",
+      "bPaper": "B 表 — 纸本报税（营业收入）",
+      "bEfiling": "B 表 — 电子报税（营业收入）"
+    },
+    "daysLeft": "还剩 {days} 天",
+    "today": "今天截止",
+    "nextYear": "明年",
+    "note": "BE 表用于就业收入；B 表用于营业收入（独资）。公司须在财政年度结束后 7 个月内提交 C 表。"
+  },
+  "whoami": {
+    "title": "不知道从哪开始？",
+    "subtitle": "告诉我们你是谁，我们帮你找到合适的工具。",
+    "p_employee": "打工族",
+    "p_soleprop": "自雇 / 独资",
+    "p_company": "公司老板",
+    "p_employer": "雇主",
+    "p_property": "买卖房产",
+    "recommendedFor": "为「{persona}」推荐",
+    "t_personal": "个人所得税计算器",
+    "t_ai": "AI 税务助手",
+    "t_soleprop": "独资生意税（B 表）",
+    "t_sst": "SST 计算器",
+    "t_einvoice": "电子发票合规检查",
+    "t_corporate": "企业所得税计算器",
+    "t_corptools": "企业工具（CP204、资本减免、预扣税、优惠）",
+    "t_employer": "雇主缴纳（EPF/SOCSO/EIS）",
+    "t_batchpcb": "批量 PCB 计算器",
+    "t_property": "产业税（RPGT 与印花税）"
+  },
   "categories": {
     "personal": "个人",
     "family": "家庭",

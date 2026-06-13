@@ -39,6 +39,39 @@
     "estimatedAnnualTax": "Anggaran Cukai Tahunan",
     "perMonth": "bulan"
   },
+  "deadlines": {
+    "title": "Tarikh akhir pemfailan cukai",
+    "items": {
+      "bePaper": "Borang BE — pemfailan kertas (pendapatan penggajian)",
+      "beEfiling": "Borang BE — e-Filing (pendapatan penggajian)",
+      "bPaper": "Borang B — pemfailan kertas (pendapatan perniagaan)",
+      "bEfiling": "Borang B — e-Filing (pendapatan perniagaan)"
+    },
+    "daysLeft": "{days} hari lagi",
+    "today": "Tamat hari ini",
+    "nextYear": "tahun depan",
+    "note": "Borang BE untuk pendapatan penggajian; Borang B untuk pendapatan perniagaan (milikan tunggal). Syarikat memfailkan Borang C dalam 7 bulan selepas akhir tahun kewangan."
+  },
+  "whoami": {
+    "title": "Tak pasti nak mula di mana?",
+    "subtitle": "Beritahu kami siapa anda dan kami tunjukkan alat yang sesuai.",
+    "p_employee": "Pekerja",
+    "p_soleprop": "Bekerja sendiri",
+    "p_company": "Pemilik syarikat",
+    "p_employer": "Majikan",
+    "p_property": "Beli/jual hartanah",
+    "recommendedFor": "Disyorkan untuk {persona}",
+    "t_personal": "Kalkulator cukai pendapatan peribadi",
+    "t_ai": "Pembantu cukai AI",
+    "t_soleprop": "Cukai milikan tunggal (Borang B)",
+    "t_sst": "Kalkulator SST",
+    "t_einvoice": "Semakan kesediaan e-Invois",
+    "t_corporate": "Kalkulator cukai korporat",
+    "t_corptools": "Alat korporat (CP204, elaun modal, cukai pegangan, insentif)",
+    "t_employer": "Caruman majikan (EPF/SOCSO/EIS)",
+    "t_batchpcb": "Kalkulator PCB berkumpulan",
+    "t_property": "Cukai hartanah (RPGT & duti setem)"
+  },
   "categories": {
     "personal": "Peribadi",
     "family": "Keluarga",
