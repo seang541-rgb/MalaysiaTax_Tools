@@ -652,10 +652,12 @@ export async function POST(request: NextRequest) {
         } catch (err) {
           controller.error(err);
         } finally {
-          controller.close();
-          // Best-effort quality log — never blocks or breaks the response.
+          // Best-effort quality log. Await BEFORE closing the stream so the
+          // serverless function stays alive until the write completes — a
+          // fire-and-forget after close() gets frozen/killed on Vercel.
+          // logChatInteraction swallows its own errors, so this never throws.
           if (fullAnswer) {
-            void logChatInteraction({
+            await logChatInteraction({
               userId: logUserId,
               locale: typeof locale === "string" ? locale : null,
               question: userMessage,
@@ -665,6 +667,7 @@ export async function POST(request: NextRequest) {
               usedDeterministic,
             });
           }
+          controller.close();
         }
       },
     });
