@@ -50,17 +50,17 @@ LLM_EMBED_DIMENSIONS=0
 
 `LLM_EMBED_DIMENSIONS=0` means "don't send a dimensions param" (bge-m3 is fixed 1024).
 
-## Step 3 — Migrate the Supabase vector column (once)
+## Step 3 — Create the Supabase RAG schema
 
-The old chunks were 768-dim (nomic). bge-m3 is 1024-dim, so resize the column and
-recreate the search function. In the Supabase dashboard → **SQL Editor**, run:
+In the Supabase dashboard → **SQL Editor**:
 
-```
-supabase/migrate-embeddings-1024.sql
-```
-
-(It truncates old chunks, alters `tax_chunks.embedding` to `vector(1024)`, recreates
-`match_tax_chunks` at 1024 dims, and rebuilds the HNSW index.)
+- **Fresh project** → run `supabase/rag-knowledge-base.sql`. It creates the
+  `tax_documents` and `tax_chunks` tables, the `vector` extension, the HNSW
+  index and `match_tax_chunks()` already at 1024 dims. Skip the migration below.
+- **Existing 768-dim deployment** (old nomic embeddings) → run
+  `supabase/migrate-embeddings-1024.sql` instead. It truncates old chunks, alters
+  `tax_chunks.embedding` to `vector(1024)`, recreates `match_tax_chunks` at 1024
+  dims, and rebuilds the HNSW index.
 
 ## Step 4 — Re-embed the knowledge base (required once)
 
