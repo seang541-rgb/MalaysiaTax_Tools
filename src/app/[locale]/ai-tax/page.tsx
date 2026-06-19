@@ -1,6 +1,20 @@
 import { useTranslations } from "next-intl";
+import { getTranslations } from "next-intl/server";
 import { PaidFeatureGate } from "@/components/paid-feature-gate";
 import { TaxChat } from "@/components/tax-chat";
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ locale: string }>;
+}) {
+  const { locale } = await params;
+  const t = await getTranslations({ locale, namespace: "aiTax" });
+  return {
+    title: t("pageTitle"),
+    description: t("pageSubtitle"),
+  };
+}
 
 export default function AiTaxPage() {
   const t = useTranslations("aiTax");

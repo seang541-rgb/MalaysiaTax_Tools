@@ -2,6 +2,9 @@ import { useTranslations } from "next-intl";
 import { getTranslations } from "next-intl/server";
 import { IncomeForm } from "@/components/income-form";
 import { SourceNote } from "@/components/source-note";
+import { DeadlineCountdown } from "@/components/deadline-countdown";
+import { WhoAmI } from "@/components/who-am-i";
+import { FaqSection, FaqItem } from "@/components/faq-section";
 import { SITE_URL } from "@/lib/site";
 
 export async function generateMetadata({
@@ -49,6 +52,8 @@ const jsonLd = {
 
 export default function HomePage() {
   const t = useTranslations("calculator");
+  const faq = useTranslations("homeFaq");
+  const faqItems = faq.raw("items") as FaqItem[];
 
   return (
     <div className="max-w-3xl mx-auto">
@@ -60,7 +65,10 @@ export default function HomePage() {
         <h1 className="text-3xl font-bold mb-2">{t("title")}</h1>
         <p className="text-muted-foreground">{t("subtitle")}</p>
       </div>
+      <DeadlineCountdown />
       <IncomeForm />
+      <WhoAmI />
+      <FaqSection title={faq("title")} items={faqItems} />
       <SourceNote topic="personal" />
     </div>
   );

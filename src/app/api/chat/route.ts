@@ -3,7 +3,9 @@ import { createClient } from "@supabase/supabase-js";
 import { TAX_RATES_YA2025 } from "@/engine/tax-rates";
 import { checkEInvoicePhase } from "@/engine/e-invoice";
 import { calculateSst } from "@/engine/sst";
+import { calculateCorporateTax } from "@/engine/corporate";
 import { embed, chatStream, llmConfigured, llmInfo } from "@/lib/llm";
+import { logChatInteraction } from "@/lib/ai-chat-log";
 import { billingErrorResponse } from "@/lib/billing/errors";
 import {
   consumeCredits,
@@ -182,6 +184,44 @@ function getDeterministicContext(message: string): string {
     ]);
   }
 
+  // Corporate income tax: treat the amount as chargeable income. SME status is
+  // hard to infer reliably from free text, so inject BOTH scenarios with their
+  // exact figures and let the model pick based on what the user stated.
+  const isCorporate =
+    /company|corporate|corporate tax|syarikat|sdn\.?\s?bhd|cukai korporat|公司税|企业税|公司所得税/.test(
+      lower
+    );
+  const isSolePropOrPersonal =
+    /sole proprietor|self[- ]?employed|kerja sendiri|enterprise|个人|individual|personal/.test(
+      lower
+    );
+  if (amount !== null && isCorporate && !isSolePropOrPersonal) {
+    const eligible = {
+      yearOfAssessment: 2025,
+      chargeableIncome: amount,
+      isSubsidiaryOfLargeCompany: false,
+      foreignOwnershipOver20Pct: false,
+    };
+    const sme = calculateCorporateTax({
+      ...eligible,
+      isSme: true,
+      paidUpCapital: 1,
+      annualRevenue: 1,
+    });
+    const std = calculateCorporateTax({
+      ...eligible,
+      isSme: false,
+      paidUpCapital: 9_999_999_999,
+      annualRevenue: 9_999_999_999,
+    });
+    return formatExactContext("Corporate income tax (YA2025)", [
+      `Treating RM${amount.toLocaleString("en-MY")} as the company's chargeable income.`,
+      `If it qualifies as an SME (paid-up capital ≤ RM2.5M AND annual revenue < RM50M, not >20% foreign-owned, not a subsidiary of a large company): tax = RM${sme.totalTax.toLocaleString("en-MY")} (effective ${sme.effectiveRate}%). SME bands: first RM150,000 @ 15%, RM150,001–600,000 @ 17%, balance @ 24%.`,
+      `If it does NOT qualify as an SME (standard rate): flat 24% = RM${std.totalTax.toLocaleString("en-MY")}.`,
+      `Ask the user about paid-up capital / revenue / ownership if SME status is unclear before concluding which figure applies.`,
+    ]);
+  }
+
   return "";
 }
 
@@ -320,6 +360,9 @@ Important fixed facts to use before general model knowledge:
 - Employer EPF is 13% for monthly wages up to RM5,000 and 12% above RM5,000; employee EPF is generally 11%.
 - SOCSO wage ceiling is RM6,000; EIS is 0.2% employee and 0.2% employer up to the applicable ceiling.
 - CP204 is the company's estimate of tax payable; underestimation can trigger penalties when the final tax exceeds the estimate beyond the allowed margin.
+- RPGT (Real Property Gains Tax) for individual citizens/PR: disposal within 3 years 30%, in the 4th year 20%, in the 5th year 15%, in the 6th year onwards 0%. For companies: ≤3 years 30%, 4th 20%, 5th 15%, 6th onwards 10%. Foreigners/non-citizens: ≤5 years 30%, 6th onwards 10%. A Malaysian citizen has a once-in-a-lifetime exemption on a private residence.
+- Stamp duty on Memorandum of Transfer (property): 1% on first RM100,000; 2% on RM100,001–500,000; 3% on RM500,001–1,000,000; 4% above RM1,000,000. Loan agreement stamp duty is a flat 0.5% of the loan amount.
+- Withholding tax (non-resident, common rates): special classes of income / technical fees 10%, royalties 10%, interest 15%, contract payments 10%+3%, rental of movable property 10%. A Double Taxation Agreement (DTA) may reduce these rates.
 
 Rules:
 1. Always cite specific rates, ceilings, and thresholds with numbers
@@ -563,10 +606,16 @@ export async function POST(request: NextRequest) {
     const reader = llmRes.body.getReader();
     const decoder = new TextDecoder();
 
+    const usedRag = ragContext !== "";
+    const usedPrecalc = preCalcContext !== "";
+    const usedDeterministic = deterministicContext !== "";
+    const logUserId = user.id;
+
     const stream = new ReadableStream({
       async start(controller) {
         const encoder = new TextEncoder();
         let buffer = "";
+        let fullAnswer = "";
 
         try {
           while (true) {
@@ -589,6 +638,7 @@ export async function POST(request: NextRequest) {
                 const json = JSON.parse(payload);
                 const token = json.choices?.[0]?.delta?.content;
                 if (token) {
+                  fullAnswer += token;
                   controller.enqueue(
                     encoder.encode(`data: ${JSON.stringify({ token })}\n\n`)
                   );
@@ -602,6 +652,21 @@ export async function POST(request: NextRequest) {
         } catch (err) {
           controller.error(err);
         } finally {
+          // Best-effort quality log. Await BEFORE closing the stream so the
+          // serverless function stays alive until the write completes — a
+          // fire-and-forget after close() gets frozen/killed on Vercel.
+          // logChatInteraction swallows its own errors, so this never throws.
+          if (fullAnswer) {
+            await logChatInteraction({
+              userId: logUserId,
+              locale: typeof locale === "string" ? locale : null,
+              question: userMessage,
+              answer: fullAnswer,
+              usedRag,
+              usedPrecalc,
+              usedDeterministic,
+            });
+          }
           controller.close();
         }
       },

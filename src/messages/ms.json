@@ -39,6 +39,72 @@
     "estimatedAnnualTax": "Anggaran Cukai Tahunan",
     "perMonth": "bulan"
   },
+  "deadlines": {
+    "title": "Tarikh akhir pemfailan cukai",
+    "items": {
+      "bePaper": "Borang BE — pemfailan kertas (pendapatan penggajian)",
+      "beEfiling": "Borang BE — e-Filing (pendapatan penggajian)",
+      "bPaper": "Borang B — pemfailan kertas (pendapatan perniagaan)",
+      "bEfiling": "Borang B — e-Filing (pendapatan perniagaan)"
+    },
+    "daysLeft": "{days} hari lagi",
+    "today": "Tamat hari ini",
+    "nextYear": "tahun depan",
+    "nextLabel": "Tarikh akhir seterusnya",
+    "viewAll": "Lihat semua",
+    "collapse": "Tutup",
+    "einvoicePrompt": "Tak pasti bila e-Invois terpakai kepada anda?",
+    "einvoiceLink": "Semak di sini",
+    "note": "Borang BE untuk pendapatan penggajian; Borang B untuk pendapatan perniagaan (milikan tunggal). Syarikat memfailkan Borang C dalam 7 bulan selepas akhir tahun kewangan."
+  },
+  "whoami": {
+    "title": "Tak pasti nak mula di mana?",
+    "subtitle": "Beritahu kami siapa anda dan kami tunjukkan alat yang sesuai.",
+    "p_employee": "Pekerja",
+    "p_soleprop": "Bekerja sendiri",
+    "p_company": "Pemilik syarikat",
+    "p_employer": "Majikan",
+    "p_property": "Beli/jual hartanah",
+    "recommendedFor": "Disyorkan untuk {persona}",
+    "t_personal": "Kalkulator cukai pendapatan peribadi",
+    "t_ai": "Pembantu cukai AI",
+    "t_soleprop": "Cukai milikan tunggal (Borang B)",
+    "t_sst": "Kalkulator SST",
+    "t_einvoice": "Semakan kesediaan e-Invois",
+    "t_corporate": "Kalkulator cukai korporat",
+    "t_corptools": "Alat korporat (CP204, elaun modal, cukai pegangan, insentif)",
+    "t_employer": "Caruman majikan (EPF/SOCSO/EIS)",
+    "t_batchpcb": "Kalkulator PCB berkumpulan",
+    "t_property": "Cukai hartanah (RPGT & duti setem)"
+  },
+  "homeFaq": {
+    "title": "Soalan lazim",
+    "items": [
+      { "q": "Berapa gaji sebelum saya mula bayar cukai pendapatan?", "a": "Selepas pelepasan peribadi automatik RM9,000, individu pemastautin dengan pendapatan bercukai sehingga RM5,000 bayar 0%. Secara praktikal, dengan pelepasan peribadi dan KWSP sahaja, anda biasanya mula kena cukai apabila pendapatan tahunan melebihi kira-kira RM37,000–40,000. Guna kalkulator di atas untuk angka tepat." },
+      { "q": "Bilakah tarikh akhir pemfailan cukai?", "a": "Pendapatan penggajian (Borang BE): 30 April (kertas) atau 15 Mei (e-Filing). Pendapatan perniagaan (Borang B, milikan tunggal): 30 Jun (kertas) atau 15 Julai (e-Filing). Syarikat failkan Borang C dalam 7 bulan selepas akhir tahun kewangan." },
+      { "q": "Apakah pelepasan cukai peribadi utama (TT2025)?", "a": "Individu RM9,000 (automatik), pasangan RM4,000, anak bawah 18 RM2,000 setiap seorang, KWSP sehingga RM4,000, insurans hayat sehingga RM3,000, gaya hidup sehingga RM2,500, perubatan ibu bapa sehingga RM8,000, dan lain-lain — lebih 20 pelepasan. Kalkulator penuh menyenaraikan semuanya." },
+      { "q": "Apakah PCB / MTD?", "a": "PCB (Potongan Cukai Bulanan) ialah cukai pendapatan pendahuluan yang ditolak majikan daripada gaji anda setiap bulan. Pada akhir tahun ia dibandingkan dengan cukai sebenar — anda dapat bayaran balik atau bayar bezanya." },
+      { "q": "Adakah kalkulator MYTax percuma?", "a": "Ya. Kalkulator cukai pendapatan peribadi adalah percuma sepenuhnya tanpa pendaftaran. Sesetengah alat lanjutan dan pembantu cukai AI menggunakan kredit prabayar." }
+    ]
+  },
+  "einvoiceFaq": {
+    "title": "e-Invois — soalan lazim",
+    "items": [
+      { "q": "Adakah saya perlu melaksanakan e-Invois?", "a": "Bergantung pada perolehan tahunan. Melebihi RM100J mula Ogos 2024, RM25J–100J Jan 2025, RM5J–25J Jul 2025, dan RM1J–5J mulai 1 Januari 2026. Perniagaan bawah RM1J kini dikecualikan. Masukkan perolehan dalam penyemak di atas untuk tarikh tepat." },
+      { "q": "Bila e-Invois menjadi wajib untuk perniagaan saya?", "a": "Tarikh wajib berdasarkan perolehan tahunan TK2022 anda. Julat RM1J–RM5J menjadi wajib pada 1 Januari 2026, dengan tempoh kelonggaran 6 bulan hingga 30 Jun 2026." },
+      { "q": "Perolehan saya bawah RM1 juta — perlukah saya?", "a": "Kini anda dikecualikan daripada mengeluarkan e-Invois. Namun pelanggan yang sudah melaksanakan e-Invois mungkin meminta maklumat anda; sebaik perolehan melebihi RM1J ia menjadi wajib dari tahun kedua berikutnya." },
+      { "q": "Apa berlaku jika tidak patuh?", "a": "Kegagalan mengeluarkan e-Invois adalah kesalahan dengan denda RM200 hingga RM20,000 atau penjara sehingga 6 bulan, atau kedua-duanya — bagi setiap kesalahan." }
+    ]
+  },
+  "propertyFaq": {
+    "title": "Cukai hartanah — soalan lazim",
+    "items": [
+      { "q": "Berapa RPGT perlu dibayar bila menjual hartanah?", "a": "Bergantung pada tempoh pegangan. Warganegara/PR: 30% dalam 3 tahun, 20% tahun ke-4, 15% tahun ke-5, dan 0% dari tahun ke-6. Keuntungan juga mendapat pengecualian Jadual 4 (RM10,000 atau 10% keuntungan, mana lebih tinggi)." },
+      { "q": "Berapa lama perlu pegang hartanah untuk elak RPGT?", "a": "Bagi warganegara dan pemastautin tetap, RPGT 0% jika melupuskan hartanah pada tahun ke-6 pegangan atau lebih. Syarikat bayar 10% dari tahun ke-6." },
+      { "q": "Bagaimana duti setem dikira semasa membeli rumah?", "a": "Duti setem pemindahan (MOT) berjajar: 1% bagi RM100,000 pertama, 2% RM100,001–500,000, 3% RM500,001–1,000,000, dan 4% melebihi RM1,000,000. Perjanjian pinjaman kadar rata 0.5%." },
+      { "q": "Adakah pengecualian duti setem untuk pembeli kali pertama?", "a": "Ya. Pembeli rumah kali pertama bagi kediaman sehingga RM500,000 mendapat pengecualian 100% bagi kedua-dua duti pemindahan dan perjanjian pinjaman, dilanjutkan hingga 31 Disember 2027." }
+    ]
+  },
   "categories": {
     "personal": "Peribadi",
     "family": "Keluarga",
