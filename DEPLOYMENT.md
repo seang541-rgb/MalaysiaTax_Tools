@@ -75,6 +75,21 @@ re-embeds all docs. The **service-role key is required** — the RAG tables have
 RLS enabled, so the public anon key cannot write to them. If the returned
 dimension differs, set the Supabase column and migration to match.
 
+### Alternative — rebuild from the web (no local Python)
+
+If you can't run the Python script locally, the same job is exposed as an admin
+page that runs on Vercel (which can reach Supabase and the embedding provider):
+
+1. In Vercel → Settings → Environment Variables, add **`ADMIN_REINDEX_SECRET`**
+   (any long random string) and confirm `SUPABASE_SERVICE_ROLE_KEY` and the
+   embedding key (`LLM_EMBED_API_KEY` or `LLM_API_KEY`) are set. Redeploy.
+2. Open `https://<your-domain>/en/admin/reindex`, paste the secret, click
+   **开始重建 / Start**. It processes one doc per request (so it never times
+   out) and shows progress.
+3. When it finishes, ask a question on `/ai-tax` to confirm retrieval works.
+
+The page is protected by `ADMIN_REINDEX_SECRET`; without it the API returns 401.
+
 ## Step 4 — Test locally
 
 ```powershell
