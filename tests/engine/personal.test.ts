@@ -40,6 +40,15 @@ describe("Relief data integrity", () => {
       expect(relief.maxAmount).toBeGreaterThan(0);
     }
   });
+
+  it("uses YA2025 disability relief amounts (Budget 2025)", () => {
+    const byId = Object.fromEntries(
+      TAX_RELIEFS_YA2025.map((r) => [r.id, r.maxAmount])
+    );
+    expect(byId["disabled_individual"]).toBe(7000);
+    expect(byId["disabled_spouse"]).toBe(6000);
+    expect(byId["disabled_child"]).toBe(8000);
+  });
 });
 
 function makeInput(overrides: Partial<TaxCalculationInput> = {}): TaxCalculationInput {

@@ -1,13 +1,16 @@
 import { ReliefDefinition } from "./types";
 
+// Disability reliefs increased by Budget 2025, effective YA2025
+// (LHDN / Crowe / EY): disabled_individual 7000, disabled_spouse 6000,
+// disabled_child 8000.
 export const TAX_RELIEFS_YA2025: ReliefDefinition[] = [
   { id: "individual", maxAmount: 9000, category: "personal" },
-  { id: "disabled_individual", maxAmount: 6000, category: "personal" },
+  { id: "disabled_individual", maxAmount: 7000, category: "personal" },
   { id: "spouse", maxAmount: 4000, category: "family" },
-  { id: "disabled_spouse", maxAmount: 5000, category: "family" },
+  { id: "disabled_spouse", maxAmount: 6000, category: "family" },
   { id: "child_under_18", maxAmount: 2000, category: "family" },
   { id: "child_18_plus_studying", maxAmount: 8000, category: "family" },
-  { id: "disabled_child", maxAmount: 6000, category: "family" },
+  { id: "disabled_child", maxAmount: 8000, category: "family" },
   { id: "disabled_child_studying", maxAmount: 14000, category: "family" },
   { id: "medical_serious_disease", maxAmount: 10000, category: "medical" },
   { id: "medical_fertility", maxAmount: 10000, category: "medical" },
@@ -22,6 +25,8 @@ export const TAX_RELIEFS_YA2025: ReliefDefinition[] = [
   { id: "ev_charging", maxAmount: 2500, category: "lifestyle" },
   { id: "epf_employee", maxAmount: 4000, category: "contribution" },
   { id: "life_insurance", maxAmount: 3000, category: "contribution" },
+  // TODO: verify against official LHDN YA2025 relief PDF — some sources cite
+  // RM4,000 for YA2025 but this is unconfirmed; keep 3000 until verified.
   { id: "education_medical_insurance", maxAmount: 3000, category: "contribution" },
   { id: "socso_eis", maxAmount: 350, category: "contribution" },
   { id: "prs_annuity", maxAmount: 3000, category: "contribution" },
