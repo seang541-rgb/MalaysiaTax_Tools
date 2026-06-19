@@ -159,6 +159,7 @@
     "rebate": "Rebat Cukai",
     "zakat": "Potongan Zakat",
     "taxPayable": "Cukai Bersih Kena Dibayar",
+    "dividendTax": "Cukai Dividen (2% melebihi RM100,000)",
     "pcbPaid": "Jumlah PCB Dibayar (12 bulan)",
     "balance": "Baki",
     "overpaid": "Bayaran Balik",

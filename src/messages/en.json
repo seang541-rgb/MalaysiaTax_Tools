@@ -159,6 +159,7 @@
     "rebate": "Tax Rebate",
     "zakat": "Zakat Deduction",
     "taxPayable": "Net Tax Payable",
+    "dividendTax": "Dividend Tax (2% above RM100,000)",
     "pcbPaid": "Total PCB Paid (12 months)",
     "balance": "Balance",
     "overpaid": "Refund Due",

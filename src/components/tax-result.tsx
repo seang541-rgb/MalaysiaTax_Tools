@@ -106,6 +106,9 @@ export function TaxResult({ result, input }: TaxResultProps) {
           )}
           <Separator />
           <Row label={t("taxPayable")} value={formatRM(result.taxAfterRebateAndZakat)} bold />
+          {result.dividendTax > 0 && (
+            <Row label={t("dividendTax")} value={formatRM(result.dividendTax)} />
+          )}
         </div>
 
         {result.totalPcbPaid > 0 && (

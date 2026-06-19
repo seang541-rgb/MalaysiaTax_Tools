@@ -159,6 +159,7 @@
     "rebate": "税务回扣",
     "zakat": "天课扣除",
     "taxPayable": "应缴净税额",
+    "dividendTax": "股息税(超过 RM100,000 部分 2%)",
     "pcbPaid": "已缴 PCB 总额（12个月）",
     "balance": "结余",
     "overpaid": "可退税金额",
