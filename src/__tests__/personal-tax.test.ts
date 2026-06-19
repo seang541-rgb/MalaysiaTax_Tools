@@ -206,5 +206,17 @@ describe("Personal Tax Engine", () => {
       expect(result.dividendTax).toBe(1000);
       expect(result.balanceTaxPayable).toBe(1080);
     });
+
+    it("charges 2% only on the cent above RM100,000", () => {
+      const result = calculatePersonalTax(makeInput({ income: div(100001) }));
+      expect(result.dividendTax).toBe(0.02); // 2% of 1
+    });
+
+    it("still applies the dividend tax for years after 2025", () => {
+      const result = calculatePersonalTax(
+        makeInput({ yearOfAssessment: 2026, income: div(150000) })
+      );
+      expect(result.dividendTax).toBe(1000);
+    });
   });
 });
