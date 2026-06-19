@@ -9,7 +9,10 @@ import { getReliefDefinitions } from "./tax-reliefs";
 
 function sumIncome(input: TaxCalculationInput): number {
   const i = input.income;
-  return i.employment + i.commission + i.rental + i.interest + i.dividend + i.other;
+  // Malaysian single-tier dividends are exempt from progressive income tax,
+  // so they are excluded here. A separate 2% dividend tax (YA2025+) is applied
+  // in calculatePersonalTax via calculateDividendTax().
+  return i.employment + i.commission + i.rental + i.interest + i.other;
 }
 
 function calculateReliefs(

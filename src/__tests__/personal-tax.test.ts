@@ -131,11 +131,12 @@ describe("Personal Tax Engine", () => {
   });
 
   describe("multiple income sources", () => {
-    it("should sum all income sources", () => {
+    it("sums progressive income sources but excludes single-tier dividends", () => {
       const result = calculatePersonalTax(makeInput({
         income: { employment: 50000, commission: 10000, rental: 12000, interest: 3000, dividend: 5000, other: 0 },
       }));
-      expect(result.grossIncome).toBe(80000);
+      // 50000 + 10000 + 12000 + 3000 = 75000; the 5000 dividend is single-tier exempt
+      expect(result.grossIncome).toBe(75000);
     });
   });
 
