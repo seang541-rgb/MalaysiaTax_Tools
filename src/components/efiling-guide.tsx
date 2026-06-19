@@ -80,6 +80,12 @@ export function EfilingGuide({ result, input }: EfilingGuideProps) {
       show: true,
     },
     {
+      figure: t("rowDividendTax"),
+      amount: result.dividendTax,
+      field: t("fieldDividendTax"),
+      show: result.dividendTax > 0,
+    },
+    {
       figure: t("rowPcb"),
       amount: result.totalPcbPaid,
       field: t("fieldPcb"),
@@ -146,6 +152,9 @@ export function EfilingGuide({ result, input }: EfilingGuideProps) {
             </table>
           </div>
 
+          {input.income.dividend > 0 && (
+            <p className="text-xs text-muted-foreground">{t("dividendNote")}</p>
+          )}
           <p className="text-xs text-muted-foreground">{t("reliefNote")}</p>
           <p className="text-xs text-muted-foreground">{t("disclaimer")}</p>
         </div>
