@@ -86,35 +86,6 @@ export async function embed(
 }
 
 /**
- * Non-streaming chat completion. Returns the full assistant message text.
- * Used by server-side jobs (e.g. the admin AI self-test) that want the whole
- * answer at once rather than an SSE stream.
- */
-export async function chatComplete(messages: ChatMessage[]): Promise<string> {
-  const body: Record<string, unknown> = {
-    model: CHAT_MODEL,
-    messages,
-    stream: false,
-    temperature: 0.3,
-    top_p: 0.9,
-    max_tokens: 2048,
-  };
-  if (/deepseek/i.test(CHAT_BASE)) {
-    body.thinking = { type: "disabled" };
-  }
-  const res = await fetch(`${CHAT_BASE}/chat/completions`, {
-    method: "POST",
-    headers: headers(CHAT_KEY),
-    body: JSON.stringify(body),
-  });
-  if (!res.ok) {
-    throw new Error(`Chat failed: ${res.status} ${await res.text()}`);
-  }
-  const data = await res.json();
-  return (data.choices?.[0]?.message?.content as string) ?? "";
-}
-
-/**
  * Start a streaming chat completion. Returns the raw fetch Response whose
  * body is an OpenAI-style SSE stream (`data: {choices:[{delta:{content}}]}`).
  */
