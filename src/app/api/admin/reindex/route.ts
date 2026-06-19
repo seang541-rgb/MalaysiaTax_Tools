@@ -7,15 +7,15 @@
  * driven one file at a time by /[locale]/admin/reindex to stay under the
  * serverless time limit.
  *
- * Auth: requires the ADMIN_REINDEX_SECRET env var, supplied as the
- * `x-admin-key` header (POST) or `?key=` query param (GET). Writes use the
+ * Auth: signed-in admin only (email in ADMIN_EMAIL). Writes use the
  * service-role key (bypasses RLS).
  */
-import { NextRequest } from "next/server";
 import { promises as fs } from "fs";
 import path from "path";
 import { embed } from "@/lib/llm";
+import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { createSupabaseAdminClient } from "@/lib/supabase/admin";
+import { isAdminEmail } from "@/lib/admin";
 import { chunkText, extractTitle } from "@/lib/rag/chunk";
 
 export const runtime = "nodejs";
@@ -29,29 +29,17 @@ async function listFiles(): Promise<string[]> {
   return entries.filter((f) => f.endsWith(".md")).sort();
 }
 
-/** Constant-time-ish comparison so the secret isn't leaked by timing. */
-function secretMatches(provided: string, expected: string): boolean {
-  if (provided.length !== expected.length) return false;
-  let diff = 0;
-  for (let i = 0; i < expected.length; i++) {
-    diff |= provided.charCodeAt(i) ^ expected.charCodeAt(i);
-  }
-  return diff === 0;
+async function isAdmin(): Promise<boolean> {
+  const supabase = await createSupabaseServerClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  return isAdminEmail(user?.email);
 }
 
-function authorized(req: NextRequest): boolean {
-  const expected = process.env.ADMIN_REINDEX_SECRET;
-  if (!expected) return false;
-  const provided =
-    req.headers.get("x-admin-key") ||
-    new URL(req.url).searchParams.get("key") ||
-    "";
-  return secretMatches(provided, expected);
-}
-
-export async function GET(req: NextRequest) {
-  if (!authorized(req)) {
-    return Response.json({ error: "unauthorized" }, { status: 401 });
+export async function GET() {
+  if (!(await isAdmin())) {
+    return Response.json({ error: "unauthorized" }, { status: 403 });
   }
   try {
     const files = await listFiles();
@@ -64,9 +52,9 @@ export async function GET(req: NextRequest) {
   }
 }
 
-export async function POST(req: NextRequest) {
-  if (!authorized(req)) {
-    return Response.json({ error: "unauthorized" }, { status: 401 });
+export async function POST(req: Request) {
+  if (!(await isAdmin())) {
+    return Response.json({ error: "unauthorized" }, { status: 403 });
   }
 
   let index = 0;
