@@ -1,6 +1,4 @@
 import { calculatePersonalTax } from "./personal";
-import { calculateCorporateTax } from "./corporate";
-import { calculateSst } from "./sst";
 import { calculateEmployerContributions } from "./employer-contributions";
 
 export interface ChatMessage {

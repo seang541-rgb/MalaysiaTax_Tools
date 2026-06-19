@@ -1,23 +1,28 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState, useSyncExternalStore } from "react";
 import { useTranslations, useLocale } from "next-intl";
 import { Clock, ChevronDown, FileText } from "lucide-react";
 import { Link } from "@/i18n/navigation";
-import { nextOccurrences, DeadlineOccurrence } from "@/lib/tax-deadlines";
+import { nextOccurrences } from "@/lib/tax-deadlines";
+
+// Render nothing until hydrated, then compute on the client so "days remaining"
+// reflects the user's local date without causing a hydration mismatch.
+const subscribe = () => () => {};
 
 export function DeadlineCountdown() {
   const t = useTranslations("deadlines");
   const locale = useLocale();
-  const [items, setItems] = useState<DeadlineOccurrence[] | null>(null);
   const [open, setOpen] = useState(false);
+  const hydrated = useSyncExternalStore(
+    subscribe,
+    () => true,
+    () => false
+  );
 
-  // Compute on the client so "days remaining" matches the user's local date.
-  useEffect(() => {
-    setItems(nextOccurrences());
-  }, []);
+  if (!hydrated) return null;
 
-  if (!items) return null;
+  const items = nextOccurrences();
 
   const fmtDate = (d: Date) =>
     d.toLocaleDateString(
