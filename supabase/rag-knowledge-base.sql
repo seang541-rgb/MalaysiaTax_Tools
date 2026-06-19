@@ -8,11 +8,17 @@
 --     extension, the HNSW index and match_tax_chunks() already at 1024 dims,
 --     so supabase/migrate-embeddings-1024.sql is NOT needed.
 --   * Existing 768-dim deployment → keep using migrate-embeddings-1024.sql,
---     which truncates and resizes the column in place.
+--     which truncates and resizes the column in place (it now applies the same
+--     RLS lockdown as this file).
 --
--- These tables hold PUBLIC tax knowledge (no per-user data), are populated with
--- the Supabase anon key by the embed script and read with the anon key by the
--- chat route via match_tax_chunks(), so RLS is intentionally left disabled.
+-- Security model:
+--   These tables hold PUBLIC tax knowledge (no per-user data), but a poisoned
+--   knowledge base would make the AI quote wrong/malicious tax advice, so WRITES
+--   must be protected. RLS is ENABLED with no anon/authenticated policies, and
+--   write grants are revoked from those roles. Reads happen only through
+--   match_tax_chunks(), which is SECURITY DEFINER so the public anon-key chat
+--   route can search without any direct table access. The embed pipeline must
+--   use the SUPABASE_SERVICE_ROLE_KEY (service_role bypasses RLS).
 
 create extension if not exists vector;
 create extension if not exists pgcrypto;
@@ -45,7 +51,21 @@ create index if not exists tax_chunks_document_id_idx
 create index if not exists tax_chunks_embedding_idx
   on public.tax_chunks using hnsw (embedding vector_cosine_ops);
 
--- Cosine-similarity retrieval used by /api/chat (RAG).
+-- ── Lock down writes ──────────────────────────────────────────────
+-- Enable RLS with no anon/authenticated policy → all direct row access from
+-- the public anon key is denied. service_role bypasses RLS for the embed job.
+alter table public.tax_documents enable row level security;
+alter table public.tax_chunks enable row level security;
+
+-- Defense in depth: strip write grants so anon/authenticated cannot insert,
+-- update or delete even if a permissive policy is added later by mistake.
+revoke insert, update, delete on public.tax_documents from anon, authenticated;
+revoke insert, update, delete on public.tax_chunks from anon, authenticated;
+
+-- ── Retrieval (RAG) ───────────────────────────────────────────────
+-- SECURITY DEFINER so the anon-key chat route can search via this function
+-- without being granted direct read access to the tables. search_path is
+-- pinned per Supabase guidance for definer functions.
 create or replace function public.match_tax_chunks(
   query_embedding vector(1024),
   match_threshold float,
@@ -57,6 +77,8 @@ returns table (
   similarity float
 )
 language sql stable
+security definer
+set search_path = public
 as $$
   select
     tax_chunks.id,
@@ -67,3 +89,6 @@ as $$
   order by tax_chunks.embedding <=> query_embedding
   limit match_count;
 $$;
+
+grant execute on function public.match_tax_chunks(vector(1024), float, int)
+  to anon, authenticated, service_role;

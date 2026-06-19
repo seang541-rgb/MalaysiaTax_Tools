@@ -27,6 +27,8 @@ returns table (
   similarity float
 )
 language sql stable
+security definer
+set search_path = public
 as $$
   select
     tax_chunks.id,
@@ -38,7 +40,18 @@ as $$
   limit match_count;
 $$;
 
+grant execute on function match_tax_chunks(vector(1024), float, int)
+  to anon, authenticated, service_role;
+
 -- 4. Recreate the ANN index for the new dimension (cosine distance).
 drop index if exists tax_chunks_embedding_idx;
 create index tax_chunks_embedding_idx
   on tax_chunks using hnsw (embedding vector_cosine_ops);
+
+-- 5. Lock down writes (see supabase/rag-knowledge-base.sql for rationale).
+--    Public reads go through match_tax_chunks(); the embed job must use the
+--    service-role key. Safe to re-run.
+alter table tax_documents enable row level security;
+alter table tax_chunks enable row level security;
+revoke insert, update, delete on tax_documents from anon, authenticated;
+revoke insert, update, delete on tax_chunks from anon, authenticated;

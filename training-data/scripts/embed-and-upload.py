@@ -31,7 +31,9 @@ LLM_API_KEY = os.environ.get("LLM_EMBED_API_KEY") or os.environ.get("LLM_API_KEY
 EMBED_MODEL = os.environ.get("LLM_EMBED_MODEL", "baai/bge-m3")
 EMBED_DIMENSIONS = int(os.environ.get("LLM_EMBED_DIMENSIONS", "0"))
 SUPABASE_URL = os.environ.get("NEXT_PUBLIC_SUPABASE_URL", "")
-SUPABASE_KEY = os.environ.get("NEXT_PUBLIC_SUPABASE_ANON_KEY", "")
+# Writes go to RLS-protected tables, so the embed job needs the service-role
+# key (service_role bypasses RLS). The public anon key cannot insert.
+SUPABASE_KEY = os.environ.get("SUPABASE_SERVICE_ROLE_KEY", "")
 CHUNK_SIZE = 500      # target chars per chunk
 CHUNK_OVERLAP = 50    # overlap between chunks
 
@@ -49,7 +51,7 @@ def load_env():
                     val = val.strip()
                     if key == "NEXT_PUBLIC_SUPABASE_URL" and not SUPABASE_URL:
                         SUPABASE_URL = val
-                    elif key == "NEXT_PUBLIC_SUPABASE_ANON_KEY" and not SUPABASE_KEY:
+                    elif key == "SUPABASE_SERVICE_ROLE_KEY" and not SUPABASE_KEY:
                         SUPABASE_KEY = val
                     elif key in ("LLM_EMBED_BASE_URL", "LLM_BASE_URL") and val:
                         LLM_BASE_URL = val
@@ -63,7 +65,8 @@ def load_env():
 load_env()
 
 if not SUPABASE_URL or not SUPABASE_KEY:
-    print("ERROR: SUPABASE_URL or SUPABASE_KEY not set. Check .env.local")
+    print("ERROR: NEXT_PUBLIC_SUPABASE_URL or SUPABASE_SERVICE_ROLE_KEY not set. "
+          "Check .env.local (the embed job needs the service-role key, not the anon key).")
     sys.exit(1)
 
 

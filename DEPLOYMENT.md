@@ -69,8 +69,10 @@ $env:PYTHONIOENCODING = "utf-8"
 python training-data/scripts/embed-and-upload.py
 ```
 
-The script reads `LLM_*` from `.env.local`, smoke-tests the embedding endpoint
-(should print "returned 1024 dims"), and re-embeds all docs. If the returned
+The script reads `LLM_*` and `SUPABASE_SERVICE_ROLE_KEY` from `.env.local`,
+smoke-tests the embedding endpoint (should print "returned 1024 dims"), and
+re-embeds all docs. The **service-role key is required** — the RAG tables have
+RLS enabled, so the public anon key cannot write to them. If the returned
 dimension differs, set the Supabase column and migration to match.
 
 ## Step 4 — Test locally
