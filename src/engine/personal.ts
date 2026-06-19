@@ -50,6 +50,15 @@ function calculateTaxByBands(
   return results;
 }
 
+function calculateDividendTax(input: TaxCalculationInput): number {
+  // YA2025+: 2% on Malaysian taxable dividend income exceeding RM100,000.
+  // Simplification: treats input.income.dividend as taxable MY dividends and
+  // does not distinguish exempt sources (foreign, pioneer status, shipping).
+  if (input.yearOfAssessment < 2025) return 0;
+  const excess = Math.max(0, input.income.dividend - 100000);
+  return Math.round(excess * 0.02 * 100) / 100;
+}
+
 export function calculatePersonalTax(
   input: TaxCalculationInput
 ): TaxCalculationResult {
@@ -78,8 +87,11 @@ export function calculatePersonalTax(
   const zakatDeduction = Math.min(input.zakatAmount, afterRebate);
   const taxAfterRebateAndZakat = Math.max(0, afterRebate - zakatDeduction);
 
+  // Dividend tax is a separate charge — not reducible by rebate or zakat.
+  const dividendTax = calculateDividendTax(input);
+
   const totalPcbPaid = input.monthlyPcbPaid * 12;
-  const balanceTaxPayable = taxAfterRebateAndZakat - totalPcbPaid;
+  const balanceTaxPayable = taxAfterRebateAndZakat + dividendTax - totalPcbPaid;
 
   return {
     grossIncome,
@@ -90,6 +102,7 @@ export function calculatePersonalTax(
     rebateAmount,
     zakatDeduction,
     taxAfterRebateAndZakat,
+    dividendTax,
     totalPcbPaid,
     balanceTaxPayable,
   };

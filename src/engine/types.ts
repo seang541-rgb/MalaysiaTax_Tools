@@ -49,6 +49,7 @@ export interface TaxCalculationResult {
   rebateAmount: number;
   zakatDeduction: number;
   taxAfterRebateAndZakat: number;
+  dividendTax: number;
   totalPcbPaid: number;
   balanceTaxPayable: number;
 }

@@ -173,4 +173,38 @@ describe("Personal Tax Engine", () => {
       expect(result.taxBeforeRebate).toBe(5600);
     });
   });
+
+  describe("dividend tax (YA2025+)", () => {
+    const div = (dividend: number) => ({
+      employment: 0, commission: 0, rental: 0, interest: 0, dividend, other: 0,
+    });
+
+    it("charges no dividend tax at or below RM100,000", () => {
+      const result = calculatePersonalTax(makeInput({ income: div(100000) }));
+      expect(result.dividendTax).toBe(0);
+    });
+
+    it("charges 2% on dividend income above RM100,000", () => {
+      const result = calculatePersonalTax(makeInput({ income: div(150000) }));
+      expect(result.dividendTax).toBe(1000); // 2% of 50000
+    });
+
+    it("does not charge dividend tax before YA2025", () => {
+      const result = calculatePersonalTax(
+        makeInput({ yearOfAssessment: 2024, income: div(150000) })
+      );
+      expect(result.dividendTax).toBe(0);
+    });
+
+    it("rebate does not offset dividend tax", () => {
+      const result = calculatePersonalTax(makeInput({
+        income: { employment: 40000, commission: 0, rental: 0, interest: 0, dividend: 150000, other: 0 },
+        reliefs: PERSONAL_RELIEF,
+      }));
+      // chargeable 31000 -> income tax 480 -> rebate 400 -> 80; dividend tax 1000 separate
+      expect(result.taxAfterRebateAndZakat).toBe(80);
+      expect(result.dividendTax).toBe(1000);
+      expect(result.balanceTaxPayable).toBe(1080);
+    });
+  });
 });
