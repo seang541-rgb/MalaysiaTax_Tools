@@ -89,7 +89,7 @@ function maintenanceResponse() {
   );
 }
 
-export default async function middleware(request: NextRequest) {
+export default async function proxy(request: NextRequest) {
   if (isMaintenanceEnabled(request)) {
     return maintenanceResponse();
   }

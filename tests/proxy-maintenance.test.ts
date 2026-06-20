@@ -43,13 +43,13 @@ describe("production maintenance mode", () => {
     ).toBe(false);
   });
 
-  it("keeps auth routes out of locale middleware redirects", () => {
-    const middlewareSource = readFileSync(
-      join(process.cwd(), "src", "middleware.ts"),
+  it("keeps auth routes out of locale proxy redirects", () => {
+    const proxySource = readFileSync(
+      join(process.cwd(), "src", "proxy.ts"),
       "utf8"
     );
 
-    expect(middlewareSource).toContain("api|auth|_next|_vercel");
+    expect(proxySource).toContain("api|auth|_next|_vercel");
   });
 
   it("keeps local development available", () => {
