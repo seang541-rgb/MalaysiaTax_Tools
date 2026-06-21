@@ -675,6 +675,13 @@
     "disclaimer": "Based on LHDN guidelines as updated June 2026. Requirements may change — verify with LHDN (hasil.gov.my) or your tax agent before making compliance decisions."
   },
   "corptools": {
+    "hubIntro": "Choose a corporate tax tool. Each opens as its own calculator.",
+    "descTaxcomp": "Turn accounting profit into chargeable income and company tax.",
+    "descSoleprop": "Estimate income tax for a sole proprietor or partnership.",
+    "descCp204": "Plan your CP204 estimate and monthly tax instalments.",
+    "descCapalw": "Calculate capital allowances on plant, machinery and equipment.",
+    "descWht": "Withholding tax on payments to non-residents.",
+    "descIncentives": "Find tax incentives like Pioneer Status and ITA.",
     "title": "Corporate Tax Tools",
     "subtitle": "Tax computation, CP204, capital allowances, withholding tax and incentives — for Malaysian companies",
     "tabTaxcomp": "Tax Computation",
@@ -895,5 +902,131 @@
         "a": "Yes. The election is made each year of assessment, so you can choose whichever method is more favourable for that year."
       }
     ]
+  },
+  "taxComputation": {
+    "page": {
+      "metaTitle": "Company Tax Computation Calculator Malaysia (YA2025)",
+      "metaDescription": "Compute Malaysian company income tax: add back non-deductible expenses, claim capital allowances, and apply SME and standard rates to find chargeable income and tax payable.",
+      "h1": "Company Tax Computation Calculator",
+      "intro": "Turn your company's accounting profit into chargeable income and tax payable. Add back non-deductible expenses, deduct capital allowances, and apply the right rate — 15% / 17% / 24% for qualifying SMEs or a flat 24% otherwise. This is an estimate; confirm with a tax agent or LHDN."
+    },
+    "faq": {
+      "title": "Company tax computation — FAQ",
+      "items": [
+        {
+          "q": "How is company income tax computed in Malaysia?",
+          "a": "Start from accounting profit, add back non-deductible expenses (e.g. depreciation, provisions), deduct capital allowances and approved incentives to get chargeable income, then apply the corporate tax rate."
+        },
+        {
+          "q": "What is the SME company tax rate for YA2025?",
+          "a": "A resident SME with paid-up capital up to RM2.5 million and annual sales up to RM50 million is taxed at 15% on the first RM150,000 of chargeable income, 17% on the next RM450,000, and 24% on the balance. Other companies pay a flat 24%."
+        }
+      ]
+    }
+  },
+  "soleProprietor": {
+    "page": {
+      "metaTitle": "Sole Proprietor Tax Calculator Malaysia (YA2025)",
+      "metaDescription": "Estimate income tax for a Malaysian sole proprietor or partnership. Business profit is taxed at individual resident rates after reliefs — with Form B filing deadlines.",
+      "h1": "Sole Proprietor Tax Calculator",
+      "intro": "Sole proprietors and partners are taxed as individuals on their business profit, at resident progressive rates after personal reliefs. Enter your net business income to estimate the tax payable and compare it with incorporating. Estimate only; confirm with LHDN."
+    },
+    "faq": {
+      "title": "Sole proprietor tax — FAQ",
+      "items": [
+        {
+          "q": "How is a sole proprietor taxed in Malaysia?",
+          "a": "Business profit is added to your other personal income and taxed at the resident individual rates (0%–30%) after deducting tax reliefs. There is no separate company tax."
+        },
+        {
+          "q": "When does a sole proprietor file taxes?",
+          "a": "Sole proprietors file Form B. The deadline is 30 June (paper) or 15 July (e-Filing) of the year after the year of assessment."
+        }
+      ]
+    }
+  },
+  "cp204Tool": {
+    "page": {
+      "metaTitle": "CP204 Tax Estimate Calculator Malaysia",
+      "metaDescription": "Work out your company's CP204 estimate of tax payable and the monthly instalments, including the 85% minimum rule and CP204A revision points.",
+      "h1": "CP204 Estimate Calculator",
+      "intro": "CP204 is a company's estimate of tax payable for the coming year, paid in monthly instalments. The estimate generally cannot be less than 85% of the previous year's estimate. Enter your figures to plan the instalments and revision in the 6th and 9th month. Estimate only."
+    },
+    "faq": {
+      "title": "CP204 — FAQ",
+      "items": [
+        {
+          "q": "What is CP204?",
+          "a": "CP204 is the estimate of tax payable that a company must submit to LHDN, generally 30 days before the start of its basis period, and pay in equal monthly instalments."
+        },
+        {
+          "q": "Can the CP204 estimate be revised?",
+          "a": "Yes. A company can revise its estimate using CP204A in the 6th and 9th month of the basis period. New SMEs may be exempt from submitting CP204 for the first two years."
+        }
+      ]
+    }
+  },
+  "capitalAllowance": {
+    "page": {
+      "metaTitle": "Capital Allowance Calculator Malaysia (YA2025)",
+      "metaDescription": "Calculate Malaysian capital allowances on plant, machinery, and equipment — initial allowance plus annual allowance — claimed in place of accounting depreciation.",
+      "h1": "Capital Allowance Calculator",
+      "intro": "Capital allowances replace accounting depreciation for tax purposes. They combine an initial allowance in the year of purchase with an annual allowance over the asset's life, at rates set by asset type. Enter your qualifying expenditure to estimate the yearly claim. Estimate only."
+    },
+    "faq": {
+      "title": "Capital allowance — FAQ",
+      "items": [
+        {
+          "q": "What is a capital allowance?",
+          "a": "A capital allowance is a tax deduction for qualifying capital expenditure on assets like plant, machinery, and equipment, claimed in place of non-deductible accounting depreciation."
+        },
+        {
+          "q": "How are capital allowance rates set?",
+          "a": "Each asset class has an initial allowance (usually 20%) plus an annual allowance that varies by type — for example 14% for plant and machinery, 20% for motor vehicles and heavy machinery, and 10% for office equipment and furniture."
+        }
+      ]
+    }
+  },
+  "withholdingTax": {
+    "page": {
+      "metaTitle": "Withholding Tax Calculator Malaysia",
+      "metaDescription": "Calculate Malaysian withholding tax on payments to non-residents — royalties, interest, technical fees, and contract payments — with the correct statutory rates.",
+      "h1": "Withholding Tax Calculator",
+      "intro": "When a Malaysian payer makes certain payments to a non-resident, tax must be withheld and remitted to LHDN within one month. Rates depend on the type of income — royalties, interest, technical or special-class income, and contract payments. Enter the payment to estimate the tax. Estimate only."
+    },
+    "faq": {
+      "title": "Withholding tax — FAQ",
+      "items": [
+        {
+          "q": "What are the Malaysian withholding tax rates?",
+          "a": "Common rates are 10% on royalties, 15% on interest, 10% on technical fees and special classes of income under Section 4A, and 10% + 3% on non-resident contract payments. Tax treaties may reduce these."
+        },
+        {
+          "q": "When must withholding tax be paid?",
+          "a": "The payer must remit the withheld tax to LHDN within one month of paying or crediting the non-resident. Late payment attracts a 10% penalty and may disallow the expense."
+        }
+      ]
+    }
+  },
+  "taxIncentives": {
+    "page": {
+      "metaTitle": "Malaysia Tax Incentives Finder (Pioneer Status, ITA, RA)",
+      "metaDescription": "Explore Malaysian tax incentives — Pioneer Status, Investment Tax Allowance, and Reinvestment Allowance — and check which may fit your company's activity.",
+      "h1": "Malaysia Tax Incentives Finder",
+      "intro": "Malaysia offers tax incentives to encourage investment in promoted activities and products. The main ones are Pioneer Status (partial income tax exemption), Investment Tax Allowance on qualifying capital expenditure, and Reinvestment Allowance for expansion. Answer a few questions to see which may apply. Informational only; confirm eligibility with MIDA or a tax agent."
+    },
+    "faq": {
+      "title": "Tax incentives — FAQ",
+      "items": [
+        {
+          "q": "What are the main tax incentives in Malaysia?",
+          "a": "The headline incentives are Pioneer Status, which exempts part of statutory income for up to 5–10 years, and the Investment Tax Allowance, which gives an allowance on qualifying capital expenditure. Manufacturers may also claim Reinvestment Allowance."
+        },
+        {
+          "q": "Who approves tax incentives?",
+          "a": "Most manufacturing and services incentives are administered by MIDA (Malaysian Investment Development Authority), while others fall under specific agencies or the Ministry of Finance."
+        }
+      ]
+    }
   }
 }

@@ -340,6 +340,13 @@
     "disclaimer": "Berdasarkan garis panduan LHDN setakat Jun 2026. Keperluan mungkin berubah — sahkan dengan LHDN (hasil.gov.my) atau ejen cukai anda sebelum membuat keputusan pematuhan."
   },
   "corptools": {
+    "hubIntro": "Pilih alat cukai korporat. Setiap satu dibuka sebagai kalkulatornya sendiri.",
+    "descTaxcomp": "Tukar keuntungan perakaunan kepada pendapatan bercukai dan cukai syarikat.",
+    "descSoleprop": "Anggar cukai pendapatan untuk pemilik tunggal atau perkongsian.",
+    "descCp204": "Rancang anggaran CP204 dan ansuran cukai bulanan.",
+    "descCapalw": "Kira elaun modal atas loji, jentera dan peralatan.",
+    "descWht": "Cukai pegangan atas bayaran kepada bukan pemastautin.",
+    "descIncentives": "Cari insentif cukai seperti Taraf Perintis dan ITA.",
     "title": "Alat Cukai Korporat",
     "subtitle": "Pengiraan cukai, CP204, elaun modal, cukai pegangan dan insentif — untuk syarikat Malaysia",
     "tabTaxcomp": "Pengiraan Cukai",
@@ -895,5 +902,131 @@
         "a": "Ya. Pemilihan dibuat setiap tahun taksiran, jadi anda boleh memilih kaedah yang lebih menguntungkan untuk tahun itu."
       }
     ]
+  },
+  "taxComputation": {
+    "page": {
+      "metaTitle": "Kalkulator Pengiraan Cukai Syarikat Malaysia (YA2025)",
+      "metaDescription": "Kira cukai pendapatan syarikat Malaysia: tambah balik perbelanjaan tidak boleh ditolak, tuntut elaun modal, dan guna kadar SME serta standard untuk dapatkan pendapatan bercukai dan cukai kena bayar.",
+      "h1": "Kalkulator Pengiraan Cukai Syarikat",
+      "intro": "Tukar keuntungan perakaunan syarikat anda kepada pendapatan bercukai dan cukai kena bayar. Tambah balik perbelanjaan tidak boleh ditolak, tolak elaun modal, dan guna kadar yang betul — 15% / 17% / 24% untuk SME layak atau 24% rata sebaliknya. Ini anggaran; sahkan dengan ejen cukai atau LHDN."
+    },
+    "faq": {
+      "title": "Pengiraan cukai syarikat — Soalan Lazim",
+      "items": [
+        {
+          "q": "Bagaimana cukai pendapatan syarikat dikira di Malaysia?",
+          "a": "Bermula dari keuntungan perakaunan, tambah balik perbelanjaan tidak boleh ditolak (cth. susut nilai, peruntukan), tolak elaun modal dan insentif yang diluluskan untuk dapatkan pendapatan bercukai, kemudian guna kadar cukai syarikat."
+        },
+        {
+          "q": "Apakah kadar cukai syarikat SME untuk YA2025?",
+          "a": "SME pemastautin dengan modal berbayar sehingga RM2.5 juta dan jualan tahunan sehingga RM50 juta dikenakan 15% atas RM150,000 pertama pendapatan bercukai, 17% atas RM450,000 berikutnya, dan 24% atas baki. Syarikat lain bayar 24% rata."
+        }
+      ]
+    }
+  },
+  "soleProprietor": {
+    "page": {
+      "metaTitle": "Kalkulator Cukai Pemilik Tunggal Malaysia (YA2025)",
+      "metaDescription": "Anggar cukai pendapatan untuk pemilik tunggal atau perkongsian Malaysia. Keuntungan perniagaan dicukai pada kadar individu pemastautin selepas pelepasan — dengan tarikh akhir Borang B.",
+      "h1": "Kalkulator Cukai Pemilik Tunggal",
+      "intro": "Pemilik tunggal dan rakan kongsi dicukai sebagai individu atas keuntungan perniagaan, pada kadar progresif pemastautin selepas pelepasan peribadi. Masukkan pendapatan perniagaan bersih untuk anggar cukai kena bayar dan banding dengan memperbadankan. Anggaran sahaja; sahkan dengan LHDN."
+    },
+    "faq": {
+      "title": "Cukai pemilik tunggal — Soalan Lazim",
+      "items": [
+        {
+          "q": "Bagaimana pemilik tunggal dicukai di Malaysia?",
+          "a": "Keuntungan perniagaan ditambah kepada pendapatan peribadi lain anda dan dicukai pada kadar individu pemastautin (0%–30%) selepas pelepasan cukai. Tiada cukai syarikat berasingan."
+        },
+        {
+          "q": "Bila pemilik tunggal memfailkan cukai?",
+          "a": "Pemilik tunggal memfailkan Borang B. Tarikh akhir ialah 30 Jun (kertas) atau 15 Julai (e-Filing) tahun selepas tahun taksiran."
+        }
+      ]
+    }
+  },
+  "cp204Tool": {
+    "page": {
+      "metaTitle": "Kalkulator Anggaran Cukai CP204 Malaysia",
+      "metaDescription": "Kira anggaran cukai kena bayar CP204 syarikat dan ansuran bulanan, termasuk peraturan minimum 85% dan titik pindaan CP204A.",
+      "h1": "Kalkulator Anggaran CP204",
+      "intro": "CP204 ialah anggaran cukai kena bayar syarikat untuk tahun hadapan, dibayar secara ansuran bulanan. Anggaran umumnya tidak boleh kurang daripada 85% anggaran tahun sebelumnya. Masukkan angka anda untuk merancang ansuran dan pindaan pada bulan ke-6 dan ke-9. Anggaran sahaja."
+    },
+    "faq": {
+      "title": "CP204 — Soalan Lazim",
+      "items": [
+        {
+          "q": "Apakah CP204?",
+          "a": "CP204 ialah anggaran cukai kena bayar yang mesti dihantar syarikat kepada LHDN, umumnya 30 hari sebelum permulaan tempoh asas, dan dibayar secara ansuran bulanan sama rata."
+        },
+        {
+          "q": "Bolehkah anggaran CP204 dipinda?",
+          "a": "Ya. Syarikat boleh meminda anggaran menggunakan CP204A pada bulan ke-6 dan ke-9 tempoh asas. SME baharu mungkin dikecualikan daripada menghantar CP204 untuk dua tahun pertama."
+        }
+      ]
+    }
+  },
+  "capitalAllowance": {
+    "page": {
+      "metaTitle": "Kalkulator Elaun Modal Malaysia (YA2025)",
+      "metaDescription": "Kira elaun modal Malaysia atas loji, jentera, dan peralatan — elaun permulaan campur elaun tahunan — dituntut menggantikan susut nilai perakaunan.",
+      "h1": "Kalkulator Elaun Modal",
+      "intro": "Elaun modal menggantikan susut nilai perakaunan bagi tujuan cukai. Ia menggabungkan elaun permulaan pada tahun pembelian dengan elaun tahunan sepanjang hayat aset, pada kadar mengikut jenis aset. Masukkan perbelanjaan layak untuk anggar tuntutan tahunan. Anggaran sahaja."
+    },
+    "faq": {
+      "title": "Elaun modal — Soalan Lazim",
+      "items": [
+        {
+          "q": "Apakah elaun modal?",
+          "a": "Elaun modal ialah potongan cukai untuk perbelanjaan modal layak atas aset seperti loji, jentera, dan peralatan, dituntut menggantikan susut nilai perakaunan yang tidak boleh ditolak."
+        },
+        {
+          "q": "Bagaimana kadar elaun modal ditetapkan?",
+          "a": "Setiap kelas aset mempunyai elaun permulaan (biasanya 20%) campur elaun tahunan yang berbeza mengikut jenis — contohnya 14% untuk loji dan jentera, 20% untuk kenderaan motor dan jentera berat, dan 10% untuk peralatan pejabat dan perabot."
+        }
+      ]
+    }
+  },
+  "withholdingTax": {
+    "page": {
+      "metaTitle": "Kalkulator Cukai Pegangan Malaysia (Withholding Tax)",
+      "metaDescription": "Kira cukai pegangan Malaysia atas bayaran kepada bukan pemastautin — royalti, faedah, yuran teknikal, dan bayaran kontrak — dengan kadar berkanun yang betul.",
+      "h1": "Kalkulator Cukai Pegangan",
+      "intro": "Apabila pembayar Malaysia membuat bayaran tertentu kepada bukan pemastautin, cukai mesti dipegang dan diremitkan kepada LHDN dalam satu bulan. Kadar bergantung pada jenis pendapatan — royalti, faedah, pendapatan teknikal atau kelas khas, dan bayaran kontrak. Masukkan bayaran untuk anggar cukai. Anggaran sahaja."
+    },
+    "faq": {
+      "title": "Cukai pegangan — Soalan Lazim",
+      "items": [
+        {
+          "q": "Apakah kadar cukai pegangan Malaysia?",
+          "a": "Kadar biasa ialah 10% atas royalti, 15% atas faedah, 10% atas yuran teknikal dan kelas khas pendapatan di bawah Seksyen 4A, dan 10% + 3% atas bayaran kontrak bukan pemastautin. Perjanjian cukai mungkin mengurangkannya."
+        },
+        {
+          "q": "Bila cukai pegangan mesti dibayar?",
+          "a": "Pembayar mesti meremitkan cukai yang dipegang kepada LHDN dalam satu bulan selepas membayar atau mengkreditkan bukan pemastautin. Bayaran lewat dikenakan penalti 10% dan boleh menyebabkan perbelanjaan tidak dibenarkan."
+        }
+      ]
+    }
+  },
+  "taxIncentives": {
+    "page": {
+      "metaTitle": "Pencari Insentif Cukai Malaysia (Taraf Perintis, ITA, RA)",
+      "metaDescription": "Terokai insentif cukai Malaysia — Taraf Perintis, Elaun Cukai Pelaburan, dan Elaun Pelaburan Semula — dan semak yang mana mungkin sesuai untuk aktiviti syarikat anda.",
+      "h1": "Pencari Insentif Cukai Malaysia",
+      "intro": "Malaysia menawarkan insentif cukai untuk menggalakkan pelaburan dalam aktiviti dan produk yang digalakkan. Yang utama ialah Taraf Perintis (pengecualian cukai pendapatan sebahagian), Elaun Cukai Pelaburan atas perbelanjaan modal layak, dan Elaun Pelaburan Semula untuk pengembangan. Jawab beberapa soalan untuk lihat yang mana mungkin terpakai. Maklumat sahaja; sahkan kelayakan dengan MIDA atau ejen cukai."
+    },
+    "faq": {
+      "title": "Insentif cukai — Soalan Lazim",
+      "items": [
+        {
+          "q": "Apakah insentif cukai utama di Malaysia?",
+          "a": "Insentif utama ialah Taraf Perintis, yang mengecualikan sebahagian pendapatan berkanun sehingga 5–10 tahun, dan Elaun Cukai Pelaburan, yang memberi elaun atas perbelanjaan modal layak. Pengilang juga boleh menuntut Elaun Pelaburan Semula."
+        },
+        {
+          "q": "Siapa meluluskan insentif cukai?",
+          "a": "Kebanyakan insentif pembuatan dan perkhidmatan ditadbir oleh MIDA (Lembaga Pembangunan Pelaburan Malaysia), manakala yang lain di bawah agensi tertentu atau Kementerian Kewangan."
+        }
+      ]
+    }
   }
 }
