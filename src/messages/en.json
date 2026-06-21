@@ -858,5 +858,42 @@
     "s6Desc": "The site contains links to LHDN, KWSP, PERKESO, RMCD and other third-party resources for your convenience. We do not control these sites and are not responsible for their content or accuracy.",
     "s7Title": "7. Changes",
     "s7Desc": "We may update this Disclaimer at any time. Continued use after changes means you accept the updated version."
+  },
+  "jointAssessment": {
+    "metaTitle": "Joint vs Separate Assessment Calculator Malaysia (2025)",
+    "metaDescription": "Compare joint and separate tax assessment for married couples in Malaysia. Enter each spouse's income and reliefs to see which method pays less tax.",
+    "h1": "Joint vs Separate Assessment Calculator",
+    "intro": "Married couples in Malaysia can be assessed separately (each on their own income) or jointly (combined under one spouse, with an extra RM4,000 spouse relief). Enter each spouse's income and reliefs to see which method results in less tax. This is an estimate — confirm with LHDN.",
+    "spouse1": "Spouse 1",
+    "spouse2": "Spouse 2",
+    "annualIncome": "Annual income (RM)",
+    "employment": "Employment",
+    "other": "Other income",
+    "compare": "Compare",
+    "reset": "Reset",
+    "resultsTitle": "Comparison",
+    "separateLabel": "Separate assessment",
+    "jointLabel": "Joint assessment",
+    "totalTax": "Total tax",
+    "recommendedSeparate": "Separate assessment pays less tax",
+    "recommendedJoint": "Joint assessment pays less tax",
+    "saving": "You could save about RM{amount}",
+    "bothSame": "Both methods give the same tax",
+    "estimateNote": "Estimate only. Joint-assessment relief transfer follows item-specific LHDN rules; verify before filing.",
+    "faqTitle": "Joint vs separate assessment — FAQ",
+    "faq": [
+      {
+        "q": "What is the difference between joint and separate assessment?",
+        "a": "Under separate assessment each spouse is taxed individually on their own income and reliefs. Under joint assessment both incomes are combined and taxed in one spouse's name, and the assessed spouse claims an extra RM4,000 spouse relief."
+      },
+      {
+        "q": "Which assessment method is better?",
+        "a": "It depends. Separate assessment is usually better when both spouses earn enough to use their own tax brackets and reliefs. Joint assessment often wins when one spouse has little or no income, because the spouse relief and unused reliefs are not wasted."
+      },
+      {
+        "q": "Can we switch between joint and separate assessment each year?",
+        "a": "Yes. The election is made each year of assessment, so you can choose whichever method is more favourable for that year."
+      }
+    ]
   }
 }

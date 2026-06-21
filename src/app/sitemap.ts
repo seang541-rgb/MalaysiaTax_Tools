@@ -30,6 +30,7 @@ function pageSourceFile(path: string): string {
 
 const pages = [
   { path: "", priority: 1.0, changeFrequency: "monthly" as const },
+  { path: "/joint-vs-separate-assessment", priority: 0.9, changeFrequency: "monthly" as const },
   { path: "/corporate", priority: 0.9, changeFrequency: "monthly" as const },
   { path: "/batch-pcb", priority: 0.8, changeFrequency: "monthly" as const },
   { path: "/employer", priority: 0.8, changeFrequency: "monthly" as const },

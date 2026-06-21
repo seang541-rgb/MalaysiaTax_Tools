@@ -858,5 +858,42 @@
     "s6Desc": "Laman ini mengandungi pautan ke LHDN, KWSP, PERKESO, RMCD, dan sumber pihak ketiga lain untuk kemudahan anda. Kami tidak mengawal laman-laman ini dan tidak bertanggungjawab atas kandungan atau ketepatannya.",
     "s7Title": "7. Perubahan",
     "s7Desc": "Kami boleh mengemas kini Penafian ini pada bila-bila masa. Penggunaan berterusan selepas perubahan bermakna anda menerima versi yang dikemas kini."
+  },
+  "jointAssessment": {
+    "metaTitle": "Kalkulator Taksiran Bersama vs Berasingan Malaysia 2025",
+    "metaDescription": "Bandingkan taksiran cukai bersama dan berasingan untuk pasangan berkahwin di Malaysia. Masukkan pendapatan dan pelepasan setiap pasangan untuk lihat kaedah mana bayar cukai lebih rendah.",
+    "h1": "Kalkulator Taksiran Bersama vs Berasingan",
+    "intro": "Pasangan berkahwin di Malaysia boleh ditaksir secara berasingan (setiap seorang atas pendapatan sendiri) atau bersama (digabungkan di bawah satu pasangan, dengan pelepasan suami/isteri tambahan RM4,000). Masukkan pendapatan dan pelepasan setiap pasangan untuk lihat kaedah mana membayar cukai lebih rendah. Ini anggaran sahaja — sahkan dengan LHDN.",
+    "spouse1": "Pasangan 1",
+    "spouse2": "Pasangan 2",
+    "annualIncome": "Pendapatan tahunan (RM)",
+    "employment": "Penggajian",
+    "other": "Pendapatan lain",
+    "compare": "Banding",
+    "reset": "Set semula",
+    "resultsTitle": "Perbandingan",
+    "separateLabel": "Taksiran berasingan",
+    "jointLabel": "Taksiran bersama",
+    "totalTax": "Jumlah cukai",
+    "recommendedSeparate": "Taksiran berasingan bayar cukai lebih rendah",
+    "recommendedJoint": "Taksiran bersama bayar cukai lebih rendah",
+    "saving": "Anda boleh jimat kira-kira RM{amount}",
+    "bothSame": "Kedua-dua kaedah memberi cukai yang sama",
+    "estimateNote": "Anggaran sahaja. Pemindahan pelepasan taksiran bersama mengikut peraturan LHDN tertentu; sahkan sebelum memfailkan.",
+    "faqTitle": "Taksiran bersama vs berasingan — Soalan Lazim",
+    "faq": [
+      {
+        "q": "Apakah perbezaan antara taksiran bersama dan berasingan?",
+        "a": "Di bawah taksiran berasingan, setiap pasangan dicukai secara individu atas pendapatan dan pelepasan sendiri. Di bawah taksiran bersama, kedua-dua pendapatan digabungkan dan dicukai atas nama satu pasangan, dan pasangan yang ditaksir menuntut pelepasan suami/isteri tambahan RM4,000."
+      },
+      {
+        "q": "Kaedah taksiran mana lebih baik?",
+        "a": "Ia bergantung. Taksiran berasingan biasanya lebih baik apabila kedua-dua pasangan berpendapatan cukup untuk menggunakan kurungan cukai dan pelepasan masing-masing. Taksiran bersama sering menang apabila seorang pasangan mempunyai sedikit atau tiada pendapatan, kerana pelepasan suami/isteri dan pelepasan yang tidak digunakan tidak dibazirkan."
+      },
+      {
+        "q": "Bolehkah kami bertukar antara taksiran bersama dan berasingan setiap tahun?",
+        "a": "Ya. Pemilihan dibuat setiap tahun taksiran, jadi anda boleh memilih kaedah yang lebih menguntungkan untuk tahun itu."
+      }
+    ]
   }
 }
