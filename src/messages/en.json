@@ -401,12 +401,21 @@
     "sourceLabel": "Source"
   },
   "property": {
+    "hubIntro": "Choose a property tax tool. RPGT applies when you sell; stamp duty applies when you buy.",
+    "rpgtCardDesc": "Estimate Real Property Gains Tax when selling Malaysian property.",
+    "stampDutyCardDesc": "Estimate MOT and loan stamp duty when buying property.",
     "title": "Property Tax Tools",
     "subtitle": "RPGT when you sell, stamp duty when you buy — for Malaysian property",
     "tabRpgt": "RPGT (selling)",
     "tabStampDuty": "Stamp Duty (buying)"
   },
   "rpgt": {
+    "page": {
+      "metaTitle": "RPGT Calculator Malaysia (2025) — Real Property Gains Tax",
+      "metaDescription": "Calculate Malaysia Real Property Gains Tax (RPGT) when selling property. Holding-period rates, Schedule 4 exemption, for citizen/PR, company, and foreigner — YA2025.",
+      "h1": "Malaysia RPGT Calculator",
+      "intro": "Work out the Real Property Gains Tax (RPGT) due when you sell Malaysian property. RPGT depends on how long you held the property and your disposer type — Malaysian citizen/PR, company, or foreigner. Enter your disposal and acquisition figures to estimate the chargeable gain, the Schedule 4 exemption, and the tax payable. Figures are checked against LHDN sources."
+    },
     "inputTitle": "Real Property Gains Tax (RPGT)",
     "inputSubtitle": "Tax on the profit when you dispose of property. Enter the figures from your Sale & Purchase Agreements.",
     "disposalPrice": "Disposal (selling) price",
@@ -439,6 +448,12 @@
     "disclaimer": "Estimate only. Low/medium-cost homes below RM200,000 and certain transfers (e.g. between family members) may be exempt. Confirm with LHDN or a tax agent."
   },
   "stampduty": {
+    "page": {
+      "metaTitle": "Stamp Duty Calculator Malaysia (2025) — Property MOT & Loan",
+      "metaDescription": "Calculate Malaysian property stamp duty: tiered Memorandum of Transfer (MOT) duty plus 0.5% loan agreement duty, with the first-time buyer exemption up to RM500,000.",
+      "h1": "Malaysia Stamp Duty Calculator",
+      "intro": "Estimate the stamp duty payable when buying property in Malaysia. The transfer (MOT) duty is tiered from 1% to 4%, the loan agreement is a flat 0.5%, and first-time buyers of homes up to RM500,000 enjoy a full exemption until 31 December 2027. Figures are checked against LHDN sources."
+    },
     "inputTitle": "Property Stamp Duty",
     "inputSubtitle": "Duty on the transfer (MOT) and the loan agreement when you buy property.",
     "propertyPrice": "Property price / market value",

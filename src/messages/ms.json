@@ -535,12 +535,21 @@
     "sourceLabel": "Sumber"
   },
   "property": {
+    "hubIntro": "Pilih alat cukai hartanah. RPGT dikenakan apabila menjual; duti setem apabila membeli.",
+    "rpgtCardDesc": "Anggar Cukai Keuntungan Harta Tanah apabila menjual hartanah Malaysia.",
+    "stampDutyCardDesc": "Anggar duti setem pindah milik dan pinjaman semasa membeli hartanah.",
     "title": "Alat Cukai Hartanah",
     "subtitle": "RPGT semasa jual, duti setem semasa beli — untuk hartanah Malaysia",
     "tabRpgt": "RPGT (jual)",
     "tabStampDuty": "Duti Setem (beli)"
   },
   "rpgt": {
+    "page": {
+      "metaTitle": "Kalkulator RPGT Malaysia 2025 — Cukai Keuntungan Harta Tanah",
+      "metaDescription": "Kira Cukai Keuntungan Harta Tanah (RPGT) Malaysia apabila menjual hartanah. Kadar mengikut tempoh pegangan, pengecualian Jadual 4, untuk warganegara/PR, syarikat dan warga asing — YA2025.",
+      "h1": "Kalkulator RPGT Malaysia",
+      "intro": "Kira Cukai Keuntungan Harta Tanah (RPGT) yang perlu dibayar apabila menjual hartanah Malaysia. RPGT bergantung pada tempoh anda memegang hartanah dan jenis pelupus — warganegara/PR Malaysia, syarikat, atau warga asing. Masukkan harga pelupusan dan perolehan untuk menganggar keuntungan bercukai, pengecualian Jadual 4, dan cukai kena bayar. Angka disemak dengan sumber LHDN."
+    },
     "inputTitle": "Cukai Keuntungan Harta Tanah (RPGT)",
     "inputSubtitle": "Cukai atas keuntungan apabila melupuskan hartanah. Masukkan angka daripada Perjanjian Jual Beli (S&P).",
     "disposalPrice": "Harga pelupusan (jualan)",
@@ -573,6 +582,12 @@
     "disclaimer": "Anggaran sahaja. Rumah kos rendah/sederhana bawah RM200,000 dan pemindahan tertentu (cth. antara ahli keluarga) mungkin dikecualikan. Sahkan dengan LHDN atau ejen cukai."
   },
   "stampduty": {
+    "page": {
+      "metaTitle": "Kalkulator Duti Setem Malaysia 2025 — MOT & Pinjaman",
+      "metaDescription": "Kira duti setem hartanah Malaysia: duti pindah milik (MOT) berperingkat dan duti perjanjian pinjaman 0.5%, dengan pengecualian pembeli kali pertama sehingga RM500,000.",
+      "h1": "Kalkulator Duti Setem Malaysia",
+      "intro": "Anggarkan duti setem yang perlu dibayar semasa membeli hartanah di Malaysia. Duti pindah milik (MOT) berperingkat dari 1% hingga 4%, perjanjian pinjaman tetap 0.5%, dan pembeli kali pertama rumah sehingga RM500,000 menikmati pengecualian penuh sehingga 31 Disember 2027. Angka disemak dengan sumber LHDN."
+    },
     "inputTitle": "Duti Setem Hartanah",
     "inputSubtitle": "Duti atas pemindahan (MOT) dan perjanjian pinjaman semasa membeli hartanah.",
     "propertyPrice": "Harga hartanah / nilai pasaran",
