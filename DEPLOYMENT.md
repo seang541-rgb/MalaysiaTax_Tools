@@ -110,6 +110,21 @@ curl http://localhost:3000/api/chat        # {"status":"ok","configured":true}
 # Then open /en/ai-tax and ask a question.
 ```
 
+## Verification and audit
+
+Before deploying, run:
+
+```powershell
+npm run lint
+npm run test
+npm run build
+npm audit --audit-level=high
+```
+
+Current npm audit status: the high-severity threshold must pass. The remaining
+known moderate finding is Next's bundled PostCSS advisory; do not use
+`npm audit fix --force` if it proposes downgrading Next.
+
 ## Step 6 - Deploy to Vercel
 
 1. Push to GitHub (already connected: `seang541-rgb/MalaysiaTax_Tools`).
