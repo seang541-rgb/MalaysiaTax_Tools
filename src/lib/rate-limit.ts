@@ -20,13 +20,17 @@ interface RateLimitRow {
 }
 
 function isRateLimitRow(value: unknown): value is RateLimitRow {
+  if (typeof value !== "object" || value === null) {
+    return false;
+  }
+
+  const row = value as Record<string, unknown>;
+
   return (
-    typeof value === "object" &&
-    value !== null &&
-    typeof value.allowed === "boolean" &&
-    typeof value.remaining === "number" &&
-    Number.isFinite(value.remaining) &&
-    (typeof value.reset_at === "string" || value.reset_at === null)
+    typeof row.allowed === "boolean" &&
+    typeof row.remaining === "number" &&
+    Number.isFinite(row.remaining) &&
+    (typeof row.reset_at === "string" || row.reset_at === null)
   );
 }
 
