@@ -67,6 +67,7 @@ ADMIN_EMAIL=owner@example.com
 Run the SQL files in `supabase/` as needed:
 
 - `supabase/billing-credits.sql`
+- `supabase/ai-chat-logs.sql` for owner-only AI chat logs
 - `supabase/rag-knowledge-base.sql`
 - `supabase/migrate-embeddings-1024.sql` for existing 768-dimension deployments
 - `supabase/rate-limits.sql`

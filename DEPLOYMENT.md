@@ -73,6 +73,7 @@ In the Supabase dashboard SQL Editor:
   knowledge-base schema.
 - **Existing 768-dim deployment** (old nomic embeddings): run
   `supabase/migrate-embeddings-1024.sql` instead.
+- Run `supabase/ai-chat-logs.sql` to support the owner-only AI logs page.
 - Run `supabase/rate-limits.sql` to set up chat and API rate limiting.
 
 ## Step 4 - Re-embed the knowledge base (required once)
