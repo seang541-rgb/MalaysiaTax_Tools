@@ -1,15 +1,11 @@
 import { notFound } from "next/navigation";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { createSupabaseAdminClient } from "@/lib/supabase/admin";
+import { isAdminEmail } from "@/lib/admin";
 
 // Owner-only. Never indexed, never cached.
 export const dynamic = "force-dynamic";
 export const metadata = { robots: { index: false, follow: false } };
-
-const ADMIN_EMAILS = (process.env.ADMIN_EMAIL || "seang541@gmail.com")
-  .split(",")
-  .map((e) => e.trim().toLowerCase())
-  .filter(Boolean);
 
 interface ChatLog {
   id: string;
@@ -45,7 +41,7 @@ export default async function AiLogsPage() {
   } = await supabase.auth.getUser();
 
   // 2. Owner gate. Anyone else gets a 404 (don't reveal the page exists).
-  if (!user || !ADMIN_EMAILS.includes((user.email || "").toLowerCase())) {
+  if (!isAdminEmail(user?.email)) {
     notFound();
   }
 
