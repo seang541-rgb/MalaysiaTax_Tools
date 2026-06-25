@@ -4,10 +4,11 @@
  * Production fails closed when ADMIN_EMAIL is not configured. Local
  * development keeps the project owner's email as a convenience fallback.
  */
-type AdminEnv = Pick<
-  NodeJS.ProcessEnv,
-  "ADMIN_EMAIL" | "VERCEL_ENV" | "NODE_ENV"
->;
+type AdminEnv = {
+  ADMIN_EMAIL?: string;
+  VERCEL_ENV?: string;
+  NODE_ENV?: string;
+};
 
 const LOCAL_DEV_ADMIN_EMAIL = "seang541@gmail.com";
 
