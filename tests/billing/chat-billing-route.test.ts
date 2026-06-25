@@ -5,6 +5,7 @@ const consumeCreditsMock = vi.fn();
 const refundCreditsMock = vi.fn();
 const embedMock = vi.fn();
 const chatStreamMock = vi.fn();
+const checkRateLimitMock = vi.fn();
 
 class MockInsufficientCreditsError extends Error {
   code = "INSUFFICIENT_CREDITS" as const;
@@ -38,6 +39,10 @@ vi.mock("@/lib/llm", () => ({
   llmInfo: { CHAT_MODEL: "test-model" },
 }));
 
+vi.mock("@/lib/rate-limit", () => ({
+  checkRateLimit: checkRateLimitMock,
+}));
+
 describe("AI chat billing gate", () => {
   beforeEach(() => {
     vi.resetModules();
@@ -46,6 +51,12 @@ describe("AI chat billing gate", () => {
     refundCreditsMock.mockReset();
     embedMock.mockReset();
     chatStreamMock.mockReset();
+    checkRateLimitMock.mockReset();
+    checkRateLimitMock.mockResolvedValue({
+      allowed: true,
+      remaining: 9,
+      resetAt: null,
+    });
   });
 
   it("requires authentication for POST", async () => {
@@ -119,6 +130,31 @@ describe("AI chat billing gate", () => {
     expect(res.status).toBe(400);
     expect(consumeCreditsMock).not.toHaveBeenCalled();
     expect(embedMock).not.toHaveBeenCalled();
+    expect(chatStreamMock).not.toHaveBeenCalled();
+  });
+
+  it("rate limits before charging credits", async () => {
+    getUserMock.mockResolvedValue({
+      data: { user: { id: "user-1", email: "user@example.com" } },
+    });
+    checkRateLimitMock.mockResolvedValue({
+      allowed: false,
+      remaining: 0,
+      resetAt: "2026-06-25T08:00:00.000Z",
+    });
+    const { POST } = await import("@/app/api/chat/route");
+
+    const res = await POST(
+      new Request("http://localhost/api/chat", {
+        method: "POST",
+        body: JSON.stringify({
+          messages: [{ role: "user", content: "How much tax for RM5000?" }],
+        }),
+      }) as never
+    );
+
+    expect(res.status).toBe(429);
+    expect(consumeCreditsMock).not.toHaveBeenCalled();
     expect(chatStreamMock).not.toHaveBeenCalled();
   });
 

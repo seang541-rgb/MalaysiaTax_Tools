@@ -13,6 +13,7 @@ import {
   refundCredits,
 } from "@/lib/billing/credits";
 import { BILLING_FEATURE_COSTS } from "@/lib/billing/plans";
+import { checkRateLimit } from "@/lib/rate-limit";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 
 // Supabase client for RAG
@@ -407,35 +408,6 @@ Tax bands (YA2025, resident individual) — APPLY EACH BAND to chargeable income
 - Above 2,000,000: 30%
 Remember: a monthly salary must be multiplied by 12 to get annual income before applying bands.`;
 
-// ─── Rate limiter (in-memory, per-IP, sliding window) ───
-const RATE_LIMIT_WINDOW_MS = 60_000; // 1 minute
-const RATE_LIMIT_MAX = 10; // max 10 requests per minute per IP
-const rateLimitMap = new Map<string, number[]>();
-
-function isRateLimited(ip: string): boolean {
-  const now = Date.now();
-  const timestamps = rateLimitMap.get(ip) || [];
-  // Remove expired entries
-  const valid = timestamps.filter((t) => now - t < RATE_LIMIT_WINDOW_MS);
-  if (valid.length >= RATE_LIMIT_MAX) {
-    rateLimitMap.set(ip, valid);
-    return true;
-  }
-  valid.push(now);
-  rateLimitMap.set(ip, valid);
-  return false;
-}
-
-// Clean up stale entries every 5 minutes
-setInterval(() => {
-  const now = Date.now();
-  for (const [ip, timestamps] of rateLimitMap) {
-    const valid = timestamps.filter((t) => now - t < RATE_LIMIT_WINDOW_MS);
-    if (valid.length === 0) rateLimitMap.delete(ip);
-    else rateLimitMap.set(ip, valid);
-  }
-}, 300_000);
-
 const MAX_MESSAGE_LENGTH = 500;
 const MAX_MESSAGES = 20;
 
@@ -465,13 +437,23 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Rate limiting
-    const ip = request.headers.get("x-forwarded-for")?.split(",")[0]?.trim()
-      || request.headers.get("x-real-ip")
-      || "unknown";
-    if (isRateLimited(ip)) {
+    const ip =
+      request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ||
+      request.headers.get("x-real-ip") ||
+      "unknown";
+    const rateKey = user.id ? `user:${user.id}` : `ip:${ip}`;
+    const rateLimit = await checkRateLimit({
+      key: rateKey,
+      route: "/api/chat",
+      limit: 10,
+      windowSeconds: 60,
+    });
+    if (!rateLimit.allowed) {
       return new Response(
-        JSON.stringify({ error: "Too many requests. Please wait a moment." }),
+        JSON.stringify({
+          error: "Too many requests. Please wait a moment.",
+          resetAt: rateLimit.resetAt,
+        }),
         { status: 429, headers: { "Content-Type": "application/json" } }
       );
     }
