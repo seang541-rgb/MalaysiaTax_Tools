@@ -2,6 +2,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 
 const getUserMock = vi.fn();
 const consumeCreditsMock = vi.fn();
+const refundCreditsMock = vi.fn();
 const embedMock = vi.fn();
 const chatStreamMock = vi.fn();
 
@@ -26,7 +27,7 @@ vi.mock("@/lib/supabase/server", () => ({
 
 vi.mock("@/lib/billing/credits", () => ({
   consumeCredits: consumeCreditsMock,
-  refundCredits: vi.fn(),
+  refundCredits: refundCreditsMock,
   InsufficientCreditsError: MockInsufficientCreditsError,
 }));
 
@@ -42,6 +43,7 @@ describe("AI chat billing gate", () => {
     vi.resetModules();
     getUserMock.mockReset();
     consumeCreditsMock.mockReset();
+    refundCreditsMock.mockReset();
     embedMock.mockReset();
     chatStreamMock.mockReset();
   });
@@ -228,6 +230,90 @@ describe("AI chat billing gate", () => {
     expect(messages[0].content).not.toContain(
       "PRE-CALCULATED TAX RESULT"
     );
+  });
+
+  it("refunds credits when the provider returns a non-200 response", async () => {
+    getUserMock.mockResolvedValue({
+      data: { user: { id: "user-1", email: "user@example.com" } },
+    });
+    consumeCreditsMock.mockResolvedValue({ balance: 9 });
+    embedMock.mockRejectedValue(new Error("skip rag"));
+    chatStreamMock.mockResolvedValue(
+      new Response("provider exploded", { status: 502 })
+    );
+    const { POST } = await import("@/app/api/chat/route");
+
+    const res = await POST(
+      new Request("http://localhost/api/chat", {
+        method: "POST",
+        body: JSON.stringify({
+          messages: [{ role: "user", content: "monthly salary RM5000" }],
+        }),
+      }) as never
+    );
+
+    expect(res.status).toBe(502);
+    expect(refundCreditsMock).toHaveBeenCalledWith(
+      expect.objectContaining({
+        userId: "user-1",
+        feature: "ai_tax_question",
+        amount: 1,
+        errorCode: "PROVIDER_FAILED_REFUNDED",
+      })
+    );
+  });
+
+  it("refunds credits when the provider stream fails before DONE", async () => {
+    getUserMock.mockResolvedValue({
+      data: { user: { id: "user-1", email: "user@example.com" } },
+    });
+    consumeCreditsMock.mockResolvedValue({ balance: 9 });
+    embedMock.mockRejectedValue(new Error("skip rag"));
+
+    let sentPartial = false;
+    const failingStream = new ReadableStream({
+      pull(controller) {
+        if (!sentPartial) {
+          sentPartial = true;
+          controller.enqueue(
+            new TextEncoder().encode(
+              'data: {"choices":[{"delta":{"content":"partial"}}]}\n\n'
+            )
+          );
+          return;
+        }
+
+        controller.error(new Error("stream broke"));
+      },
+    });
+
+    chatStreamMock.mockResolvedValue(new Response(failingStream));
+    const { POST } = await import("@/app/api/chat/route");
+
+    const res = await POST(
+      new Request("http://localhost/api/chat", {
+        method: "POST",
+        body: JSON.stringify({
+          messages: [{ role: "user", content: "monthly salary RM5000" }],
+        }),
+      }) as never
+    );
+
+    expect(res.status).toBe(200);
+    const reader = res.body!.getReader();
+    await expect(reader.read()).resolves.toMatchObject({ done: false });
+    await expect(reader.read()).rejects.toThrow("stream broke");
+
+    await vi.waitFor(() => {
+      expect(refundCreditsMock).toHaveBeenCalledWith(
+        expect.objectContaining({
+          userId: "user-1",
+          feature: "ai_tax_question",
+          amount: 1,
+          errorCode: "STREAM_FAILED_REFUNDED",
+        })
+      );
+    });
   });
 
   it("reports provider availability without charging credits", async () => {

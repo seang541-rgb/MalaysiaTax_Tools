@@ -605,6 +605,8 @@ export async function POST(request: NextRequest) {
     // Transform the provider's OpenAI-style SSE → our client SSE (data: {token})
     const reader = llmRes.body.getReader();
     const decoder = new TextDecoder();
+    const chargedFeature = "ai_tax_question" as const;
+    const chargedAmount = aiCreditCost;
 
     const usedRag = ragContext !== "";
     const usedPrecalc = preCalcContext !== "";
@@ -616,6 +618,9 @@ export async function POST(request: NextRequest) {
         const encoder = new TextEncoder();
         let buffer = "";
         let fullAnswer = "";
+        let sawDone = false;
+        let streamFailed = false;
+        let streamFailure: unknown;
 
         try {
           while (true) {
@@ -631,6 +636,7 @@ export async function POST(request: NextRequest) {
               if (!line || !line.startsWith("data:")) continue;
               const payload = line.slice(5).trim();
               if (payload === "[DONE]") {
+                sawDone = true;
                 controller.enqueue(encoder.encode("data: [DONE]\n\n"));
                 continue;
               }
@@ -650,8 +656,24 @@ export async function POST(request: NextRequest) {
           }
           controller.enqueue(encoder.encode("data: [DONE]\n\n"));
         } catch (err) {
-          controller.error(err);
+          streamFailed = true;
+          streamFailure = err;
         } finally {
+          if (streamFailed && !sawDone) {
+            await Promise.resolve(
+              refundCredits({
+                userId: logUserId,
+                feature: chargedFeature,
+                amount: chargedAmount,
+                errorCode: "STREAM_FAILED_REFUNDED",
+                metadata: {
+                  route: "/api/chat",
+                  partialAnswerLength: fullAnswer.length,
+                },
+              })
+            ).catch(() => {});
+          }
+
           // Best-effort quality log. Await BEFORE closing the stream so the
           // serverless function stays alive until the write completes — a
           // fire-and-forget after close() gets frozen/killed on Vercel.
@@ -667,7 +689,13 @@ export async function POST(request: NextRequest) {
               usedDeterministic,
             });
           }
-          controller.close();
+          if (!streamFailed) {
+            controller.close();
+          } else {
+            queueMicrotask(() => {
+              controller.error(streamFailure);
+            });
+          }
         }
       },
     });
@@ -681,13 +709,15 @@ export async function POST(request: NextRequest) {
     });
   } catch {
     if (chargedAiCredit && chargedUserId) {
-      await refundCredits({
-        userId: chargedUserId,
-        feature: "ai_tax_question",
-        amount: aiCreditCost,
-        errorCode: "PROVIDER_FAILED_REFUNDED",
-        metadata: { route: "/api/chat" },
-      }).catch(() => {});
+      await Promise.resolve(
+        refundCredits({
+          userId: chargedUserId,
+          feature: "ai_tax_question",
+          amount: aiCreditCost,
+          errorCode: "PROVIDER_FAILED_REFUNDED",
+          metadata: { route: "/api/chat" },
+        })
+      ).catch(() => {});
     }
 
     return new Response(
