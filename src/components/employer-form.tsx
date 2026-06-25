@@ -8,6 +8,7 @@ import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { CreditChargeButton } from "@/components/credit-charge-button";
+import { SourceNote } from "@/components/source-note";
 import { calculateBatchContributions } from "@/engine/employer-contributions";
 import { BatchContributionInput, BatchContributionSummary } from "@/engine/types";
 
@@ -306,6 +307,8 @@ export function EmployerForm() {
               <p className="text-xs text-muted-foreground p-3 bg-muted rounded-md">
                 {t("disclaimer")}
               </p>
+
+              <SourceNote topic="employer-contributions" />
             </CardContent>
           </Card>
         </>

@@ -149,7 +149,7 @@ export function StampDutyCalculator() {
         </Card>
       )}
 
-      <SourceNote topic="stampduty" />
+      <SourceNote topic="stamp-duty" />
     </div>
   );
 }

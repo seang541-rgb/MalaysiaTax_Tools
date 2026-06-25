@@ -129,7 +129,7 @@ export function SoleProprietorCalculator() {
         </Card>
       )}
 
-      <SourceNote topic="soleprop" />
+      <SourceNote topic="sole-proprietor" />
     </div>
   );
 }

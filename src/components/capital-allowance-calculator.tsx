@@ -193,7 +193,7 @@ export function CapitalAllowanceCalculator() {
         </Card>
       )}
 
-      <SourceNote topic="capalw" />
+      <SourceNote topic="capital-allowance" />
     </div>
   );
 }

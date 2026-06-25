@@ -4,7 +4,6 @@ import { StampDutyCalculator } from "@/components/stamp-duty-calculator";
 import { PaidFeatureGate } from "@/components/paid-feature-gate";
 import { GatedTool } from "@/components/gated-tool";
 import { FaqSection, FaqItem } from "@/components/faq-section";
-import { SourceNote } from "@/components/source-note";
 import { SITE_URL } from "@/lib/site";
 
 export async function generateMetadata({
@@ -64,7 +63,6 @@ export default function StampDutyPage() {
         </GatedTool>
       </PaidFeatureGate>
       <FaqSection title={faq("title")} items={faqItems} />
-      <SourceNote topic="stampduty" />
     </div>
   );
 }

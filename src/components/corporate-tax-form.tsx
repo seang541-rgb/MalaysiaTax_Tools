@@ -8,6 +8,7 @@ import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { CreditChargeButton } from "@/components/credit-charge-button";
+import { SourceNote } from "@/components/source-note";
 import { calculateCorporateTax } from "@/engine/corporate";
 import { CorporateTaxInput } from "@/engine/types";
 
@@ -285,6 +286,8 @@ export function CorporateTaxForm() {
               <p className="text-xs text-muted-foreground mt-4 p-3 bg-muted rounded-md">
                 {t("disclaimer")}
               </p>
+
+              <SourceNote topic="corporate" />
             </CardContent>
           </Card>
         </>

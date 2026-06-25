@@ -1,6 +1,6 @@
 "use client";
 
-import { useTranslations, useLocale } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import { ShieldCheck } from "lucide-react";
 import { TAX_SOURCES, TaxTopic } from "@/lib/tax-sources";
 
@@ -17,25 +17,37 @@ export function SourceNote({ topic }: { topic: TaxTopic }) {
   const t = useTranslations("sourceNote");
   const locale = useLocale();
   const entry = TAX_SOURCES[topic];
+
   if (!entry) return null;
 
+  const formattedDate = formatVerified(entry.verified, locale);
+  const reviewedLabel = entry.reviewedLabel
+    ? `${entry.reviewedLabel} ${formattedDate}`
+    : t("verified", { date: formattedDate });
+
   return (
-    <div className="mt-6 flex items-start gap-2 text-xs text-muted-foreground border-t pt-4">
-      <ShieldCheck className="h-4 w-4 mt-0.5 shrink-0 text-primary/70" />
+    <div className="mt-6 flex items-start gap-2 border-t pt-4 text-xs text-muted-foreground">
+      <ShieldCheck className="mt-0.5 h-4 w-4 shrink-0 text-primary/70" />
       <p className="leading-relaxed">
-        <span className="font-medium">{t("verified", { date: formatVerified(entry.verified, locale) })}</span>
-        {" · "}
+        <span className="font-medium">{reviewedLabel}</span>
+        {entry.rulePeriod ? (
+          <>
+            {" | "}
+            <span>{`Applies to ${entry.rulePeriod}`}</span>
+          </>
+        ) : null}
+        {" | "}
         <span>{t("sourceLabel")}: </span>
-        {entry.sources.map((s, i) => (
-          <span key={s.url}>
-            {i > 0 && ", "}
+        {entry.sources.map((source, index) => (
+          <span key={source.url}>
+            {index > 0 && ", "}
             <a
-              href={s.url}
+              href={source.url}
               target="_blank"
               rel="noopener noreferrer"
               className="text-primary underline underline-offset-2 hover:no-underline"
             >
-              {s.label}
+              {source.label}
             </a>
           </span>
         ))}
