@@ -1,10 +1,14 @@
 import { mkdirSync, rmSync, writeFileSync } from "node:fs";
 import path from "node:path";
-import { beforeEach, describe, expect, it } from "vitest";
+import { afterEach, afterAll, beforeEach, describe, expect, it } from "vitest";
 import { getAllPosts, getPost } from "@/lib/blog";
 
 const BLOG_TEST_LOCALE = "__task-1-regressions";
 const BLOG_TEST_DIR = path.join(process.cwd(), "content", "blog", BLOG_TEST_LOCALE);
+
+function cleanupTestFixtures() {
+  rmSync(BLOG_TEST_DIR, { force: true, recursive: true });
+}
 
 function writePost(slug: string, content: string) {
   writeFileSync(path.join(BLOG_TEST_DIR, `${slug}.md`), content, "utf-8");
@@ -12,9 +16,12 @@ function writePost(slug: string, content: string) {
 
 describe("blog frontmatter parser compatibility", () => {
   beforeEach(() => {
-    rmSync(BLOG_TEST_DIR, { force: true, recursive: true });
+    cleanupTestFixtures();
     mkdirSync(BLOG_TEST_DIR, { recursive: true });
   });
+
+  afterEach(cleanupTestFixtures);
+  afterAll(cleanupTestFixtures);
 
   it("parses BOM-prefixed frontmatter metadata", () => {
     writePost(
