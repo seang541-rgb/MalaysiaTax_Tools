@@ -38,6 +38,8 @@ begin
     raise exception 'rate limit window must be positive';
   end if;
 
+  perform pg_advisory_xact_lock(hashtextextended(p_route || ':' || p_key, 0));
+
   v_window_start := now() - make_interval(secs => p_window_seconds);
 
   delete from public.rate_limit_events

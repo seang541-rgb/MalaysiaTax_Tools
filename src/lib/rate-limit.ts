@@ -23,9 +23,32 @@ function isRateLimitRow(value: unknown): value is RateLimitRow {
   return (
     typeof value === "object" &&
     value !== null &&
-    "allowed" in value &&
-    "remaining" in value &&
-    "reset_at" in value
+    typeof value.allowed === "boolean" &&
+    typeof value.remaining === "number" &&
+    Number.isFinite(value.remaining) &&
+    (typeof value.reset_at === "string" || value.reset_at === null)
+  );
+}
+
+function isKnownLocalFailOpenError(error: unknown): boolean {
+  if (!(error instanceof Error)) {
+    return false;
+  }
+
+  if (error.message === "Supabase admin env vars are not configured.") {
+    return true;
+  }
+
+  const message = error.message.toLowerCase();
+
+  return (
+    message.includes("fetch failed") ||
+    message.includes("failed to fetch") ||
+    message.includes("network request failed") ||
+    message.includes("getaddrinfo") ||
+    message.includes("econnrefused") ||
+    message.includes("connect timeout") ||
+    message.includes("connection timed out")
   );
 }
 
@@ -55,18 +78,21 @@ export async function checkRateLimit(
 
     return {
       allowed: Boolean(row.allowed),
-      remaining: Number(row.remaining),
+      remaining: row.remaining,
       resetAt: row.reset_at,
     };
   } catch (error) {
-    if (process.env.NODE_ENV === "production") {
-      throw error;
+    if (
+      process.env.NODE_ENV !== "production" &&
+      isKnownLocalFailOpenError(error)
+    ) {
+      return {
+        allowed: true,
+        remaining: input.limit,
+        resetAt: null,
+      };
     }
 
-    return {
-      allowed: true,
-      remaining: input.limit,
-      resetAt: null,
-    };
+    throw error;
   }
 }
