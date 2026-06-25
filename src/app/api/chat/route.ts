@@ -1,6 +1,6 @@
 import { NextRequest } from "next/server";
 import { createClient } from "@supabase/supabase-js";
-import { TAX_RATES_YA2025 } from "@/engine/tax-rates";
+import { getTaxRates } from "@/engine/tax-rates";
 import { checkEInvoicePhase } from "@/engine/e-invoice";
 import { calculateSst } from "@/engine/sst";
 import { calculateCorporateTax } from "@/engine/corporate";
@@ -263,11 +263,12 @@ function preCalculateTax(annualIncome: number, originalMessage: string): PreCalc
   const socsoEisRelief = isMonthly ? 350 : 0;
   const totalReliefs = personalRelief + epfRelief + socsoEisRelief;
   const chargeableIncome = Math.max(0, annualIncome - totalReliefs);
+  const taxRates = getTaxRates(2025);
 
   const bands: PreCalculatedTax["bands"] = [];
   let remaining = chargeableIncome;
 
-  for (const band of TAX_RATES_YA2025) {
+  for (const band of taxRates) {
     if (remaining <= 0) break;
     const bandWidth = band.max === Infinity ? remaining : band.max - band.min;
     const taxable = Math.min(remaining, bandWidth);

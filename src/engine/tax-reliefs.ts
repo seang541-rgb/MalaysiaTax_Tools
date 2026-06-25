@@ -37,9 +37,38 @@ export const TAX_RELIEFS_YA2025: ReliefDefinition[] = [
   { id: "parents_medical", maxAmount: 8000, category: "medical" },
 ];
 
-export function getReliefDefinitions(yearOfAssessment: number): ReliefDefinition[] {
-  if (yearOfAssessment === 2025) {
-    return TAX_RELIEFS_YA2025;
-  }
-  return TAX_RELIEFS_YA2025;
+export interface ReliefRuleSet {
+  yearOfAssessment: number;
+  requestedYearOfAssessment: number;
+  reliefs: ReliefDefinition[];
+  reviewed: string;
+  sources: string[];
+}
+
+const RELIEF_RULE_SETS: Record<
+  number,
+  Omit<ReliefRuleSet, "requestedYearOfAssessment">
+> = {
+  2025: {
+    yearOfAssessment: 2025,
+    reliefs: TAX_RELIEFS_YA2025,
+    reviewed: "2026-06",
+    sources: ["LHDN YA2025 relief guidance", "Budget 2025 disability relief changes"],
+  },
+};
+
+export function getReliefRuleSet(yearOfAssessment: number): ReliefRuleSet {
+  const exact = RELIEF_RULE_SETS[yearOfAssessment];
+  const selected = exact ?? RELIEF_RULE_SETS[2025];
+
+  return {
+    ...selected,
+    requestedYearOfAssessment: yearOfAssessment,
+  };
+}
+
+export function getReliefDefinitions(
+  yearOfAssessment: number
+): ReliefDefinition[] {
+  return getReliefRuleSet(yearOfAssessment).reliefs;
 }
