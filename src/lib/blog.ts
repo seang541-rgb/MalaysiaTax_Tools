@@ -18,10 +18,19 @@ export interface BlogPost extends BlogPostMeta {
   html: string;
 }
 
-const MAX_FRONTMATTER_LENGTH = 16_384;
-
 function localeDir(locale: string): string {
   return path.join(BLOG_DIR, locale);
+}
+
+function emptyMeta(): BlogPostMeta {
+  return {
+    slug: "",
+    title: "",
+    description: "",
+    date: "",
+    keywords: [],
+    locale: "",
+  };
 }
 
 function stringValue(value: unknown): string {
@@ -35,52 +44,59 @@ function stringArrayValue(value: unknown): string[] {
 }
 
 function parseMarkdown(raw: string): { data: BlogPostMeta; content: string } {
-  if (!raw.startsWith("---\n") && !raw.startsWith("---\r\n")) {
-    return {
-      data: {
-        slug: "",
-        title: "",
-        description: "",
-        date: "",
-        keywords: [],
-        locale: "",
-      },
-      content: raw,
-    };
+  const source = raw.startsWith("\uFEFF") ? raw.slice(1) : raw;
+  const firstLineEnd = source.indexOf("\n");
+  if (firstLineEnd === -1) {
+    return { data: emptyMeta(), content: raw };
   }
 
-  const firstLineEnd = raw.indexOf("\n");
-  const closingMarker = raw.indexOf("\n---", firstLineEnd + 1);
-  if (closingMarker === -1) {
-    throw new Error("Blog post frontmatter is missing a closing marker.");
+  const openingLine = source.slice(0, firstLineEnd).replace(/\r$/, "");
+  if (openingLine !== "---") {
+    return { data: emptyMeta(), content: raw };
   }
 
-  const frontmatter = raw
-    .slice(firstLineEnd + 1, closingMarker)
-    .replace(/\r\n/g, "\n")
-    .replace(/\r/g, "\n");
-  if (frontmatter.length > MAX_FRONTMATTER_LENGTH) {
-    throw new Error("Blog post frontmatter is too large.");
+  let lineStart = firstLineEnd + 1;
+  while (lineStart <= source.length) {
+    const lineEnd = source.indexOf("\n", lineStart);
+    const line = (lineEnd === -1 ? source.slice(lineStart) : source.slice(lineStart, lineEnd)).replace(/\r$/, "");
+
+    if (line === "---") {
+      const frontmatter = source
+        .slice(firstLineEnd + 1, lineStart)
+        .replace(/\r\n/g, "\n")
+        .replace(/\r/g, "\n");
+      let parsed: unknown = {};
+      try {
+        parsed = parseYaml(frontmatter);
+      } catch {
+        parsed = {};
+      }
+
+      const data =
+        typeof parsed === "object" && parsed !== null
+          ? (parsed as Record<string, unknown>)
+          : {};
+
+      return {
+        data: {
+          ...emptyMeta(),
+          title: stringValue(data.title),
+          description: stringValue(data.description),
+          date: stringValue(data.date),
+          keywords: stringArrayValue(data.keywords),
+        },
+        content: lineEnd === -1 ? "" : source.slice(lineEnd + 1),
+      };
+    }
+
+    if (lineEnd === -1) {
+      break;
+    }
+
+    lineStart = lineEnd + 1;
   }
 
-  const afterMarker = raw.indexOf("\n", closingMarker + 1);
-  const parsed = parseYaml(frontmatter);
-  const data =
-    typeof parsed === "object" && parsed !== null
-      ? (parsed as Record<string, unknown>)
-      : {};
-
-  return {
-    data: {
-      slug: "",
-      title: stringValue(data.title),
-      description: stringValue(data.description),
-      date: stringValue(data.date),
-      keywords: stringArrayValue(data.keywords),
-      locale: "",
-    },
-    content: afterMarker === -1 ? "" : raw.slice(afterMarker + 1),
-  };
+  return { data: emptyMeta(), content: raw };
 }
 
 export function getAllPosts(locale: string): BlogPostMeta[] {
