@@ -539,7 +539,11 @@
   },
   "sourceNote": {
     "verified": "Kadar disahkan setakat {date}",
-    "sourceLabel": "Sumber"
+    "sourceLabel": "Sumber",
+    "appliesTo": "Berlaku untuk {period}",
+    "reviewedLabel": {
+      "comparisonRules": "Peraturan perbandingan disemak"
+    }
   },
   "property": {
     "hubIntro": "Pilih alat cukai hartanah. RPGT dikenakan apabila menjual; duti setem apabila membeli.",

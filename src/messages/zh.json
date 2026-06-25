@@ -398,7 +398,11 @@
   },
   "sourceNote": {
     "verified": "税率核实于 {date}",
-    "sourceLabel": "来源"
+    "sourceLabel": "来源",
+    "appliesTo": "适用于 {period}",
+    "reviewedLabel": {
+      "comparisonRules": "并行评税规则已核实"
+    }
   },
   "property": {
     "hubIntro": "选择一个房产税工具。卖房用 RPGT,买房用印花税。",

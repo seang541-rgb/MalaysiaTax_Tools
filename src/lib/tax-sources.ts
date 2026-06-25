@@ -122,7 +122,7 @@ export const TAX_SOURCES: Record<TaxTopic, TaxSourceEntry> = {
   },
   "joint-assessment": {
     verified: "2026-06",
-    reviewedLabel: "Comparison rules reviewed",
+    reviewedLabel: "comparisonRules",
     rulePeriod: "YA 2025",
     sources: [
       {

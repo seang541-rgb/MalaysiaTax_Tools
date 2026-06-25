@@ -398,7 +398,11 @@
   },
   "sourceNote": {
     "verified": "Rates verified as of {date}",
-    "sourceLabel": "Source"
+    "sourceLabel": "Source",
+    "appliesTo": "Applies to {period}",
+    "reviewedLabel": {
+      "comparisonRules": "Comparison rules reviewed"
+    }
   },
   "property": {
     "hubIntro": "Choose a property tax tool. RPGT applies when you sell; stamp duty applies when you buy.",

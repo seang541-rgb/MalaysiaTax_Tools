@@ -22,7 +22,7 @@ export function SourceNote({ topic }: { topic: TaxTopic }) {
 
   const formattedDate = formatVerified(entry.verified, locale);
   const reviewedLabel = entry.reviewedLabel
-    ? `${entry.reviewedLabel} ${formattedDate}`
+    ? `${t(`reviewedLabel.${entry.reviewedLabel}`)} ${formattedDate}`
     : t("verified", { date: formattedDate });
 
   return (
@@ -33,7 +33,7 @@ export function SourceNote({ topic }: { topic: TaxTopic }) {
         {entry.rulePeriod ? (
           <>
             {" | "}
-            <span>{`Applies to ${entry.rulePeriod}`}</span>
+            <span>{t("appliesTo", { period: entry.rulePeriod })}</span>
           </>
         ) : null}
         {" | "}
