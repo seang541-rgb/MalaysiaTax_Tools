@@ -1,36 +1,99 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# MYTax
 
-## Getting Started
+MYTax is a multilingual Malaysia tax calculator and AI tax assistant built with Next.js. It includes deterministic calculators for personal income tax, corporate tax, PCB, SST, RPGT, stamp duty, withholding tax, CP204, e-Invoice, capital allowance, sole proprietor tax, employer contributions, and joint assessment.
 
-First, run the development server:
+## Tech Stack
 
-```bash
+- Next.js App Router
+- React
+- TypeScript
+- next-intl
+- Supabase Auth and Postgres
+- Stripe Checkout
+- Vitest
+- Tailwind CSS
+
+## Local Setup
+
+```powershell
+npm install
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open `http://localhost:3000/en`.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Environment Variables
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+Required for Supabase:
 
-## Learn More
+```env
+NEXT_PUBLIC_SUPABASE_URL=
+NEXT_PUBLIC_SUPABASE_ANON_KEY=
+SUPABASE_SERVICE_ROLE_KEY=
+```
 
-To learn more about Next.js, take a look at the following resources:
+Required for AI:
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+```env
+LLM_CHAT_BASE_URL=https://api.deepseek.com
+LLM_CHAT_API_KEY=
+LLM_CHAT_MODEL=deepseek-v4-flash
+LLM_EMBED_BASE_URL=https://integrate.api.nvidia.com/v1
+LLM_EMBED_API_KEY=
+LLM_EMBED_MODEL=baai/bge-m3
+LLM_EMBED_DIMENSIONS=0
+```
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+Required for billing:
 
-## Deploy on Vercel
+```env
+STRIPE_SECRET_KEY=
+NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=
+STRIPE_WEBHOOK_SECRET=
+STRIPE_PRICE_STARTER=
+STRIPE_PRICE_PRO=
+STRIPE_PRICE_BUSINESS=
+NEXT_PUBLIC_APP_URL=
+```
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+Required for admin pages:
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+```env
+ADMIN_EMAIL=owner@example.com
+```
+
+## Supabase Setup
+
+Run the SQL files in `supabase/` as needed:
+
+- `supabase/billing-credits.sql`
+- `supabase/rag-knowledge-base.sql`
+- `supabase/migrate-embeddings-1024.sql` for existing 768-dimension deployments
+- `supabase/rate-limits.sql`
+
+## RAG Reindexing
+
+Use either:
+
+```powershell
+python training-data/scripts/embed-and-upload.py
+```
+
+or the admin page:
+
+```text
+/en/admin/reindex
+```
+
+## Verification
+
+```powershell
+npm run lint
+npm run test
+npm run build
+npm audit --audit-level=high
+```
+
+## Deployment
+
+Deploy after setting Supabase, Stripe, LLM, and admin environment variables. See `DEPLOYMENT.md` for the full checklist.
