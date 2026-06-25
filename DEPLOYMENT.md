@@ -27,26 +27,40 @@ Chat and embeddings use separate providers:
 
 ## Step 2 - Configure env vars
 
-In `.env.local` (local) and in your host's env settings (production):
+In `.env.local` (local) and in your host's env settings (production), set:
 
 ```text
+# Supabase
+NEXT_PUBLIC_SUPABASE_URL=
+NEXT_PUBLIC_SUPABASE_ANON_KEY=
+SUPABASE_SERVICE_ROLE_KEY=
+
 # Chat - DeepSeek
 LLM_CHAT_BASE_URL=https://api.deepseek.com
-LLM_CHAT_API_KEY=sk-xxxxxxxx
+LLM_CHAT_API_KEY=sk-...
 LLM_CHAT_MODEL=deepseek-v4-flash
 
 # Embeddings - NVIDIA NIM
 LLM_EMBED_BASE_URL=https://integrate.api.nvidia.com/v1
-LLM_EMBED_API_KEY=nvapi-xxxxxxxx
+LLM_EMBED_API_KEY=nvapi-...
 LLM_EMBED_MODEL=baai/bge-m3
 LLM_EMBED_DIMENSIONS=0
 
-# Shared fallback (optional, supported by current code):
+# Shared fallback (optional, supported by current code)
 LLM_BASE_URL=
 LLM_API_KEY=
 
 # Production admin access control (required for admin-only pages)
 ADMIN_EMAIL=owner@example.com
+
+# Stripe/billing
+STRIPE_SECRET_KEY=sk_...
+NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=pk_...
+STRIPE_WEBHOOK_SECRET=whsec_...
+STRIPE_PRICE_STARTER=price_...
+STRIPE_PRICE_PRO=price_...
+STRIPE_PRICE_BUSINESS=price_...
+NEXT_PUBLIC_APP_URL=https://your-domain.example
 ```
 
 `LLM_EMBED_DIMENSIONS=0` means "don't send dimensions" (bge-m3 is fixed 1024).
@@ -100,8 +114,7 @@ curl http://localhost:3000/api/chat        # {"status":"ok","configured":true}
 
 1. Push to GitHub (already connected: `seang541-rgb/MalaysiaTax_Tools`).
 2. Import the repo on <https://vercel.com>.
-3. Add the env vars from Step 2, plus the Supabase vars
-   (`NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`) and Stripe vars.
+3. Add the env vars from Step 2 above.
 4. Deploy. `/api/chat` runs as a serverless function, streams chat responses from
    the configured chat provider, and uses the configured embedding provider for RAG.
 
@@ -128,18 +141,7 @@ MYTax paid features use Stripe Checkout and Supabase credits. Run
 `supabase/billing-credits.sql` in the Supabase SQL Editor before enabling billing
 routes.
 
-Required env vars:
-
-```env
-STRIPE_SECRET_KEY=sk_test_...
-NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=pk_test_...
-STRIPE_WEBHOOK_SECRET=whsec_...
-STRIPE_PRICE_STARTER=price_...
-STRIPE_PRICE_PRO=price_...
-STRIPE_PRICE_BUSINESS=price_...
-SUPABASE_SERVICE_ROLE_KEY=...
-NEXT_PUBLIC_APP_URL=https://your-domain.example
-```
+Required env vars are listed in Step 2.
 
 Stripe webhook endpoint:
 
