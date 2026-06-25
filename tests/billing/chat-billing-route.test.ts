@@ -316,6 +316,84 @@ describe("AI chat billing gate", () => {
     });
   });
 
+  it("does not refund credits when the provider stream reaches DONE", async () => {
+    getUserMock.mockResolvedValue({
+      data: { user: { id: "user-1", email: "user@example.com" } },
+    });
+    consumeCreditsMock.mockResolvedValue({ balance: 9 });
+    embedMock.mockRejectedValue(new Error("skip rag"));
+    chatStreamMock.mockResolvedValue(
+      new Response('data: {"choices":[{"delta":{"content":"partial"}}]}\n\ndata: [DONE]\n\n')
+    );
+    const { POST } = await import("@/app/api/chat/route");
+
+    const res = await POST(
+      new Request("http://localhost/api/chat", {
+        method: "POST",
+        body: JSON.stringify({
+          messages: [{ role: "user", content: "monthly salary RM5000" }],
+        }),
+      }) as never
+    );
+
+    expect(res.status).toBe(200);
+    const reader = res.body!.getReader();
+    const decoder = new TextDecoder();
+    let output = "";
+    while (true) {
+      const chunk = await reader.read();
+      if (chunk.done) break;
+      output += decoder.decode(chunk.value);
+    }
+
+    expect(output).toContain("data: [DONE]");
+    expect(refundCreditsMock).not.toHaveBeenCalled();
+  });
+
+  it("does not refund credits when the stream emits DONE and then fails", async () => {
+    getUserMock.mockResolvedValue({
+      data: { user: { id: "user-1", email: "user@example.com" } },
+    });
+    consumeCreditsMock.mockResolvedValue({ balance: 9 });
+    embedMock.mockRejectedValue(new Error("skip rag"));
+
+    let emittedDone = false;
+    const doneThenErrorStream = new ReadableStream({
+      pull(controller) {
+        if (!emittedDone) {
+          emittedDone = true;
+          controller.enqueue(
+            new TextEncoder().encode("data: [DONE]\n\n")
+          );
+          return;
+        }
+
+        controller.error(new Error("stream broke after done"));
+      },
+    });
+
+    chatStreamMock.mockResolvedValue(new Response(doneThenErrorStream));
+    const { POST } = await import("@/app/api/chat/route");
+
+    const res = await POST(
+      new Request("http://localhost/api/chat", {
+        method: "POST",
+        body: JSON.stringify({
+          messages: [{ role: "user", content: "monthly salary RM5000" }],
+        }),
+      }) as never
+    );
+
+    expect(res.status).toBe(200);
+    const reader = res.body!.getReader();
+    await expect(reader.read()).resolves.toMatchObject({ done: false });
+    await expect(reader.read()).rejects.toThrow("stream broke after done");
+
+    await vi.waitFor(() => {
+      expect(refundCreditsMock).not.toHaveBeenCalled();
+    });
+  });
+
   it("reports provider availability without charging credits", async () => {
     const { GET } = await import("@/app/api/chat/route");
 
