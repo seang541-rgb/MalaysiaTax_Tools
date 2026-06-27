@@ -232,6 +232,42 @@ describe("AI chat billing gate", () => {
     );
   });
 
+  it("asks for SST tax type before calculating ambiguous SST questions", async () => {
+    getUserMock.mockResolvedValue({
+      data: { user: { id: "user-1", email: "user@example.com" } },
+    });
+    consumeCreditsMock.mockResolvedValue({ balance: 9 });
+    embedMock.mockRejectedValue(new Error("skip rag"));
+    chatStreamMock.mockResolvedValue(
+      new Response('data: {"choices":[{"delta":{"content":"ok"}}]}\n\ndata: [DONE]\n\n')
+    );
+    const { POST } = await import("@/app/api/chat/route");
+
+    const res = await POST(
+      new Request("http://localhost/api/chat", {
+        method: "POST",
+        body: JSON.stringify({
+          locale: "en",
+          messages: [
+            {
+              role: "user",
+              content: "RM700k SST need register?",
+            },
+          ],
+        }),
+      }) as never
+    );
+
+    expect(res.status).toBe(200);
+    const messages = chatStreamMock.mock.calls[0][0] as Array<{
+      role: string;
+      content: string;
+    }>;
+    expect(messages[0].content).toContain("FOLLOW-UP REQUIRED");
+    expect(messages[0].content).toContain("sales tax or service tax");
+    expect(messages[0].content).not.toContain("Conclusion: registration is required.");
+  });
+
   it("does not inject personal tax pre-calculation into corporate questions", async () => {
     getUserMock.mockResolvedValue({
       data: { user: { id: "user-1", email: "user@example.com" } },

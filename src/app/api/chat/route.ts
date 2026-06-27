@@ -13,6 +13,7 @@ import {
   refundCredits,
 } from "@/lib/billing/credits";
 import { BILLING_FEATURE_COSTS } from "@/lib/billing/plans";
+import { buildDeterministicAgentContext } from "@/lib/agent/tools";
 import { checkRateLimit } from "@/lib/rate-limit";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 
@@ -53,7 +54,7 @@ async function retrieveContext(query: string): Promise<string> {
 // ─── Pre-calculation: deterministic tax math ───
 
 /** Extract annual income amount from user message */
-function extractIncomeAmount(message: string): number | null {
+function _extractIncomeAmount(message: string): number | null {
   // Normalize: remove commas, spaces in numbers
   const normalized = message.replace(/,/g, "").replace(/\s+/g, " ");
 
@@ -128,7 +129,7 @@ function extractMoneyAmount(message: string): number | null {
   return amount > 0 ? amount : null;
 }
 
-function isPersonalTaxQuestion(message: string): boolean {
+function _isPersonalTaxQuestion(message: string): boolean {
   const lower = message.toLowerCase();
   const hasPersonalSignal =
     /personal|individual|income tax|salary|monthly|month|gaji|月薪|个人所得税|个人税|所得税/.test(
@@ -146,7 +147,7 @@ function formatExactContext(title: string, lines: string[]): string {
   return `\n\n--- EXACT MYTAX FACTS (${title}) ---\n${lines.join("\n")}\n--- END EXACT MYTAX FACTS ---\nIMPORTANT: Use these exact facts. Do not contradict them.\n`;
 }
 
-function getDeterministicContext(message: string): string {
+function _getDeterministicContext(message: string): string {
   const lower = message.toLowerCase();
   const amount = extractMoneyAmount(message);
 
@@ -256,7 +257,7 @@ interface PreCalculatedTax {
 }
 
 /** Deterministic tax calculation using the rule engine */
-function preCalculateTax(annualIncome: number, originalMessage: string): PreCalculatedTax {
+function _preCalculateTax(annualIncome: number, originalMessage: string): PreCalculatedTax {
   const isMonthly = /月薪|monthly|month|bulan|gaji|salary/i.test(originalMessage);
   const personalRelief = 9000; // automatic individual relief
   const epfRelief = isMonthly ? Math.min(annualIncome * 0.11, 4000) : 0;
@@ -307,7 +308,7 @@ function preCalculateTax(annualIncome: number, originalMessage: string): PreCalc
 }
 
 /** Format pre-calculated tax into injection text for system prompt */
-function formatPreCalculation(calc: PreCalculatedTax): string {
+function _formatPreCalculation(calc: PreCalculatedTax): string {
   const incomeLabel = calc.isMonthly
     ? `RM${calc.monthlyAmount!.toLocaleString()} per month (= RM${calc.grossIncome.toLocaleString()} per year)`
     : `RM${calc.grossIncome.toLocaleString()} per year`;
@@ -521,17 +522,10 @@ export async function POST(request: NextRequest) {
 
     const ragContext = userMessage ? await retrieveContext(userMessage) : "";
 
-    const deterministicContext = userMessage
-      ? getDeterministicContext(userMessage)
-      : "";
-
-    // Pre-calculate personal tax only for personal/salary questions.
-    let preCalcContext = "";
-    const detectedIncome = extractIncomeAmount(userMessage);
-    if (detectedIncome !== null && isPersonalTaxQuestion(userMessage)) {
-      const calc = preCalculateTax(detectedIncome, userMessage);
-      preCalcContext = formatPreCalculation(calc);
-    }
+    const agentContext = userMessage
+      ? buildDeterministicAgentContext(userMessage)
+      : null;
+    const deterministicContext = agentContext?.context ?? "";
 
     // Build system prompt. When we have a deterministic pre-calculation,
     // inject it and SKIP the manual band guide (which would invite the model
@@ -541,9 +535,7 @@ export async function POST(request: NextRequest) {
     if (deterministicContext) {
       systemWithRag += deterministicContext;
     }
-    if (preCalcContext) {
-      systemWithRag += preCalcContext;
-    } else {
+    if (!agentContext?.usedDeterministic) {
       systemWithRag += CALC_GUIDE;
     }
     if (ragContext) {
@@ -592,8 +584,8 @@ export async function POST(request: NextRequest) {
     const chargedAmount = aiCreditCost;
 
     const usedRag = ragContext !== "";
-    const usedPrecalc = preCalcContext !== "";
-    const usedDeterministic = deterministicContext !== "";
+    const usedPrecalc = agentContext?.toolName === "personal_tax_calculator";
+    const usedDeterministic = agentContext?.usedDeterministic ?? false;
     const logUserId = user.id;
 
     const stream = new ReadableStream({
@@ -670,6 +662,10 @@ export async function POST(request: NextRequest) {
               usedRag,
               usedPrecalc,
               usedDeterministic,
+              agentToolName: agentContext?.toolName ?? null,
+              agentNeedsFollowUp: agentContext?.needsFollowUp ?? false,
+              agentMissingFields:
+                agentContext?.missingFields.map((field) => field.field) ?? [],
             });
           }
           if (!streamFailed) {

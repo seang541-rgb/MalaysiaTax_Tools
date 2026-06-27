@@ -11,6 +11,9 @@ export async function logChatInteraction(input: {
   usedRag: boolean;
   usedPrecalc: boolean;
   usedDeterministic: boolean;
+  agentToolName?: string | null;
+  agentNeedsFollowUp?: boolean;
+  agentMissingFields?: string[];
 }): Promise<void> {
   try {
     const { createSupabaseAdminClient } = await import("@/lib/supabase/admin");
@@ -29,6 +32,9 @@ export async function logChatInteraction(input: {
       used_rag: input.usedRag,
       used_precalc: input.usedPrecalc,
       used_deterministic: input.usedDeterministic,
+      agent_tool_name: input.agentToolName ?? null,
+      agent_needs_follow_up: input.agentNeedsFollowUp ?? false,
+      agent_missing_fields: input.agentMissingFields ?? [],
     });
   } catch {
     // Logging is best-effort. Never surface to the user.
