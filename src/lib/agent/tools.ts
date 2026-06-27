@@ -1,4 +1,5 @@
 import { checkEInvoicePhase } from "@/engine/e-invoice";
+import { calculateCorporateTax } from "@/engine/corporate";
 import { calculatePersonalTax } from "@/engine/personal";
 import { calculateSst } from "@/engine/sst";
 import type { ReliefClaim } from "@/engine/types";
@@ -60,6 +61,14 @@ export function detectAgentTool(message: string): AgentToolName | null {
     return "sst_checker";
   }
 
+  if (
+    /company|corporate|sdn\.?\s?bhd|cukai korporat|company tax|corporate tax|chargeable income|sme/.test(
+      lower
+    )
+  ) {
+    return "corporate_tax_calculator";
+  }
+
   const personalSignal =
     /personal|individual|income tax|salary|monthly|gaji|pendapatan|tax payable|how much tax/.test(
       lower
@@ -74,6 +83,180 @@ export function detectAgentTool(message: string): AgentToolName | null {
   }
 
   return null;
+}
+
+function extractMoneyAfter(message: string, labelPattern: string): number | null {
+  const normalized = message.replace(/,/g, "").replace(/\s+/g, " ");
+  const match = normalized.match(
+    new RegExp(
+      `(?:${labelPattern})[^0-9]*(?:RM|rm)?\\s*(\\d+(?:\\.\\d+)?)\\s*(million|juta|m|k|K|ribu)?`,
+      "i"
+    )
+  );
+  if (!match) return null;
+
+  let amount = Number.parseFloat(match[1]);
+  const suffix = match[2]?.toLowerCase();
+  if (suffix === "million" || suffix === "juta" || suffix === "m") {
+    amount *= 1_000_000;
+  } else if (suffix === "k" || suffix === "ribu") {
+    amount *= 1_000;
+  }
+
+  return Number.isFinite(amount) && amount > 0 ? amount : null;
+}
+
+function extractChargeableIncome(message: string): number | null {
+  return (
+    extractMoneyAfter(message, "chargeable\\s+income|taxable\\s+income") ??
+    extractMoneyAmount(message)
+  );
+}
+
+function extractPaidUpCapital(message: string): number | null {
+  return extractMoneyAfter(
+    message,
+    "paid[-\\s]?up\\s+capital|modal\\s+berbayar|share\\s+capital"
+  );
+}
+
+function extractAnnualRevenue(message: string): number | null {
+  return extractMoneyAfter(
+    message,
+    "annual\\s+revenue|revenue|turnover|sales|hasil"
+  );
+}
+
+function formatCorporateBandBreakdown(
+  result: ReturnType<typeof calculateCorporateTax>
+): string[] {
+  return result.bandBreakdown.map((bandResult) => {
+    const bandMax =
+      bandResult.band.max === Infinity ? "above" : formatRM(bandResult.band.max);
+    return `Band ${bandResult.band.label}: ${formatRM(bandResult.taxableInBand)} taxed at ${bandResult.band.rate * 100}% (${bandMax}) = ${formatRM(bandResult.taxForBand)}.`;
+  });
+}
+
+function buildCorporateTaxContext(message: string): AgentContextResult {
+  const lower = message.toLowerCase();
+  const chargeableIncome = extractChargeableIncome(message);
+
+  if (chargeableIncome === null) {
+    const question =
+      "What is the company chargeable income in RM for the corporate tax estimate?";
+    return {
+      ...emptyResult,
+      toolName: "corporate_tax_calculator",
+      context: followUpContext(question),
+      needsFollowUp: true,
+      followUpQuestion: question,
+      missingFields: [{ field: "chargeableIncome", question }],
+    };
+  }
+
+  const wantsStandard =
+    /non[-\s]?sme|not\s+(?:an?\s+)?sme|standard|not\s+small\s+and\s+medium/.test(
+      lower
+    );
+  const wantsSme =
+    !wantsStandard &&
+    /sme|small\s+and\s+medium|small\s+medium|中小|pkb/.test(lower);
+
+  const paidUpCapital = extractPaidUpCapital(message);
+  const annualRevenue = extractAnnualRevenue(message);
+
+  if (wantsSme && (paidUpCapital === null || annualRevenue === null)) {
+    const question =
+      "What are the company's paid-up capital and annual revenue in RM for the SME corporate tax check?";
+    return {
+      ...emptyResult,
+      toolName: "corporate_tax_calculator",
+      context: followUpContext(question),
+      needsFollowUp: true,
+      followUpQuestion: question,
+      missingFields: [
+        ...(paidUpCapital === null
+          ? [{ field: "paidUpCapital", question }]
+          : []),
+        ...(annualRevenue === null
+          ? [{ field: "annualRevenue", question }]
+          : []),
+      ],
+    };
+  }
+
+  const isSubsidiaryOfLargeCompany =
+    /subsidiary|related\s+company|large\s+company\s+group/.test(lower);
+  const foreignOwnershipOver20Pct =
+    /foreign\s+ownership.*(?:over|above|>|more\s+than)\s*20|foreign-owned|foreign\s+owned/.test(
+      lower
+    );
+
+  if (wantsSme) {
+    const result = calculateCorporateTax({
+      yearOfAssessment: 2025,
+      chargeableIncome,
+      isSme: true,
+      paidUpCapital: paidUpCapital ?? 0,
+      annualRevenue: annualRevenue ?? 0,
+      isSubsidiaryOfLargeCompany,
+      foreignOwnershipOver20Pct,
+    });
+
+    return {
+      ...emptyResult,
+      toolName: "corporate_tax_calculator",
+      context: exactContext("SME corporate tax (YA2025)", [
+        `Chargeable income: ${formatRM(result.chargeableIncome)}.`,
+        `Paid-up capital: ${formatRM(paidUpCapital ?? 0)}.`,
+        `Annual revenue: ${formatRM(annualRevenue ?? 0)}.`,
+        `SME qualified: ${result.isSmeQualified ? "yes" : "no"}.`,
+        `Total tax: ${formatRM(result.totalTax)}.`,
+        `Effective tax rate: ${result.effectiveRate}%.`,
+        ...formatCorporateBandBreakdown(result),
+      ]),
+      usedDeterministic: true,
+    };
+  }
+
+  const standardResult = calculateCorporateTax({
+    yearOfAssessment: 2025,
+    chargeableIncome,
+    isSme: false,
+    paidUpCapital: paidUpCapital ?? 9_999_999_999,
+    annualRevenue: annualRevenue ?? 9_999_999_999,
+  });
+
+  const lines = [
+    `Chargeable income: ${formatRM(standardResult.chargeableIncome)}.`,
+    "SME qualified: no.",
+    `Total tax: ${formatRM(standardResult.totalTax)}.`,
+    `Effective tax rate: ${standardResult.effectiveRate}%.`,
+    ...formatCorporateBandBreakdown(standardResult),
+  ];
+
+  if (!wantsStandard) {
+    const smeResult = calculateCorporateTax({
+      yearOfAssessment: 2025,
+      chargeableIncome,
+      isSme: true,
+      paidUpCapital: paidUpCapital ?? 2_500_000,
+      annualRevenue: annualRevenue ?? 49_999_999,
+    });
+    lines.push(
+      "",
+      "If the company qualifies for SME rates:",
+      `SME total tax: ${formatRM(smeResult.totalTax)}.`,
+      `SME effective tax rate: ${smeResult.effectiveRate}%.`
+    );
+  }
+
+  return {
+    ...emptyResult,
+    toolName: "corporate_tax_calculator",
+    context: exactContext("Standard corporate tax (YA2025)", lines),
+    usedDeterministic: true,
+  };
 }
 
 function buildEInvoiceContext(message: string): AgentContextResult {
@@ -256,6 +439,9 @@ export function buildDeterministicAgentContext(
   }
   if (toolName === "sst_checker") {
     return buildSstContext(message);
+  }
+  if (toolName === "corporate_tax_calculator") {
+    return buildCorporateTaxContext(message);
   }
   if (toolName === "personal_tax_calculator") {
     return buildPersonalTaxContext(message);

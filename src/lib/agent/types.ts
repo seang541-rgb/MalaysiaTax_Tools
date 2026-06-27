@@ -1,7 +1,8 @@
 export type AgentToolName =
   | "personal_tax_calculator"
   | "e_invoice_phase_checker"
-  | "sst_checker";
+  | "sst_checker"
+  | "corporate_tax_calculator";
 
 export interface MissingField {
   field: string;
@@ -16,4 +17,3 @@ export interface AgentContextResult {
   missingFields: MissingField[];
   usedDeterministic: boolean;
 }
-

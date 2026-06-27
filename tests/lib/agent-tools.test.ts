@@ -59,4 +59,45 @@ describe("agent tools", () => {
     expect(result.context).toContain("RM8,000 per month");
     expect(result.context).toContain("FINAL TAX PAYABLE");
   });
+
+  it("detects corporate tax questions", () => {
+    expect(
+      detectAgentTool("My Sdn Bhd chargeable income is RM800k. Calculate corporate tax.")
+    ).toBe("corporate_tax_calculator");
+  });
+
+  it("asks SME qualification follow-up when user asks for SME tax without details", () => {
+    const result = buildDeterministicAgentContext(
+      "My SME company chargeable income is RM800k. How much corporate tax?"
+    );
+
+    expect(result.toolName).toBe("corporate_tax_calculator");
+    expect(result.needsFollowUp).toBe(true);
+    expect(result.followUpQuestion).toContain("paid-up capital");
+    expect(result.followUpQuestion).toContain("annual revenue");
+  });
+
+  it("builds exact SME corporate tax context when qualification details are present", () => {
+    const result = buildDeterministicAgentContext(
+      "My SME company chargeable income RM800k, paid-up capital RM1m, annual revenue RM20m. Calculate corporate tax."
+    );
+
+    expect(result.toolName).toBe("corporate_tax_calculator");
+    expect(result.usedDeterministic).toBe(true);
+    expect(result.context).toContain("EXACT MYTAX FACTS");
+    expect(result.context).toContain("SME corporate tax (YA2025)");
+    expect(result.context).toContain("SME qualified: yes");
+    expect(result.context).toContain("Total tax: RM147,000");
+  });
+
+  it("builds exact standard corporate tax context for non-SME companies", () => {
+    const result = buildDeterministicAgentContext(
+      "Non-SME company chargeable income is RM800k. Calculate corporate tax."
+    );
+
+    expect(result.toolName).toBe("corporate_tax_calculator");
+    expect(result.usedDeterministic).toBe(true);
+    expect(result.context).toContain("Standard corporate tax (YA2025)");
+    expect(result.context).toContain("Total tax: RM192,000");
+  });
 });
