@@ -60,6 +60,50 @@ describe("agent tools", () => {
     expect(result.context).toContain("FINAL TAX PAYABLE");
   });
 
+  it("detects PCB monthly deduction questions before personal tax", () => {
+    expect(
+      detectAgentTool("Single employee monthly salary RM5000, estimate PCB.")
+    ).toBe("pcb_calculator");
+  });
+
+  it("asks for monthly salary before PCB calculation", () => {
+    const result = buildDeterministicAgentContext(
+      "How much PCB should my employer deduct every month?"
+    );
+
+    expect(result.toolName).toBe("pcb_calculator");
+    expect(result.needsFollowUp).toBe(true);
+    expect(result.followUpQuestion).toContain("monthly gross salary");
+  });
+
+  it("builds exact PCB context from the deterministic engine", () => {
+    const result = buildDeterministicAgentContext(
+      "Single employee monthly gross salary RM5000, estimate PCB monthly tax deduction."
+    );
+
+    expect(result.toolName).toBe("pcb_calculator");
+    expect(result.usedDeterministic).toBe(true);
+    expect(result.context).toContain("EXACT MYTAX FACTS");
+    expect(result.context).toContain("PCB monthly tax deduction (YA2025)");
+    expect(result.context).toContain("Monthly gross salary: RM5,000");
+    expect(result.context).toContain("Marital status: single");
+    expect(result.context).toContain("Monthly PCB: RM108.25");
+    expect(result.context).toContain("Annual PCB: RM1,299");
+    expect(result.context).toContain("Annual tax: RM1,299");
+  });
+
+  it("builds exact PCB context with spouse and child relief assumptions", () => {
+    const result = buildDeterministicAgentContext(
+      "Married employee monthly gross salary RM8000, spouse no income, 2 children. Estimate PCB."
+    );
+
+    expect(result.toolName).toBe("pcb_calculator");
+    expect(result.context).toContain("Marital status: married");
+    expect(result.context).toContain("Spouse has income: no");
+    expect(result.context).toContain("Children under 18: 2");
+    expect(result.context).toContain("Monthly PCB: RM381.96");
+  });
+
   it("detects employer contribution questions", () => {
     expect(
       detectAgentTool("Monthly salary RM5000, calculate employer EPF SOCSO EIS.")

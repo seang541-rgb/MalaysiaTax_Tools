@@ -2,8 +2,13 @@ import { checkEInvoicePhase } from "@/engine/e-invoice";
 import { calculateCorporateTax } from "@/engine/corporate";
 import { calculateEmployerContributions } from "@/engine/employer-contributions";
 import { calculatePersonalTax } from "@/engine/personal";
+import { estimateMonthlyPcb } from "@/engine/pcb";
 import { calculateSst } from "@/engine/sst";
-import type { EmployerContributionInput, ReliefClaim } from "@/engine/types";
+import type {
+  EmployerContributionInput,
+  ReliefClaim,
+  TaxCalculationInput,
+} from "@/engine/types";
 import type { AgentContextResult, AgentToolName } from "./types";
 import {
   extractIncomeAmount,
@@ -60,6 +65,14 @@ export function detectAgentTool(message: string): AgentToolName | null {
 
   if (/sst|sales tax|service tax|cukai jualan|cukai perkhidmatan/.test(lower)) {
     return "sst_checker";
+  }
+
+  if (
+    /pcb|mtd|monthly\s+tax\s+deduction|potongan\s+cukai\s+bulanan|monthly\s+deduction|预扣税|每月扣税/.test(
+      lower
+    )
+  ) {
+    return "pcb_calculator";
   }
 
   if (
@@ -162,6 +175,86 @@ function inferMalaysianOrPr(message: string): boolean {
   return !/non[-\s]?malaysian|not\s+malaysian|foreign|expatriate|foreigner/.test(
     message.toLowerCase()
   );
+}
+
+function inferMaritalStatus(message: string): TaxCalculationInput["maritalStatus"] {
+  return /married|spouse|wife|husband|berkahwin|已婚/.test(
+    message.toLowerCase()
+  )
+    ? "married"
+    : "single";
+}
+
+function inferSpouseHasIncome(message: string): boolean {
+  const lower = message.toLowerCase();
+  if (
+    /spouse\s+(?:no|without|zero)\s+income|non[-\s]?working\s+spouse|wife\s+(?:no|without|zero)\s+income|husband\s+(?:no|without|zero)\s+income|配偶无收入/.test(
+      lower
+    )
+  ) {
+    return false;
+  }
+  return true;
+}
+
+function inferNumberOfChildren(message: string): number {
+  const lower = message.toLowerCase();
+  const childMatch = lower.match(/(\d+)\s*(?:children|child|kids|anak|子女|孩子)/);
+  if (!childMatch) return 0;
+
+  const count = Number.parseInt(childMatch[1], 10);
+  return Number.isFinite(count) && count > 0 ? Math.min(count, 20) : 0;
+}
+
+function buildPcbContext(message: string): AgentContextResult {
+  const lower = message.toLowerCase();
+  const salaryLooksAnnual =
+    /annual\s+salary|yearly\s+salary|per\s+year|setahun/.test(lower) &&
+    !/monthly|per\s+month|bulan/.test(lower);
+  const monthlyGrossSalary = salaryLooksAnnual
+    ? null
+    : extractMonthlyGrossSalary(message);
+
+  if (monthlyGrossSalary === null) {
+    const question =
+      "What is the employee's monthly gross salary in RM for the PCB estimate?";
+    return {
+      ...emptyResult,
+      toolName: "pcb_calculator",
+      context: followUpContext(question),
+      needsFollowUp: true,
+      followUpQuestion: question,
+      missingFields: [{ field: "monthlyGrossSalary", question }],
+    };
+  }
+
+  const maritalStatus = inferMaritalStatus(message);
+  const spouseHasIncome =
+    maritalStatus === "married" ? inferSpouseHasIncome(message) : true;
+  const numberOfChildren = inferNumberOfChildren(message);
+  const result = estimateMonthlyPcb({
+    yearOfAssessment: 2025,
+    monthlyGrossSalary,
+    maritalStatus,
+    spouseHasIncome,
+    numberOfChildren,
+  });
+
+  return {
+    ...emptyResult,
+    toolName: "pcb_calculator",
+    context: exactContext("PCB monthly tax deduction (YA2025)", [
+      `Monthly gross salary: ${formatRM(monthlyGrossSalary)}.`,
+      `Marital status: ${maritalStatus}.`,
+      `Spouse has income: ${spouseHasIncome ? "yes" : "no"}.`,
+      `Children under 18: ${numberOfChildren}.`,
+      `Monthly PCB: ${formatRM(result.monthlyPcb)}.`,
+      `Annual PCB: ${formatRM(result.annualPcb)}.`,
+      `Annual tax: ${formatRM(result.annualTax)}.`,
+      `Rounding difference: ${formatRM(result.difference)}.`,
+    ]),
+    usedDeterministic: true,
+  };
 }
 
 function buildEmployerContributionContext(message: string): AgentContextResult {
@@ -530,6 +623,9 @@ export function buildDeterministicAgentContext(
   }
   if (toolName === "corporate_tax_calculator") {
     return buildCorporateTaxContext(message);
+  }
+  if (toolName === "pcb_calculator") {
+    return buildPcbContext(message);
   }
   if (toolName === "employer_contribution_calculator") {
     return buildEmployerContributionContext(message);

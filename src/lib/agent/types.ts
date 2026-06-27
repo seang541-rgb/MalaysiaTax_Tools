@@ -3,7 +3,8 @@ export type AgentToolName =
   | "e_invoice_phase_checker"
   | "sst_checker"
   | "corporate_tax_calculator"
-  | "employer_contribution_calculator";
+  | "employer_contribution_calculator"
+  | "pcb_calculator";
 
 export interface MissingField {
   field: string;
