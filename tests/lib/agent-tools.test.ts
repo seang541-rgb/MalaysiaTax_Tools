@@ -60,6 +60,51 @@ describe("agent tools", () => {
     expect(result.context).toContain("FINAL TAX PAYABLE");
   });
 
+  it("detects employer contribution questions", () => {
+    expect(
+      detectAgentTool("Monthly salary RM5000, calculate employer EPF SOCSO EIS.")
+    ).toBe("employer_contribution_calculator");
+  });
+
+  it("asks for monthly salary before employer contribution calculation", () => {
+    const result = buildDeterministicAgentContext(
+      "How much EPF SOCSO EIS must the employer pay?"
+    );
+
+    expect(result.toolName).toBe("employer_contribution_calculator");
+    expect(result.needsFollowUp).toBe(true);
+    expect(result.followUpQuestion).toContain("monthly gross salary");
+  });
+
+  it("builds exact employer contribution context for a Malaysian employee below 60", () => {
+    const result = buildDeterministicAgentContext(
+      "Employee monthly gross salary RM5000, age below 60, Malaysian. Calculate employer EPF SOCSO EIS."
+    );
+
+    expect(result.toolName).toBe("employer_contribution_calculator");
+    expect(result.usedDeterministic).toBe(true);
+    expect(result.context).toContain("EXACT MYTAX FACTS");
+    expect(result.context).toContain("Employer statutory contributions (monthly)");
+    expect(result.context).toContain("Monthly gross salary: RM5,000");
+    expect(result.context).toContain("EPF employer: RM650");
+    expect(result.context).toContain("SOCSO employer: RM87.5");
+    expect(result.context).toContain("EIS employer: RM10");
+    expect(result.context).toContain("Total employer portion: RM747.5");
+    expect(result.context).toContain("Total employer cost: RM5,747.5");
+  });
+
+  it("builds exact employer contribution context for a non-Malaysian employee", () => {
+    const result = buildDeterministicAgentContext(
+      "Foreign employee monthly salary RM5000, below 60. Calculate employer EPF SOCSO EIS."
+    );
+
+    expect(result.toolName).toBe("employer_contribution_calculator");
+    expect(result.context).toContain("Malaysian/PR: no");
+    expect(result.context).toContain("SOCSO employer: RM0");
+    expect(result.context).toContain("EIS employer: RM0");
+    expect(result.context).toContain("Total employer portion: RM650");
+  });
+
   it("detects corporate tax questions", () => {
     expect(
       detectAgentTool("My Sdn Bhd chargeable income is RM800k. Calculate corporate tax.")

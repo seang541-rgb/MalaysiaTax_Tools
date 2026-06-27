@@ -1,8 +1,9 @@
 import { checkEInvoicePhase } from "@/engine/e-invoice";
 import { calculateCorporateTax } from "@/engine/corporate";
+import { calculateEmployerContributions } from "@/engine/employer-contributions";
 import { calculatePersonalTax } from "@/engine/personal";
 import { calculateSst } from "@/engine/sst";
-import type { ReliefClaim } from "@/engine/types";
+import type { EmployerContributionInput, ReliefClaim } from "@/engine/types";
 import type { AgentContextResult, AgentToolName } from "./types";
 import {
   extractIncomeAmount,
@@ -59,6 +60,14 @@ export function detectAgentTool(message: string): AgentToolName | null {
 
   if (/sst|sales tax|service tax|cukai jualan|cukai perkhidmatan/.test(lower)) {
     return "sst_checker";
+  }
+
+  if (
+    /employer\s+contribution|employer\s+cost|statutory\s+contribution|epf|kwsp|socso|perkeso|eis|sip|公积金|社险|就业保险/.test(
+      lower
+    )
+  ) {
+    return "employer_contribution_calculator";
   }
 
   if (
@@ -125,6 +134,85 @@ function extractAnnualRevenue(message: string): number | null {
     message,
     "annual\\s+revenue|revenue|turnover|sales|hasil"
   );
+}
+
+function extractMonthlyGrossSalary(message: string): number | null {
+  return (
+    extractMoneyAfter(
+      message,
+      "monthly\\s+gross\\s+salary|gross\\s+salary|monthly\\s+salary|monthly\\s+wage|salary|wage|gaji"
+    ) ?? extractMoneyAmount(message)
+  );
+}
+
+function inferEmployeeAgeBand(
+  message: string
+): EmployerContributionInput["employeeAge"] {
+  const lower = message.toLowerCase();
+  if (/above\s+65|over\s+65|older\s+than\s+65|65\+/.test(lower)) {
+    return "above65";
+  }
+  if (/60\s*(?:to|-|and)\s*65|age\s+6[0-5]|aged\s+6[0-5]/.test(lower)) {
+    return "60to65";
+  }
+  return "below60";
+}
+
+function inferMalaysianOrPr(message: string): boolean {
+  return !/non[-\s]?malaysian|not\s+malaysian|foreign|expatriate|foreigner/.test(
+    message.toLowerCase()
+  );
+}
+
+function buildEmployerContributionContext(message: string): AgentContextResult {
+  const lower = message.toLowerCase();
+  const salaryLooksAnnual =
+    /annual\s+salary|yearly\s+salary|per\s+year|setahun/.test(lower) &&
+    !/monthly|per\s+month|bulan/.test(lower);
+  const monthlyGrossSalary = salaryLooksAnnual
+    ? null
+    : extractMonthlyGrossSalary(message);
+
+  if (monthlyGrossSalary === null) {
+    const question =
+      "What is the employee's monthly gross salary in RM for the employer contribution calculation?";
+    return {
+      ...emptyResult,
+      toolName: "employer_contribution_calculator",
+      context: followUpContext(question),
+      needsFollowUp: true,
+      followUpQuestion: question,
+      missingFields: [{ field: "monthlyGrossSalary", question }],
+    };
+  }
+
+  const employeeAge = inferEmployeeAgeBand(message);
+  const isMalaysianOrPR = inferMalaysianOrPr(message);
+  const result = calculateEmployerContributions({
+    monthlyGrossSalary,
+    employeeAge,
+    isMalaysianOrPR,
+  });
+
+  return {
+    ...emptyResult,
+    toolName: "employer_contribution_calculator",
+    context: exactContext("Employer statutory contributions (monthly)", [
+      `Monthly gross salary: ${formatRM(result.employee.monthlyGrossSalary)}.`,
+      `Employee age band: ${employeeAge}.`,
+      `Malaysian/PR: ${isMalaysianOrPR ? "yes" : "no"}.`,
+      `EPF employer: ${formatRM(result.epfEmployer)}.`,
+      `EPF employee: ${formatRM(result.epfEmployee)}.`,
+      `SOCSO employer: ${formatRM(result.socsoEmployer)}.`,
+      `SOCSO employee: ${formatRM(result.socsoEmployee)}.`,
+      `EIS employer: ${formatRM(result.eisEmployer)}.`,
+      `EIS employee: ${formatRM(result.eisEmployee)}.`,
+      `Total employer portion: ${formatRM(result.totalEmployer)}.`,
+      `Total employee deductions: ${formatRM(result.totalEmployee)}.`,
+      `Total employer cost: ${formatRM(result.totalCost)}.`,
+    ]),
+    usedDeterministic: true,
+  };
 }
 
 function formatCorporateBandBreakdown(
@@ -442,6 +530,9 @@ export function buildDeterministicAgentContext(
   }
   if (toolName === "corporate_tax_calculator") {
     return buildCorporateTaxContext(message);
+  }
+  if (toolName === "employer_contribution_calculator") {
+    return buildEmployerContributionContext(message);
   }
   if (toolName === "personal_tax_calculator") {
     return buildPersonalTaxContext(message);
