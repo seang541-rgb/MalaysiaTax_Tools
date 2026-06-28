@@ -119,8 +119,23 @@ Before deploying, run:
 npm run lint
 npm run test
 npm run build
+npm run readiness:prod
 npm audit --audit-level=high
 ```
+
+`npm run readiness:prod` reads `.env.local` without printing secrets and checks:
+
+- required Supabase, chat, embedding, app URL, and `ADMIN_EMAIL` env vars;
+- local SQL safety gates such as billing authenticated read grants and AI log
+  agent/provider columns;
+- remote Supabase REST access for `ai_chat_logs.provider_metadata`,
+  `tax_documents`, and `tax_chunks`.
+
+If the readiness check reports that `ai_chat_logs.provider_metadata` is missing,
+run `supabase/ai-chat-logs.sql` in the Supabase SQL Editor for the production
+project. If the embedding provider key is missing, set `LLM_EMBED_API_KEY`
+or `LLM_API_KEY` before running the RAG reindex job. If `ADMIN_EMAIL` is missing,
+set it in production before using `/admin/ai-logs` or `/admin/reindex`.
 
 Current npm audit status: the high-severity threshold must pass. The remaining
 known moderate finding is Next's bundled PostCSS advisory; do not use

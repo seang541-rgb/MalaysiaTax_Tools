@@ -92,8 +92,15 @@ or the admin page:
 npm run lint
 npm run test
 npm run build
+npm run readiness:prod
 npm audit --audit-level=high
 ```
+
+`npm run readiness:prod` checks required production env vars, the local Supabase
+SQL files, remote Supabase RAG tables, and the `ai_chat_logs.provider_metadata`
+schema. If it reports a missing AI log column, rerun `supabase/ai-chat-logs.sql`
+in the Supabase SQL Editor. If it reports missing embedding/admin env, set
+`LLM_EMBED_API_KEY` (or `LLM_API_KEY`) and `ADMIN_EMAIL` before reindexing.
 
 ## Deployment
 
