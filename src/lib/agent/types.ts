@@ -27,4 +27,6 @@ export interface AgentContextResult {
   followUpQuestion: string | null;
   missingFields: MissingField[];
   usedDeterministic: boolean;
+  calculatorLabel: string | null;
+  calculatorPath: string | null;
 }

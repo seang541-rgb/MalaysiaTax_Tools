@@ -43,7 +43,86 @@ const emptyResult: AgentContextResult = {
   followUpQuestion: null,
   missingFields: [],
   usedDeterministic: false,
+  calculatorLabel: null,
+  calculatorPath: null,
 };
+
+const calculatorLinks: Record<
+  AgentToolName,
+  { label: string; path: string }
+> = {
+  personal_tax_calculator: {
+    label: "Personal Tax Calculator",
+    path: "/",
+  },
+  e_invoice_phase_checker: {
+    label: "e-Invoice Checker",
+    path: "/e-invoice",
+  },
+  sst_checker: {
+    label: "SST Calculator",
+    path: "/sst",
+  },
+  corporate_tax_calculator: {
+    label: "Corporate Tax Calculator",
+    path: "/corporate",
+  },
+  employer_contribution_calculator: {
+    label: "Employer Contribution Calculator",
+    path: "/employer",
+  },
+  pcb_calculator: {
+    label: "PCB Calculator",
+    path: "/batch-pcb",
+  },
+  rpgt_calculator: {
+    label: "RPGT Calculator",
+    path: "/rpgt-calculator",
+  },
+  stamp_duty_calculator: {
+    label: "Stamp Duty Calculator",
+    path: "/stamp-duty",
+  },
+  withholding_tax_calculator: {
+    label: "Withholding Tax Calculator",
+    path: "/withholding-tax-calculator",
+  },
+  cp204_calculator: {
+    label: "CP204 Calculator",
+    path: "/cp204-calculator",
+  },
+  capital_allowance_calculator: {
+    label: "Capital Allowance Calculator",
+    path: "/capital-allowance-calculator",
+  },
+  sole_proprietor_tax_calculator: {
+    label: "Sole Proprietor Tax Calculator",
+    path: "/sole-proprietor-tax-calculator",
+  },
+  tax_computation_calculator: {
+    label: "Tax Computation Calculator",
+    path: "/tax-computation-calculator",
+  },
+  joint_assessment_calculator: {
+    label: "Joint Assessment Calculator",
+    path: "/joint-vs-separate-assessment",
+  },
+  batch_pcb_calculator: {
+    label: "Batch PCB Calculator",
+    path: "/batch-pcb",
+  },
+};
+
+function withCalculatorLink(result: AgentContextResult): AgentContextResult {
+  if (!result.toolName) return result;
+
+  const link = calculatorLinks[result.toolName];
+  return {
+    ...result,
+    calculatorLabel: link.label,
+    calculatorPath: link.path,
+  };
+}
 
 function formatRM(amount: number): string {
   return `RM${amount.toLocaleString("en-MY", {
@@ -1489,49 +1568,49 @@ export function buildDeterministicAgentContext(
   const toolName = detectAgentTool(message);
 
   if (toolName === "e_invoice_phase_checker") {
-    return buildEInvoiceContext(message);
+    return withCalculatorLink(buildEInvoiceContext(message));
   }
   if (toolName === "sst_checker") {
-    return buildSstContext(message);
+    return withCalculatorLink(buildSstContext(message));
   }
   if (toolName === "corporate_tax_calculator") {
-    return buildCorporateTaxContext(message);
+    return withCalculatorLink(buildCorporateTaxContext(message));
   }
   if (toolName === "rpgt_calculator") {
-    return buildRpgtContext(message);
+    return withCalculatorLink(buildRpgtContext(message));
   }
   if (toolName === "stamp_duty_calculator") {
-    return buildStampDutyContext(message);
+    return withCalculatorLink(buildStampDutyContext(message));
   }
   if (toolName === "withholding_tax_calculator") {
-    return buildWithholdingTaxContext(message);
+    return withCalculatorLink(buildWithholdingTaxContext(message));
   }
   if (toolName === "cp204_calculator") {
-    return buildCp204Context(message);
+    return withCalculatorLink(buildCp204Context(message));
   }
   if (toolName === "capital_allowance_calculator") {
-    return buildCapitalAllowanceContext(message);
+    return withCalculatorLink(buildCapitalAllowanceContext(message));
   }
   if (toolName === "sole_proprietor_tax_calculator") {
-    return buildSoleProprietorContext(message);
+    return withCalculatorLink(buildSoleProprietorContext(message));
   }
   if (toolName === "tax_computation_calculator") {
-    return buildTaxComputationContext(message);
+    return withCalculatorLink(buildTaxComputationContext(message));
   }
   if (toolName === "joint_assessment_calculator") {
-    return buildJointAssessmentContext(message);
+    return withCalculatorLink(buildJointAssessmentContext(message));
   }
   if (toolName === "batch_pcb_calculator") {
-    return buildBatchPcbContext(message);
+    return withCalculatorLink(buildBatchPcbContext(message));
   }
   if (toolName === "pcb_calculator") {
-    return buildPcbContext(message);
+    return withCalculatorLink(buildPcbContext(message));
   }
   if (toolName === "employer_contribution_calculator") {
-    return buildEmployerContributionContext(message);
+    return withCalculatorLink(buildEmployerContributionContext(message));
   }
   if (toolName === "personal_tax_calculator") {
-    return buildPersonalTaxContext(message);
+    return withCalculatorLink(buildPersonalTaxContext(message));
   }
 
   return emptyResult;

@@ -26,6 +26,14 @@ export interface AgentTurnResult {
   usedDeterministic: boolean;
 }
 
+function calculatorContext(agentContext: AgentContextResult | null): string {
+  if (!agentContext?.calculatorLabel || !agentContext.calculatorPath) {
+    return "";
+  }
+
+  return `\nCalculator link: [${agentContext.calculatorLabel}](${agentContext.calculatorPath}). Include this link when giving the user next steps.\n`;
+}
+
 export function buildAgentTurn(input: AgentTurnInput): AgentTurnResult {
   const agentContext = input.userMessage
     ? buildDeterministicAgentContext(input.userMessage)
@@ -33,7 +41,7 @@ export function buildAgentTurn(input: AgentTurnInput): AgentTurnResult {
   const usedDeterministic = agentContext?.usedDeterministic ?? false;
   const systemPrompt = buildChatSystemPrompt({
     locale: input.locale,
-    deterministicContext: agentContext?.context ?? "",
+    deterministicContext: `${agentContext?.context ?? ""}${calculatorContext(agentContext)}`,
     usedDeterministic,
     ragContext: input.ragContext,
   });
@@ -72,11 +80,15 @@ export function buildDeterministicFallbackAnswer(
         !line.startsWith("IMPORTANT:")
     )
     .join("\n");
+  const link =
+    agentContext.calculatorLabel && agentContext.calculatorPath
+      ? `\n\nCalculator: [${agentContext.calculatorLabel}](${agentContext.calculatorPath})`
+      : "";
 
   if (locale === "zh") {
     return [
       "AI 说明服务暂时无法连接，但 MYTax 已经完成确定性计算：",
-      facts,
+      `${facts}${link}`,
       "请把以上内容视为计算器参考结果；正式申报前建议再向 LHDN 或税务专业人士确认。",
     ].join("\n\n");
   }
@@ -84,14 +96,14 @@ export function buildDeterministicFallbackAnswer(
   if (locale === "ms") {
     return [
       "Perkhidmatan penjelasan AI tidak dapat dicapai buat sementara waktu, tetapi MYTax telah mengira keputusan deterministik:",
-      facts,
+      `${facts}${link}`,
       "Sila anggap keputusan ini sebagai rujukan kalkulator sahaja dan semak dengan LHDN atau profesional cukai untuk nasihat rasmi.",
     ].join("\n\n");
   }
 
   return [
     "I could not reach the AI explanation provider, but MYTax already calculated a deterministic MYTax result:",
-    facts,
+    `${facts}${link}`,
     "Please treat this as a calculator result for reference only and consult LHDN or a tax professional for official advice.",
   ].join("\n\n");
 }

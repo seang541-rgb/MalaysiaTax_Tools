@@ -26,6 +26,9 @@ describe("agent orchestrator", () => {
     expect(result.usedPrecalc).toBe(false);
     expect(result.llmMessages[0]).toMatchObject({ role: "system" });
     expect(result.llmMessages[0].content).toContain("EXACT MYTAX FACTS (SST)");
+    expect(result.llmMessages[0].content).toContain(
+      "Calculator link: [SST Calculator](/sst)"
+    );
     expect(result.llmMessages[1]).toEqual({
       role: "user",
       content:
@@ -74,6 +77,7 @@ describe("agent orchestrator", () => {
 
     expect(fallback).toContain("deterministic MYTax result");
     expect(fallback).toContain("Monthly PCB: RM108.25");
+    expect(fallback).toContain("[PCB Calculator](/batch-pcb)");
     expect(fallback).not.toContain("IMPORTANT:");
     expect(fallback).not.toContain("END EXACT MYTAX FACTS");
   });
