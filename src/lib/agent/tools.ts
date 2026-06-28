@@ -9,6 +9,7 @@ import { calculateEmployerContributions } from "@/engine/employer-contributions"
 import { calculatePersonalTax } from "@/engine/personal";
 import { estimateMonthlyPcb } from "@/engine/pcb";
 import { calculateRpgt, type RpgtDisposerType } from "@/engine/rpgt";
+import { calculateSoleProprietorTax } from "@/engine/sole-proprietor";
 import { calculateStampDuty, type StampBuyerType } from "@/engine/stamp-duty";
 import { calculateSst } from "@/engine/sst";
 import {
@@ -112,6 +113,14 @@ export function detectAgentTool(message: string): AgentToolName | null {
 
   if (/cp204|cp204a|cp207|estimated\s+tax|tax\s+estimate/.test(lower)) {
     return "cp204_calculator";
+  }
+
+  if (
+    /sole\s+proprietor|sole\s+proprietorship|self[-\s]?employed|business\s+revenue|business\s+income|form\s+b/.test(
+      lower
+    )
+  ) {
+    return "sole_proprietor_tax_calculator";
   }
 
   if (
@@ -363,6 +372,38 @@ function inferNewVehicleUnder150k(message: string): boolean {
   return /new\s+(?:motor\s+)?vehicle|new\s+car|under\s+rm?150k|below\s+rm?150k|<=\s*rm?150k/.test(
     message.toLowerCase()
   );
+}
+
+function extractBusinessRevenue(message: string): number | null {
+  return extractMoneyAfter(
+    message,
+    "business\\s+revenue|business\\s+income|revenue|sales|turnover"
+  );
+}
+
+function extractBusinessExpenses(message: string): number {
+  return (
+    extractMoneyAfter(
+      message,
+      "business\\s+expenses|allowable\\s+expenses|expenses|costs"
+    ) ?? 0
+  );
+}
+
+function extractCapitalAllowanceAmount(message: string): number {
+  return extractMoneyAfter(message, "capital\\s+allowance") ?? 0;
+}
+
+function extractOtherIncome(message: string): number {
+  return extractMoneyAfter(message, "other\\s+income") ?? 0;
+}
+
+function extractTotalReliefs(message: string): number {
+  return extractMoneyAfter(message, "total\\s+reliefs|reliefs") ?? 9_000;
+}
+
+function extractZakatAmount(message: string): number {
+  return extractMoneyAfter(message, "zakat") ?? 0;
 }
 
 function extractMonthlyGrossSalary(message: string): number | null {
@@ -815,6 +856,58 @@ function buildCapitalAllowanceContext(message: string): AgentContextResult {
   };
 }
 
+function buildSoleProprietorContext(message: string): AgentContextResult {
+  const businessRevenue = extractBusinessRevenue(message);
+  if (businessRevenue === null) {
+    const question =
+      "What is the business revenue in RM for the sole proprietor tax calculation?";
+    return {
+      ...emptyResult,
+      toolName: "sole_proprietor_tax_calculator",
+      context: followUpContext(question),
+      needsFollowUp: true,
+      followUpQuestion: question,
+      missingFields: [{ field: "businessRevenue", question }],
+    };
+  }
+
+  const maritalStatus = inferMaritalStatus(message);
+  const result = calculateSoleProprietorTax({
+    yearOfAssessment: 2025,
+    businessRevenue,
+    businessExpenses: extractBusinessExpenses(message),
+    capitalAllowance: extractCapitalAllowanceAmount(message),
+    otherIncome: extractOtherIncome(message),
+    totalReliefs: extractTotalReliefs(message),
+    maritalStatus,
+    spouseHasIncome:
+      maritalStatus === "married" ? inferSpouseHasIncome(message) : true,
+    zakatAmount: extractZakatAmount(message),
+  });
+
+  return {
+    ...emptyResult,
+    toolName: "sole_proprietor_tax_calculator",
+    context: exactContext("Sole proprietor tax (YA2025)", [
+      `Business revenue: ${formatRM(businessRevenue)}.`,
+      `Business expenses: ${formatRM(extractBusinessExpenses(message))}.`,
+      `Capital allowance: ${formatRM(extractCapitalAllowanceAmount(message))}.`,
+      `Other income: ${formatRM(result.otherIncome)}.`,
+      `Adjusted business income: ${formatRM(result.adjustedBusinessIncome)}.`,
+      `Business loss: ${formatRM(result.businessLoss)}.`,
+      `Total income: ${formatRM(result.totalIncome)}.`,
+      `Total reliefs: ${formatRM(result.totalReliefs)}.`,
+      `Chargeable income: ${formatRM(result.chargeableIncome)}.`,
+      `Tax before rebate: ${formatRM(result.taxBeforeRebate)}.`,
+      `Rebate: ${formatRM(result.rebateAmount)}.`,
+      `Zakat deduction: ${formatRM(result.zakatDeduction)}.`,
+      `Tax payable: ${formatRM(result.taxPayable)}.`,
+      `Effective rate: ${result.effectiveRate}%.`,
+    ]),
+    usedDeterministic: true,
+  };
+}
+
 function buildCorporateTaxContext(message: string): AgentContextResult {
   const lower = message.toLowerCase();
   const chargeableIncome = extractChargeableIncome(message);
@@ -1135,6 +1228,9 @@ export function buildDeterministicAgentContext(
   }
   if (toolName === "capital_allowance_calculator") {
     return buildCapitalAllowanceContext(message);
+  }
+  if (toolName === "sole_proprietor_tax_calculator") {
+    return buildSoleProprietorContext(message);
   }
   if (toolName === "pcb_calculator") {
     return buildPcbContext(message);

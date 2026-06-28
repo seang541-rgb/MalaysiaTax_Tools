@@ -436,4 +436,48 @@ describe("agent tools", () => {
     expect(result.context).toContain("Qualifying expenditure: RM50,000");
     expect(result.context).toContain("Year 1: IA RM10,000, AA RM10,000, total RM20,000");
   });
+
+  it("detects sole proprietor business tax questions", () => {
+    expect(
+      detectAgentTool("Sole proprietor business revenue RM200k, expenses RM80k, capital allowance RM20k. Calculate tax.")
+    ).toBe("sole_proprietor_tax_calculator");
+  });
+
+  it("asks for business revenue before sole proprietor calculation", () => {
+    const result = buildDeterministicAgentContext(
+      "How much tax for my sole proprietorship business?"
+    );
+
+    expect(result.toolName).toBe("sole_proprietor_tax_calculator");
+    expect(result.needsFollowUp).toBe(true);
+    expect(result.followUpQuestion).toContain("business revenue");
+  });
+
+  it("builds exact sole proprietor tax context from the deterministic engine", () => {
+    const result = buildDeterministicAgentContext(
+      "Sole proprietor business revenue RM200k, expenses RM80k, capital allowance RM20k. Calculate tax."
+    );
+
+    expect(result.toolName).toBe("sole_proprietor_tax_calculator");
+    expect(result.usedDeterministic).toBe(true);
+    expect(result.context).toContain("EXACT MYTAX FACTS");
+    expect(result.context).toContain("Sole proprietor tax (YA2025)");
+    expect(result.context).toContain("Business revenue: RM200,000");
+    expect(result.context).toContain("Adjusted business income: RM100,000");
+    expect(result.context).toContain("Total reliefs: RM9,000");
+    expect(result.context).toContain("Chargeable income: RM91,000");
+    expect(result.context).toContain("Tax payable: RM7,690");
+    expect(result.context).toContain("Effective rate: 7.69%");
+  });
+
+  it("builds exact sole proprietor loss context", () => {
+    const result = buildDeterministicAgentContext(
+      "Sole proprietor business revenue RM50k, expenses RM60k, capital allowance RM10k, other income RM30k. Calculate tax."
+    );
+
+    expect(result.toolName).toBe("sole_proprietor_tax_calculator");
+    expect(result.context).toContain("Business loss: RM20,000");
+    expect(result.context).toContain("Total income: RM30,000");
+    expect(result.context).toContain("Tax payable: RM0");
+  });
 });
