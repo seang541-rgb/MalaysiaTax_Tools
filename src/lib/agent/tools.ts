@@ -1,4 +1,8 @@
 import { checkEInvoicePhase } from "@/engine/e-invoice";
+import {
+  calculateCapitalAllowance,
+  type CapitalAssetType,
+} from "@/engine/capital-allowance";
 import { calculateCorporateTax } from "@/engine/corporate";
 import { calculateCp204 } from "@/engine/cp204";
 import { calculateEmployerContributions } from "@/engine/employer-contributions";
@@ -108,6 +112,14 @@ export function detectAgentTool(message: string): AgentToolName | null {
 
   if (/cp204|cp204a|cp207|estimated\s+tax|tax\s+estimate/.test(lower)) {
     return "cp204_calculator";
+  }
+
+  if (
+    /capital\s+allowance|allowance\s+schedule|qualifying\s+expenditure|asset\s+cost|ict\s+equipment|motor\s+vehicle|plant\s+(?:and|&)\s+machinery|industrial\s+building/.test(
+      lower
+    )
+  ) {
+    return "capital_allowance_calculator";
   }
 
   if (
@@ -323,6 +335,34 @@ function extractBasisPeriodMonths(message: string): number | undefined {
 
   const months = Number.parseInt(match[1], 10);
   return Number.isFinite(months) && months > 0 ? months : undefined;
+}
+
+function extractAssetCost(message: string): number | null {
+  return (
+    extractMoneyAfter(
+      message,
+      "asset\\s+cost|cost|purchase\\s+cost|qualifying\\s+expenditure"
+    ) ?? extractMoneyAmount(message)
+  );
+}
+
+function inferCapitalAssetType(message: string): CapitalAssetType {
+  const lower = message.toLowerCase();
+  if (/ict|computer|software|laptop|equipment/.test(lower)) return "ict";
+  if (/motor\s+vehicle|car|vehicle/.test(lower)) return "motor_vehicle";
+  if (/small\s+value|low\s+value/.test(lower)) return "small_value";
+  if (/office|furniture|fixture/.test(lower)) return "office";
+  if (/industrial\s+building|factory\s+building/.test(lower)) {
+    return "industrial_building";
+  }
+  if (/heavy\s+machinery/.test(lower)) return "heavy_machinery";
+  return "general_pm";
+}
+
+function inferNewVehicleUnder150k(message: string): boolean {
+  return /new\s+(?:motor\s+)?vehicle|new\s+car|under\s+rm?150k|below\s+rm?150k|<=\s*rm?150k/.test(
+    message.toLowerCase()
+  );
 }
 
 function extractMonthlyGrossSalary(message: string): number | null {
@@ -730,6 +770,51 @@ function buildCp204Context(message: string): AgentContextResult {
   };
 }
 
+function buildCapitalAllowanceContext(message: string): AgentContextResult {
+  const cost = extractAssetCost(message);
+  if (cost === null) {
+    const question =
+      "What is the asset cost in RM for the capital allowance calculation?";
+    return {
+      ...emptyResult,
+      toolName: "capital_allowance_calculator",
+      context: followUpContext(question),
+      needsFollowUp: true,
+      followUpQuestion: question,
+      missingFields: [{ field: "assetCost", question }],
+    };
+  }
+
+  const assetType = inferCapitalAssetType(message);
+  const result = calculateCapitalAllowance({
+    assetType,
+    cost,
+    isNewVehicleUnder150k:
+      assetType === "motor_vehicle"
+        ? inferNewVehicleUnder150k(message)
+        : undefined,
+  });
+  const scheduleLines = result.schedule.slice(0, 6).map(
+    (row) =>
+      `Year ${row.year}: IA ${formatRM(row.initialAllowance)}, AA ${formatRM(row.annualAllowance)}, total ${formatRM(row.totalAllowance)}, residual ${formatRM(row.residualExpenditure)}.`
+  );
+
+  return {
+    ...emptyResult,
+    toolName: "capital_allowance_calculator",
+    context: exactContext("Capital allowance (YA2025)", [
+      `Asset type: ${result.assetType}.`,
+      `Asset cost: ${formatRM(result.cost)}.`,
+      `Qualifying expenditure: ${formatRM(result.qualifyingExpenditure)}.`,
+      `Initial allowance rate: ${result.iaRate * 100}%.`,
+      `Annual allowance rate: ${result.aaRate * 100}%.`,
+      `Years to full claim: ${result.yearsToFullClaim}.`,
+      ...scheduleLines,
+    ]),
+    usedDeterministic: true,
+  };
+}
+
 function buildCorporateTaxContext(message: string): AgentContextResult {
   const lower = message.toLowerCase();
   const chargeableIncome = extractChargeableIncome(message);
@@ -1047,6 +1132,9 @@ export function buildDeterministicAgentContext(
   }
   if (toolName === "cp204_calculator") {
     return buildCp204Context(message);
+  }
+  if (toolName === "capital_allowance_calculator") {
+    return buildCapitalAllowanceContext(message);
   }
   if (toolName === "pcb_calculator") {
     return buildPcbContext(message);

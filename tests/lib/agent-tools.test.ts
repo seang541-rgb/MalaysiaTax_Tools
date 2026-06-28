@@ -391,4 +391,49 @@ describe("agent tools", () => {
     expect(result.context).toContain("Excess over buffer: RM40,000");
     expect(result.context).toContain("Penalty amount: RM4,000");
   });
+
+  it("detects capital allowance questions", () => {
+    expect(
+      detectAgentTool("ICT equipment cost RM10k, calculate capital allowance.")
+    ).toBe("capital_allowance_calculator");
+  });
+
+  it("asks for asset cost before capital allowance calculation", () => {
+    const result = buildDeterministicAgentContext(
+      "How much capital allowance can I claim for ICT equipment?"
+    );
+
+    expect(result.toolName).toBe("capital_allowance_calculator");
+    expect(result.needsFollowUp).toBe(true);
+    expect(result.followUpQuestion).toContain("asset cost");
+  });
+
+  it("builds exact capital allowance context for ICT equipment", () => {
+    const result = buildDeterministicAgentContext(
+      "ICT equipment cost RM10k, calculate capital allowance."
+    );
+
+    expect(result.toolName).toBe("capital_allowance_calculator");
+    expect(result.usedDeterministic).toBe(true);
+    expect(result.context).toContain("EXACT MYTAX FACTS");
+    expect(result.context).toContain("Capital allowance (YA2025)");
+    expect(result.context).toContain("Asset type: ict");
+    expect(result.context).toContain("Qualifying expenditure: RM10,000");
+    expect(result.context).toContain("Initial allowance rate: 20%");
+    expect(result.context).toContain("Annual allowance rate: 20%");
+    expect(result.context).toContain("Years to full claim: 4");
+    expect(result.context).toContain("Year 1: IA RM2,000, AA RM2,000, total RM4,000, residual RM6,000");
+  });
+
+  it("builds exact capital allowance context for capped motor vehicles", () => {
+    const result = buildDeterministicAgentContext(
+      "Motor vehicle cost RM200k, calculate capital allowance."
+    );
+
+    expect(result.toolName).toBe("capital_allowance_calculator");
+    expect(result.context).toContain("Asset type: motor_vehicle");
+    expect(result.context).toContain("Asset cost: RM200,000");
+    expect(result.context).toContain("Qualifying expenditure: RM50,000");
+    expect(result.context).toContain("Year 1: IA RM10,000, AA RM10,000, total RM20,000");
+  });
 });
