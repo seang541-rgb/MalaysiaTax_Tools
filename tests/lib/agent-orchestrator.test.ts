@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import {
   buildAgentTurn,
   buildAgentTurnWithRetrieval,
@@ -174,5 +174,28 @@ describe("agent orchestrator", () => {
     expect(result.usedRag).toBe(false);
     expect(result.agentContext?.toolName).toBe("sst_checker");
     expect(result.llmMessages[0].content).toContain("EXACT MYTAX FACTS (SST)");
+  });
+
+  it("skips retrieval when the deterministic tool layer fails", async () => {
+    const retrieveContext = vi.fn(async () => "retrieved");
+    const result = await buildAgentTurnWithRetrieval({
+      locale: "en",
+      userMessage: "Service tax taxable revenue RM700k, do I need SST?",
+      messages: [
+        {
+          role: "user",
+          content: "Service tax taxable revenue RM700k, do I need SST?",
+        },
+      ],
+      retrieveContext,
+      buildContext: () => {
+        throw new Error("tool unavailable");
+      },
+    });
+
+    expect(result.agentFailureAnswer).toContain(
+      "I could not complete the MYTax tool calculation"
+    );
+    expect(retrieveContext).not.toHaveBeenCalled();
   });
 });

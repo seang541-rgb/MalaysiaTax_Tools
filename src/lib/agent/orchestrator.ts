@@ -80,19 +80,31 @@ export function buildAgentTurn(input: AgentTurnInput): AgentTurnResult {
 export async function buildAgentTurnWithRetrieval(
   input: AgentTurnWithRetrievalInput
 ): Promise<AgentTurnResult> {
-  let ragContext = "";
+  const baseTurn = buildAgentTurn({
+    ...input,
+    ragContext: "",
+  });
 
-  if (input.userMessage && input.retrieveContext) {
-    try {
-      ragContext = await input.retrieveContext(input.userMessage);
-    } catch {
-      ragContext = "";
-    }
+  if (!input.userMessage || !input.retrieveContext || baseTurn.agentFailureAnswer) {
+    return baseTurn;
+  }
+
+  let ragContext = "";
+  try {
+    ragContext = await input.retrieveContext(input.userMessage);
+  } catch {
+    ragContext = "";
+  }
+
+  if (!ragContext) {
+    return baseTurn;
   }
 
   return buildAgentTurn({
     ...input,
     ragContext,
+    buildContext: () =>
+      baseTurn.agentContext ?? buildDeterministicAgentContext(input.userMessage),
   });
 }
 
