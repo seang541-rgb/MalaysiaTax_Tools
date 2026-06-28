@@ -212,6 +212,7 @@ npm run lint            # Run ESLint
 npm run test            # Run Vitest once
 npm run test:watch      # Run Vitest in watch mode
 npm run readiness:prod  # Check production readiness
+npm run smoke:prod      # Check deployed public pages and auth gates
 npm run billing:env     # Configure local Supabase and Stripe billing env vars
 ```
 
@@ -237,6 +238,7 @@ npm run lint
 npm run test
 npm run build
 npm run readiness:prod
+npm run smoke:prod
 ```
 
 `npm run readiness:prod` checks required production environment variables, local Supabase SQL files, remote Supabase RAG tables, and the `ai_chat_logs.provider_metadata` schema.

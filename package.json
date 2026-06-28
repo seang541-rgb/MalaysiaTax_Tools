@@ -9,6 +9,7 @@
     "lint": "eslint",
     "billing:env": "powershell -ExecutionPolicy Bypass -File scripts/configure-billing-env.ps1",
     "readiness:prod": "node scripts/check-production-readiness.mjs",
+    "smoke:prod": "node scripts/check-production-smoke.mjs",
     "test": "vitest run",
     "test:watch": "vitest"
   },

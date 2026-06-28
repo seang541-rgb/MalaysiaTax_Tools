@@ -28,4 +28,24 @@ describe("billing Supabase schema", () => {
     );
     expect(schema).toContain("to service_role");
   });
+
+  it("keeps Stripe webhook events idempotent", () => {
+    const schema = billingSchema().toLowerCase();
+
+    expect(schema).toContain(
+      "create table if not exists public.stripe_events"
+    );
+    expect(schema).toContain("id text primary key");
+    expect(schema).toContain("alter table public.stripe_events enable row level security");
+  });
+
+  it("grants each new auth user a single signup bonus", () => {
+    const schema = billingSchema().toLowerCase();
+
+    expect(schema).toContain("create or replace function public.handle_new_user()");
+    expect(schema).toContain("create trigger on_auth_user_created");
+    expect(schema).toContain("for each row execute function public.handle_new_user()");
+    expect(schema).toContain("feature = 'signup_bonus'");
+    expect(schema).toContain("on conflict (user_id, feature)");
+  });
 });
