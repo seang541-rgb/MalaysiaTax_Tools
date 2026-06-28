@@ -169,12 +169,12 @@ export function TaxChat() {
           return;
         }
 
-        // Fallback to rule engine on LLM failure
-        const lastUser = allMessages[allMessages.length - 1];
-        const fallback = getTaxAssistantResponse(lastUser.content, locale);
         setMessages((prev) => {
           const updated = [...prev];
-          updated[updated.length - 1] = { role: "assistant", content: fallback };
+          updated[updated.length - 1] = {
+            role: "assistant",
+            content: t("serviceUnavailable"),
+          };
           return updated;
         });
       } finally {

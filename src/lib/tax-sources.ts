@@ -27,6 +27,7 @@ export type TaxTopic =
   | "withholding-tax"
   | "sole-proprietor"
   | "cp204"
+  | "pcb"
   | "capital-allowance"
   | "employer-contributions"
   | "joint-assessment";
@@ -101,6 +102,20 @@ export const TAX_SOURCES: Record<TaxTopic, TaxSourceEntry> = {
       {
         label: "LHDN — Tax Estimation (CP204)",
         url: "https://www.hasil.gov.my/en/company/tax-estimation/",
+      },
+    ],
+  },
+  pcb: {
+    verified: "2026-06",
+    rulePeriod: "YA 2025",
+    sources: [
+      {
+        label: "HASiL - MTD/PCB Payment",
+        url: "https://www.hasil.gov.my/en/employers/mtd-payment/",
+      },
+      {
+        label: "HASiL - Computerized MTD/PCB Specification 2025",
+        url: "https://www.hasil.gov.my/media/mdahzjwi/spesifikasi-kaedah-pengiraan-berkomputer-pcb-2025.pdf",
       },
     ],
   },

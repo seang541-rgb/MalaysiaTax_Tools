@@ -49,6 +49,14 @@ describe("Relief data integrity", () => {
     expect(byId["disabled_spouse"]).toBe(6000);
     expect(byId["disabled_child"]).toBe(8000);
   });
+
+  it("uses the YA2025 RM4,000 education and medical insurance relief cap", () => {
+    const byId = Object.fromEntries(
+      TAX_RELIEFS_YA2025.map((r) => [r.id, r.maxAmount])
+    );
+
+    expect(byId["education_medical_insurance"]).toBe(4000);
+  });
 });
 
 function makeInput(overrides: Partial<TaxCalculationInput> = {}): TaxCalculationInput {

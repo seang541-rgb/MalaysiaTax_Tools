@@ -12,6 +12,7 @@ const aiMessages: Record<string, string> = {
   pageTitle: "AI Tax Assistant",
   placeholder: "Ask a tax question...",
   send: "Send",
+  serviceUnavailable: "MYTax AI is temporarily unavailable. Please try again.",
   subtitle: "Powered by Gemma 4 12B local LLM",
   title: "MYTax AI Assistant",
 };
@@ -177,5 +178,33 @@ describe("TaxChat billing gate", () => {
     expect(
       await screen.findByText("Assumptions: YA2025, resident individual, single")
     ).toBeInTheDocument();
+  });
+
+  it("does not use the local tax assistant as an answer fallback after API failure", async () => {
+    vi.mocked(fetch).mockReset();
+    vi.mocked(fetch)
+      .mockResolvedValueOnce({
+        json: vi.fn(async () => ({ status: "ok", available: true })),
+      } as never)
+      .mockRejectedValueOnce(new Error("network down"));
+
+    render(<TaxChat />);
+
+    await waitFor(() => {
+      expect(fetch).toHaveBeenCalledWith(
+        "/api/chat",
+        expect.objectContaining({ signal: expect.any(AbortSignal) })
+      );
+    });
+
+    fireEvent.change(screen.getByPlaceholderText("Ask a tax question..."), {
+      target: { value: "How much tax for RM5000 salary?" },
+    });
+    fireEvent.click(screen.getByRole("button", { name: "Send" }));
+
+    expect(
+      await screen.findByText("MYTax AI is temporarily unavailable. Please try again.")
+    ).toBeInTheDocument();
+    expect(screen.queryByText(/Estimated Tax/i)).toBeNull();
   });
 });

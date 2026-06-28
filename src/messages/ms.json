@@ -802,7 +802,8 @@
     "send": "Hantar",
     "disclaimer": "Jawapan adalah untuk rujukan sahaja. Rujuk LHDN atau perunding cukai untuk nasihat rasmi.",
     "authRequired": "Sila log masuk untuk menggunakan MYTax AI.",
-    "insufficientCredits": "Credits tidak mencukupi. Sila beli credits di halaman Harga."
+    "insufficientCredits": "Credits tidak mencukupi. Sila beli credits di halaman Harga.",
+    "serviceUnavailable": "MYTax AI tidak tersedia buat sementara waktu. Sila cuba lagi."
   },
   "common": {
     "rm": "RM",

@@ -1,7 +1,10 @@
 import "@testing-library/jest-dom/vitest";
+import fs from "node:fs";
+import path from "node:path";
 import { render, screen } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 import { SourceNote } from "@/components/source-note";
+import { TAX_SOURCES } from "@/lib/tax-sources";
 
 type Locale = "en" | "ms" | "zh";
 
@@ -85,6 +88,37 @@ describe("SourceNote", () => {
 
     expect(screen.getByText(/Comparison rules reviewed/i)).toBeInTheDocument();
     expect(screen.getByText(/Applies to YA 2025/i)).toBeInTheDocument();
+  });
+
+  it("exposes official PCB source metadata for batch PCB tools", () => {
+    const pcbSource = (TAX_SOURCES as Record<string, unknown>).pcb as
+      | { sources: Array<{ label: string; url: string }> }
+      | undefined;
+
+    expect(pcbSource).toBeDefined();
+    expect(pcbSource?.sources).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          label: expect.stringMatching(/MTD|PCB/i),
+          url: expect.stringContaining("hasil.gov.my"),
+        }),
+      ])
+    );
+
+    render(<SourceNote topic={"pcb" as never} />);
+    expect(
+      screen.getAllByRole("link", { name: /MTD|PCB/i }).length
+    ).toBeGreaterThan(0);
+  });
+
+  it("renders PCB source notes on the batch PCB form", () => {
+    const source = fs.readFileSync(
+      path.join(process.cwd(), "src/components/batch-pcb-form.tsx"),
+      "utf8"
+    );
+
+    expect(source).toContain("SourceNote");
+    expect(source).toContain('topic="pcb"');
   });
 
   it("localizes reviewed labels and rule periods for non-English locale", () => {
