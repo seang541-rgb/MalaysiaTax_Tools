@@ -240,6 +240,24 @@ export async function POST(request: NextRequest) {
         let streamFailure: unknown;
 
         try {
+          if (agentTurn.agentContext?.toolName) {
+            controller.enqueue(
+              encoder.encode(
+                `data: ${JSON.stringify({
+                  agent: {
+                    toolName: agentTurn.agentContext.toolName,
+                    needsFollowUp: agentTurn.agentContext.needsFollowUp,
+                    calculatorLabel: agentTurn.agentContext.calculatorLabel,
+                    calculatorPath: agentTurn.agentContext.calculatorPath,
+                    missingFields: agentTurn.agentContext.missingFields.map(
+                      (field) => field.field
+                    ),
+                  },
+                })}\n\n`
+              )
+            );
+          }
+
           while (true) {
             const { done, value } = await reader.read();
             if (done) break;

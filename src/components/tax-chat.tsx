@@ -9,10 +9,22 @@ const DISCLAIMER_ACK_KEY = "mytax.ai.disclaimerAck.v1";
 
 class ChatBillingError extends Error {}
 
+interface AgentStreamMetadata {
+  toolName: string;
+  needsFollowUp: boolean;
+  calculatorLabel: string | null;
+  calculatorPath: string | null;
+  missingFields: string[];
+}
+
+type UiChatMessage = ChatMessage & {
+  agent?: AgentStreamMetadata;
+};
+
 export function TaxChat() {
   const t = useTranslations("aiTax");
   const locale = useLocale();
-  const [messages, setMessages] = useState<ChatMessage[]>([]);
+  const [messages, setMessages] = useState<UiChatMessage[]>([]);
   const [input, setInput] = useState("");
   const [isTyping, setIsTyping] = useState(false);
   const [disclaimerAck, setDisclaimerAck] = useState(true);
@@ -59,7 +71,7 @@ export function TaxChat() {
 
   // Stream response from Ollama
   const streamFromLLM = useCallback(
-    async (allMessages: ChatMessage[]) => {
+    async (allMessages: UiChatMessage[]) => {
       const controller = new AbortController();
       abortRef.current = controller;
 
@@ -107,7 +119,23 @@ export function TaxChat() {
             const data = line.replace(/^data: /, "").trim();
             if (!data || data === "[DONE]") continue;
             try {
-              const { token } = JSON.parse(data);
+              const { agent, token } = JSON.parse(data) as {
+                agent?: AgentStreamMetadata;
+                token?: string;
+              };
+              if (agent) {
+                setMessages((prev) => {
+                  const updated = [...prev];
+                  const last = updated[updated.length - 1];
+                  if (last.role === "assistant") {
+                    updated[updated.length - 1] = {
+                      ...last,
+                      agent,
+                    };
+                  }
+                  return updated;
+                });
+              }
               if (token) {
                 setMessages((prev) => {
                   const updated = [...prev];
@@ -160,7 +188,7 @@ export function TaxChat() {
     const trimmed = input.trim();
     if (!trimmed) return;
 
-    const userMsg: ChatMessage = { role: "user", content: trimmed };
+    const userMsg: UiChatMessage = { role: "user", content: trimmed };
     const newMessages = [...messages, userMsg];
     setMessages((prev) => [...prev, userMsg]);
     setInput("");
@@ -231,6 +259,29 @@ export function TaxChat() {
     });
   };
 
+  const agentStatusLabel = (agent: AgentStreamMetadata) => {
+    if (agent.needsFollowUp) {
+      return locale === "zh"
+        ? "需要补充资料"
+        : locale === "ms"
+          ? "Maklumat diperlukan"
+          : "Needs details";
+    }
+
+    return locale === "zh"
+      ? `工具: ${agent.calculatorLabel ?? agent.toolName}`
+      : locale === "ms"
+        ? `Alat: ${agent.calculatorLabel ?? agent.toolName}`
+        : `Tool: ${agent.calculatorLabel ?? agent.toolName}`;
+  };
+
+  const openCalculatorLabel =
+    locale === "zh"
+      ? "打开计算器"
+      : locale === "ms"
+        ? "Buka kalkulator"
+        : "Open calculator";
+
   return (
     <div className="max-w-2xl mx-auto space-y-3">
       {!disclaimerAck && (
@@ -290,7 +341,27 @@ export function TaxChat() {
               }`}
             >
               {msg.role === "assistant"
-                ? renderContent(msg.content)
+                ? (
+                    <>
+                      {msg.agent && (
+                        <div className="mb-2 flex flex-wrap items-center gap-2 text-[11px] text-muted-foreground">
+                          <span className="rounded bg-background px-2 py-0.5">
+                            {agentStatusLabel(msg.agent)}
+                          </span>
+                          {msg.agent.calculatorLabel &&
+                            msg.agent.calculatorPath && (
+                              <a
+                                href={`/${locale}${msg.agent.calculatorPath}`}
+                                className="rounded bg-background px-2 py-0.5 text-primary underline hover:text-primary/80"
+                              >
+                                {openCalculatorLabel}
+                              </a>
+                            )}
+                        </div>
+                      )}
+                      {renderContent(msg.content)}
+                    </>
+                  )
                 : msg.content}
             </div>
           </div>

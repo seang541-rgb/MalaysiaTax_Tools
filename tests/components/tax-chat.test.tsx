@@ -77,4 +77,37 @@ describe("TaxChat billing gate", () => {
       await screen.findByText("Please sign in to use MYTax AI.")
     ).toBeInTheDocument();
   });
+
+  it("shows agent tool status and calculator link from stream metadata", async () => {
+    vi.mocked(fetch).mockReset();
+    vi.mocked(fetch)
+      .mockResolvedValueOnce({
+        json: vi.fn(async () => ({ status: "ok", available: true })),
+      } as never)
+      .mockResolvedValueOnce(
+        new Response(
+          'data: {"agent":{"toolName":"sst_checker","needsFollowUp":false,"calculatorLabel":"SST Calculator","calculatorPath":"/sst","missingFields":[]}}\n\ndata: {"token":"SST result"}\n\ndata: [DONE]\n\n',
+          { status: 200 }
+        ) as never
+      );
+
+    render(<TaxChat />);
+
+    await waitFor(() => {
+      expect(fetch).toHaveBeenCalledWith(
+        "/api/chat",
+        expect.objectContaining({ signal: expect.any(AbortSignal) })
+      );
+    });
+
+    fireEvent.change(screen.getByPlaceholderText("Ask a tax question..."), {
+      target: { value: "Service tax taxable revenue RM700k" },
+    });
+    fireEvent.click(screen.getByRole("button", { name: "Send" }));
+
+    expect(await screen.findByText("Tool: SST Calculator")).toBeInTheDocument();
+    const link = screen.getByRole("link", { name: "Open calculator" });
+    expect(link).toHaveAttribute("href", "/en/sst");
+    expect(await screen.findByText("SST result")).toBeInTheDocument();
+  });
 });

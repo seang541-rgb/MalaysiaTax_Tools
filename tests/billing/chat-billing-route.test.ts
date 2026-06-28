@@ -232,6 +232,42 @@ describe("AI chat billing gate", () => {
     );
   });
 
+  it("streams agent metadata before provider tokens", async () => {
+    getUserMock.mockResolvedValue({
+      data: { user: { id: "user-1", email: "user@example.com" } },
+    });
+    consumeCreditsMock.mockResolvedValue({ balance: 9 });
+    embedMock.mockRejectedValue(new Error("skip rag"));
+    chatStreamMock.mockResolvedValue(
+      new Response('data: {"choices":[{"delta":{"content":"ok"}}]}\n\ndata: [DONE]\n\n')
+    );
+    const { POST } = await import("@/app/api/chat/route");
+
+    const res = await POST(
+      new Request("http://localhost/api/chat", {
+        method: "POST",
+        body: JSON.stringify({
+          locale: "en",
+          messages: [
+            {
+              role: "user",
+              content:
+                "Do I need to register SST if taxable service revenue is RM700,000?",
+            },
+          ],
+        }),
+      }) as never
+    );
+
+    expect(res.status).toBe(200);
+    const text = await res.text();
+    expect(text).toContain('"agent"');
+    expect(text).toContain('"toolName":"sst_checker"');
+    expect(text).toContain('"calculatorLabel":"SST Calculator"');
+    expect(text).toContain('"calculatorPath":"/sst"');
+    expect(text.indexOf('"agent"')).toBeLessThan(text.indexOf('"token":"ok"'));
+  });
+
   it("asks for SST tax type before calculating ambiguous SST questions", async () => {
     getUserMock.mockResolvedValue({
       data: { user: { id: "user-1", email: "user@example.com" } },
@@ -407,6 +443,7 @@ describe("AI chat billing gate", () => {
 
     expect(res.status).toBe(200);
     const reader = res.body!.getReader();
+    await expect(reader.read()).resolves.toMatchObject({ done: false });
     await expect(reader.read()).resolves.toMatchObject({ done: false });
     await expect(reader.read()).rejects.toThrow("stream broke");
 
