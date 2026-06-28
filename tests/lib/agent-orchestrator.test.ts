@@ -103,4 +103,27 @@ describe("agent orchestrator", () => {
     expect(fallback).toContain("AI 说明服务暂时无法连接");
     expect(fallback).toContain("Monthly PCB: RM108.25");
   });
+
+  it("builds a soft failure answer when a deterministic tool throws", () => {
+    const result = buildAgentTurn({
+      locale: "en",
+      userMessage: "Service tax taxable revenue RM700k, do I need SST?",
+      ragContext: "",
+      messages: [
+        {
+          role: "user",
+          content: "Service tax taxable revenue RM700k, do I need SST?",
+        },
+      ],
+      buildContext: () => {
+        throw new Error("engine unavailable");
+      },
+    });
+
+    expect(result.agentFailureAnswer).toContain(
+      "I could not complete the MYTax tool calculation"
+    );
+    expect(result.agentFailureAnswer).toContain("[MYTax calculators](/)");
+    expect(result.usedDeterministic).toBe(false);
+  });
 });

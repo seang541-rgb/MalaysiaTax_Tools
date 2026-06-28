@@ -164,6 +164,32 @@ export async function POST(request: NextRequest) {
       messages: sanitizedMessages,
     });
 
+    if (agentTurn.agentFailureAnswer) {
+      await logChatInteraction({
+        userId: user.id,
+        locale: typeof locale === "string" ? locale : null,
+        question: userMessage,
+        answer: agentTurn.agentFailureAnswer,
+        usedRag: agentTurn.usedRag,
+        usedPrecalc: false,
+        usedDeterministic: false,
+        agentToolName: null,
+        agentNeedsFollowUp: false,
+        agentMissingFields: [],
+      });
+
+      const payload = `data: ${JSON.stringify({
+        token: agentTurn.agentFailureAnswer,
+      })}\n\ndata: [DONE]\n\n`;
+      return new Response(payload, {
+        headers: {
+          "Content-Type": "text/event-stream",
+          "Cache-Control": "no-cache",
+          Connection: "keep-alive",
+        },
+      });
+    }
+
     const llmRes = await chatStream(agentTurn.llmMessages);
 
     if (!llmRes.ok || !llmRes.body) {

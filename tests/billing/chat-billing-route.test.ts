@@ -6,6 +6,8 @@ const refundCreditsMock = vi.fn();
 const embedMock = vi.fn();
 const chatStreamMock = vi.fn();
 const checkRateLimitMock = vi.fn();
+const buildAgentTurnMock = vi.fn();
+let realBuildAgentTurn: typeof import("@/lib/agent/orchestrator").buildAgentTurn;
 
 class MockInsufficientCreditsError extends Error {
   code = "INSUFFICIENT_CREDITS" as const;
@@ -43,6 +45,17 @@ vi.mock("@/lib/rate-limit", () => ({
   checkRateLimit: checkRateLimitMock,
 }));
 
+vi.mock("@/lib/agent/orchestrator", async (importOriginal) => {
+  const actual =
+    await importOriginal<typeof import("@/lib/agent/orchestrator")>();
+  realBuildAgentTurn = actual.buildAgentTurn;
+  buildAgentTurnMock.mockImplementation(actual.buildAgentTurn);
+  return {
+    ...actual,
+    buildAgentTurn: buildAgentTurnMock,
+  };
+});
+
 describe("AI chat billing gate", () => {
   beforeEach(() => {
     vi.resetModules();
@@ -52,6 +65,8 @@ describe("AI chat billing gate", () => {
     embedMock.mockReset();
     chatStreamMock.mockReset();
     checkRateLimitMock.mockReset();
+    buildAgentTurnMock.mockReset();
+    buildAgentTurnMock.mockImplementation(realBuildAgentTurn);
     checkRateLimitMock.mockResolvedValue({
       allowed: true,
       remaining: 9,
@@ -371,6 +386,39 @@ describe("AI chat billing gate", () => {
     expect(text).toContain("deterministic MYTax result");
     expect(text).toContain("Monthly PCB: RM108.25");
     expect(text).toContain("data: [DONE]");
+    expect(refundCreditsMock).not.toHaveBeenCalled();
+  });
+
+  it("returns a soft failure when the agent tool layer fails before provider work", async () => {
+    getUserMock.mockResolvedValue({
+      data: { user: { id: "user-1", email: "user@example.com" } },
+    });
+    consumeCreditsMock.mockResolvedValue({ balance: 9 });
+    embedMock.mockRejectedValue(new Error("skip rag"));
+    buildAgentTurnMock.mockReturnValue({
+      agentContext: null,
+      agentFailureAnswer:
+        "I could not complete the MYTax tool calculation. Try [MYTax calculators](/).",
+      systemPrompt: "",
+      llmMessages: [],
+      usedRag: false,
+      usedPrecalc: false,
+      usedDeterministic: false,
+    });
+    const { POST } = await import("@/app/api/chat/route");
+
+    const res = await POST(
+      new Request("http://localhost/api/chat", {
+        method: "POST",
+        body: JSON.stringify({
+          messages: [{ role: "user", content: "Service tax revenue RM700k" }],
+        }),
+      }) as never
+    );
+
+    expect(res.status).toBe(200);
+    await expect(res.text()).resolves.toContain("MYTax tool calculation");
+    expect(chatStreamMock).not.toHaveBeenCalled();
     expect(refundCreditsMock).not.toHaveBeenCalled();
   });
 

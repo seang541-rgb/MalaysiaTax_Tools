@@ -12,6 +12,7 @@ export interface AgentTurnInput {
   userMessage: string;
   ragContext: string;
   messages: AgentChatMessage[];
+  buildContext?: typeof buildDeterministicAgentContext;
 }
 
 export interface AgentTurnResult {
@@ -24,6 +25,7 @@ export interface AgentTurnResult {
   usedRag: boolean;
   usedPrecalc: boolean;
   usedDeterministic: boolean;
+  agentFailureAnswer: string | null;
 }
 
 function calculatorContext(agentContext: AgentContextResult | null): string {
@@ -35,9 +37,16 @@ function calculatorContext(agentContext: AgentContextResult | null): string {
 }
 
 export function buildAgentTurn(input: AgentTurnInput): AgentTurnResult {
-  const agentContext = input.userMessage
-    ? buildDeterministicAgentContext(input.userMessage)
-    : null;
+  let agentContext: AgentContextResult | null = null;
+  let agentFailureAnswer: string | null = null;
+
+  try {
+    const buildContext = input.buildContext ?? buildDeterministicAgentContext;
+    agentContext = input.userMessage ? buildContext(input.userMessage) : null;
+  } catch {
+    agentFailureAnswer = buildAgentFailureAnswer(input.locale);
+  }
+
   const usedDeterministic = agentContext?.usedDeterministic ?? false;
   const systemPrompt = buildChatSystemPrompt({
     locale: input.locale,
@@ -59,7 +68,20 @@ export function buildAgentTurn(input: AgentTurnInput): AgentTurnResult {
     usedRag: input.ragContext !== "",
     usedPrecalc: agentContext?.toolName === "personal_tax_calculator",
     usedDeterministic,
+    agentFailureAnswer,
   };
+}
+
+function buildAgentFailureAnswer(locale: unknown): string {
+  if (locale === "zh") {
+    return "我暂时无法完成 MYTax 工具计算。请先使用完整的 [MYTax calculators](/) 页面核对资料，或稍后再试。";
+  }
+
+  if (locale === "ms") {
+    return "Saya tidak dapat melengkapkan pengiraan alat MYTax buat sementara waktu. Sila semak semula di halaman [MYTax calculators](/) atau cuba lagi sebentar nanti.";
+  }
+
+  return "I could not complete the MYTax tool calculation. Please try the full [MYTax calculators](/) page or try again shortly.";
 }
 
 export function buildDeterministicFallbackAnswer(
