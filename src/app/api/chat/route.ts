@@ -10,7 +10,7 @@ import {
 } from "@/lib/billing/credits";
 import { BILLING_FEATURE_COSTS } from "@/lib/billing/plans";
 import {
-  buildAgentTurn,
+  buildAgentTurnWithRetrieval,
   buildDeterministicFallbackAnswer,
   type AgentChatMessage,
 } from "@/lib/agent/orchestrator";
@@ -156,12 +156,11 @@ export async function POST(request: NextRequest) {
       throw error;
     }
 
-    const ragContext = userMessage ? await retrieveContext(userMessage) : "";
-    const agentTurn = buildAgentTurn({
+    const agentTurn = await buildAgentTurnWithRetrieval({
       locale,
       userMessage,
-      ragContext,
       messages: sanitizedMessages,
+      retrieveContext,
     });
 
     if (agentTurn.agentFailureAnswer) {

@@ -6,8 +6,8 @@ const refundCreditsMock = vi.fn();
 const embedMock = vi.fn();
 const chatStreamMock = vi.fn();
 const checkRateLimitMock = vi.fn();
-const buildAgentTurnMock = vi.fn();
-let realBuildAgentTurn: typeof import("@/lib/agent/orchestrator").buildAgentTurn;
+const buildAgentTurnWithRetrievalMock = vi.fn();
+let realBuildAgentTurnWithRetrieval: typeof import("@/lib/agent/orchestrator").buildAgentTurnWithRetrieval;
 
 class MockInsufficientCreditsError extends Error {
   code = "INSUFFICIENT_CREDITS" as const;
@@ -48,11 +48,13 @@ vi.mock("@/lib/rate-limit", () => ({
 vi.mock("@/lib/agent/orchestrator", async (importOriginal) => {
   const actual =
     await importOriginal<typeof import("@/lib/agent/orchestrator")>();
-  realBuildAgentTurn = actual.buildAgentTurn;
-  buildAgentTurnMock.mockImplementation(actual.buildAgentTurn);
+  realBuildAgentTurnWithRetrieval = actual.buildAgentTurnWithRetrieval;
+  buildAgentTurnWithRetrievalMock.mockImplementation(
+    actual.buildAgentTurnWithRetrieval
+  );
   return {
     ...actual,
-    buildAgentTurn: buildAgentTurnMock,
+    buildAgentTurnWithRetrieval: buildAgentTurnWithRetrievalMock,
   };
 });
 
@@ -65,8 +67,10 @@ describe("AI chat billing gate", () => {
     embedMock.mockReset();
     chatStreamMock.mockReset();
     checkRateLimitMock.mockReset();
-    buildAgentTurnMock.mockReset();
-    buildAgentTurnMock.mockImplementation(realBuildAgentTurn);
+    buildAgentTurnWithRetrievalMock.mockReset();
+    buildAgentTurnWithRetrievalMock.mockImplementation(
+      realBuildAgentTurnWithRetrieval
+    );
     checkRateLimitMock.mockResolvedValue({
       allowed: true,
       remaining: 9,
@@ -395,7 +399,7 @@ describe("AI chat billing gate", () => {
     });
     consumeCreditsMock.mockResolvedValue({ balance: 9 });
     embedMock.mockRejectedValue(new Error("skip rag"));
-    buildAgentTurnMock.mockReturnValue({
+    buildAgentTurnWithRetrievalMock.mockResolvedValue({
       agentContext: null,
       agentFailureAnswer:
         "I could not complete the MYTax tool calculation. Try [MYTax calculators](/).",

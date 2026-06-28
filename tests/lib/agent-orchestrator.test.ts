@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
   buildAgentTurn,
+  buildAgentTurnWithRetrieval,
   buildDeterministicFallbackAnswer,
 } from "@/lib/agent/orchestrator";
 
@@ -125,5 +126,53 @@ describe("agent orchestrator", () => {
     );
     expect(result.agentFailureAnswer).toContain("[MYTax calculators](/)");
     expect(result.usedDeterministic).toBe(false);
+  });
+
+  it("retrieves tax knowledge inside the agent orchestrator", async () => {
+    const result = await buildAgentTurnWithRetrieval({
+      locale: "en",
+      userMessage:
+        "Service tax taxable revenue RM700k, do I need SST registration?",
+      messages: [
+        {
+          role: "user",
+          content:
+            "Service tax taxable revenue RM700k, do I need SST registration?",
+        },
+      ],
+      retrieveContext: async (query) => {
+        expect(query).toBe(
+          "Service tax taxable revenue RM700k, do I need SST registration?"
+        );
+        return "\n\n--- Retrieved Tax Knowledge ---\nSST guide\n";
+      },
+    });
+
+    expect(result.usedRag).toBe(true);
+    expect(result.agentContext?.toolName).toBe("sst_checker");
+    expect(result.llmMessages[0].content).toContain("Retrieved Tax Knowledge");
+    expect(result.llmMessages[0].content).toContain("SST guide");
+  });
+
+  it("keeps deterministic agent context when retrieval fails", async () => {
+    const result = await buildAgentTurnWithRetrieval({
+      locale: "en",
+      userMessage:
+        "Service tax taxable revenue RM700k, do I need SST registration?",
+      messages: [
+        {
+          role: "user",
+          content:
+            "Service tax taxable revenue RM700k, do I need SST registration?",
+        },
+      ],
+      retrieveContext: async () => {
+        throw new Error("embedding unavailable");
+      },
+    });
+
+    expect(result.usedRag).toBe(false);
+    expect(result.agentContext?.toolName).toBe("sst_checker");
+    expect(result.llmMessages[0].content).toContain("EXACT MYTAX FACTS (SST)");
   });
 });

@@ -15,6 +15,11 @@ export interface AgentTurnInput {
   buildContext?: typeof buildDeterministicAgentContext;
 }
 
+export interface AgentTurnWithRetrievalInput
+  extends Omit<AgentTurnInput, "ragContext"> {
+  retrieveContext?: (query: string) => Promise<string>;
+}
+
 export interface AgentTurnResult {
   agentContext: AgentContextResult | null;
   systemPrompt: string;
@@ -70,6 +75,25 @@ export function buildAgentTurn(input: AgentTurnInput): AgentTurnResult {
     usedDeterministic,
     agentFailureAnswer,
   };
+}
+
+export async function buildAgentTurnWithRetrieval(
+  input: AgentTurnWithRetrievalInput
+): Promise<AgentTurnResult> {
+  let ragContext = "";
+
+  if (input.userMessage && input.retrieveContext) {
+    try {
+      ragContext = await input.retrieveContext(input.userMessage);
+    } catch {
+      ragContext = "";
+    }
+  }
+
+  return buildAgentTurn({
+    ...input,
+    ragContext,
+  });
 }
 
 function buildAgentFailureAnswer(locale: unknown): string {

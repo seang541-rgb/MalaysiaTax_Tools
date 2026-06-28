@@ -16,6 +16,8 @@ describe("chat route cleanup", () => {
     expect(source).not.toContain("calculateCorporateTax");
     expect(source).not.toContain("buildDeterministicAgentContext");
     expect(source).not.toContain("buildChatSystemPrompt");
-    expect(source).toContain("buildAgentTurn");
+    expect(source).toContain("buildAgentTurnWithRetrieval");
+    expect(source).not.toContain("const ragContext =");
+    expect(source).not.toContain("buildAgentTurn({");
   });
 });

@@ -1,11 +1,38 @@
 import { describe, expect, it } from "vitest";
 import {
+  agentToolRegistry,
   buildDeterministicAgentContext,
   detectAgentTool,
   extractMoneyAmount,
 } from "@/lib/agent/tools";
 
 describe("agent tools", () => {
+  it("exports a registry entry for every deterministic agent tool", () => {
+    expect(Object.keys(agentToolRegistry).sort()).toEqual([
+      "batch_pcb_calculator",
+      "capital_allowance_calculator",
+      "corporate_tax_calculator",
+      "cp204_calculator",
+      "e_invoice_phase_checker",
+      "employer_contribution_calculator",
+      "joint_assessment_calculator",
+      "pcb_calculator",
+      "personal_tax_calculator",
+      "rpgt_calculator",
+      "sole_proprietor_tax_calculator",
+      "sst_checker",
+      "stamp_duty_calculator",
+      "tax_computation_calculator",
+      "withholding_tax_calculator",
+    ]);
+
+    for (const tool of Object.values(agentToolRegistry)) {
+      expect(tool.label).toMatch(/Calculator|Checker/);
+      expect(tool.path).toMatch(/^\//);
+      expect(tool.buildContext).toEqual(expect.any(Function));
+    }
+  });
+
   it("extracts RM amounts with k, million, and juta suffixes", () => {
     expect(extractMoneyAmount("RM700k revenue")).toBe(700000);
     expect(extractMoneyAmount("RM3 million turnover")).toBe(3000000);
