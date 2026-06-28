@@ -24,6 +24,11 @@ describe("AiTaxWorkspace", () => {
     expect(screen.getByRole("heading", { name: "AI Tax Assistant" })).toBeInTheDocument();
     expect(screen.getByText("Chat component")).toBeInTheDocument();
     expect(screen.getByText("1 credit per AI answer")).toBeInTheDocument();
+    expect(screen.getByRole("complementary", { name: "Tax Context" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Tax Context" })).toBeInTheDocument();
+    expect(screen.getByText("Taxpayer type")).toBeInTheDocument();
+    expect(screen.getByText("Year of assessment")).toBeInTheDocument();
+    expect(screen.getByText("Income / revenue")).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "How much tax for RM5000 salary?" })).toBeInTheDocument();
     expect(screen.queryByLabelText(/tax area/i)).not.toBeInTheDocument();
     expect(screen.queryByLabelText(/assessment year/i)).not.toBeInTheDocument();
@@ -53,5 +58,33 @@ describe("AiTaxWorkspace", () => {
     );
 
     expect(selectedPrompts).toEqual(["How much tax for RM5000 salary?"]);
+  });
+
+  it("allows localized tax context copy", () => {
+    render(
+      <AiTaxWorkspace
+        title="AI 税务助手"
+        subtitle="直接提问。"
+        creditHint="每次回答扣 1 credit"
+        contextHint="税务背景"
+        toolHint="可转去计算器"
+        prompts={["公司买电脑怎样扣税？"]}
+        contextPanelTitle="税务背景"
+        contextPanelNote="保留旧版填表感。"
+        contextApplyLabel="套用背景"
+        contextFields={[
+          ["纳税人类型", "Sdn Bhd"],
+          ["估税年", "YA 2025"],
+        ]}
+      >
+        <div>聊天区</div>
+      </AiTaxWorkspace>
+    );
+
+    expect(screen.getByRole("complementary", { name: "税务背景" })).toBeInTheDocument();
+    expect(screen.getByText("保留旧版填表感。")).toBeInTheDocument();
+    expect(screen.getByText("纳税人类型")).toBeInTheDocument();
+    expect(screen.getByText("Sdn Bhd")).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "套用背景" })).toBeInTheDocument();
   });
 });

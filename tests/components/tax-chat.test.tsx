@@ -3,6 +3,8 @@ import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { TaxChat } from "@/components/tax-chat";
 
+let mockedLocale = "en";
+
 const aiMessages: Record<string, string> = {
   authRequired: "Please sign in to use MYTax AI.",
   disclaimer:
@@ -18,12 +20,13 @@ const aiMessages: Record<string, string> = {
 };
 
 vi.mock("next-intl", () => ({
-  useLocale: () => "en",
+  useLocale: () => mockedLocale,
   useTranslations: () => (key: string) => aiMessages[key] ?? key,
 }));
 
 describe("TaxChat billing gate", () => {
   beforeEach(() => {
+    mockedLocale = "en";
     Element.prototype.scrollIntoView = vi.fn();
     vi.stubGlobal(
       "fetch",
@@ -225,5 +228,20 @@ describe("TaxChat billing gate", () => {
     expect(
       await screen.findByDisplayValue("What is the corporate tax rate?")
     ).toBeInTheDocument();
+  });
+
+  it("renders Chinese quick questions without mojibake", async () => {
+    mockedLocale = "zh";
+    vi.mocked(fetch).mockReset();
+    vi.mocked(fetch).mockResolvedValue({
+      json: vi.fn(async () => ({ status: "ok", available: true })),
+    } as never);
+
+    render(<TaxChat />);
+
+    expect(
+      await screen.findByRole("button", { name: "月薪 RM5000 要交多少税？" })
+    ).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "企业税率是多少？" })).toBeInTheDocument();
   });
 });

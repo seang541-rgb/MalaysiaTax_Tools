@@ -36,7 +36,7 @@ export function Header() {
             MYTax
           </Link>
         </div>
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-2">
           {/* Desktop nav */}
           <nav className="hidden lg:flex gap-1">
             {navItems.map((item) => {
@@ -59,10 +59,12 @@ export function Header() {
               );
             })}
           </nav>
-          <CreditBalance />
-          <AuthButton />
-          <ThemeToggle />
-          <LocaleSwitcher />
+          <div className="hidden items-center gap-3 lg:flex">
+            <CreditBalance />
+            <AuthButton />
+            <ThemeToggle />
+            <LocaleSwitcher />
+          </div>
           {/* Mobile hamburger */}
           <button
             className="lg:hidden p-2 rounded-md hover:bg-muted transition-colors"
@@ -79,6 +81,10 @@ export function Header() {
       {mobileOpen && (
         <nav className="lg:hidden border-t bg-white dark:bg-zinc-900 absolute left-0 right-0 z-50 shadow-lg">
           <div className="container mx-auto px-4 py-2 flex flex-col gap-1">
+            <div className="flex items-center justify-between gap-3 border-b pb-3">
+              <LocaleSwitcher />
+              <ThemeToggle />
+            </div>
             {navItems.map((item) => {
               const isActive =
                 item.href === "/"
@@ -99,6 +105,10 @@ export function Header() {
                 </Link>
               );
             })}
+            <div className="mt-2 flex flex-col gap-2 border-t pt-3">
+              <CreditBalance />
+              <AuthButton />
+            </div>
           </div>
         </nav>
       )}
