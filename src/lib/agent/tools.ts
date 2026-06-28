@@ -4,6 +4,7 @@ import { calculateEmployerContributions } from "@/engine/employer-contributions"
 import { calculatePersonalTax } from "@/engine/personal";
 import { estimateMonthlyPcb } from "@/engine/pcb";
 import { calculateRpgt, type RpgtDisposerType } from "@/engine/rpgt";
+import { calculateStampDuty, type StampBuyerType } from "@/engine/stamp-duty";
 import { calculateSst } from "@/engine/sst";
 import type {
   EmployerContributionInput,
@@ -82,6 +83,14 @@ export function detectAgentTool(message: string): AgentToolName | null {
     )
   ) {
     return "employer_contribution_calculator";
+  }
+
+  if (
+    /stamp\s+duty|mot\b|memorandum\s+of\s+transfer|loan\s+agreement\s+duty|property\s+price|buying\s+(?:a\s+)?(?:house|property)|buy\s+(?:a\s+)?(?:house|property)/.test(
+      lower
+    )
+  ) {
+    return "stamp_duty_calculator";
   }
 
   if (
@@ -201,6 +210,38 @@ function inferRpgtDisposerType(message: string): RpgtDisposerType {
     return "foreigner";
   }
   return "citizen_pr";
+}
+
+function extractPropertyPrice(message: string): number | null {
+  return (
+    extractMoneyAfter(
+      message,
+      "property\\s+price|property\\s+value|market\\s+value|purchase\\s+price|buying\\s+(?:a\\s+)?(?:house|property)\\s+for|buy\\s+(?:a\\s+)?(?:house|property)\\s+for"
+    ) ?? extractMoneyAmount(message)
+  );
+}
+
+function extractLoanAmount(message: string): number {
+  return (
+    extractMoneyAfter(
+      message,
+      "loan\\s+amount|loan|mortgage|financing\\s+amount"
+    ) ?? 0
+  );
+}
+
+function inferStampBuyerType(message: string): StampBuyerType {
+  return /foreign|foreigner|non[-\s]?citizen|non[-\s]?resident/.test(
+    message.toLowerCase()
+  )
+    ? "foreigner"
+    : "citizen_pr";
+}
+
+function inferFirstTimeBuyer(message: string): boolean {
+  return /first[-\s]?time|first\s+home|first\s+house|first\s+property|rumah\s+pertama/.test(
+    message.toLowerCase()
+  );
 }
 
 function extractMonthlyGrossSalary(message: string): number | null {
@@ -431,6 +472,58 @@ function buildRpgtContext(message: string): AgentContextResult {
       `Net chargeable gain: ${formatRM(result.netChargeableGain)}.`,
       `RPGT rate: ${result.rate}%.`,
       `RPGT payable: ${formatRM(result.rpgtPayable)}.`,
+    ]),
+    usedDeterministic: true,
+  };
+}
+
+function buildStampDutyContext(message: string): AgentContextResult {
+  const propertyPrice = extractPropertyPrice(message);
+
+  if (propertyPrice === null) {
+    const question =
+      "What is the property price or market value in RM for the stamp duty estimate?";
+    return {
+      ...emptyResult,
+      toolName: "stamp_duty_calculator",
+      context: followUpContext(question),
+      needsFollowUp: true,
+      followUpQuestion: question,
+      missingFields: [{ field: "propertyPrice", question }],
+    };
+  }
+
+  const buyerType = inferStampBuyerType(message);
+  const loanAmount = extractLoanAmount(message);
+  const firstTimeBuyer = inferFirstTimeBuyer(message);
+  const result = calculateStampDuty({
+    propertyPrice,
+    buyerType,
+    loanAmount,
+    firstTimeBuyer,
+  });
+
+  const tierLines = result.motTiers.map((tier) => {
+    const upper = tier.to === Infinity ? "above" : formatRM(tier.to);
+    return `MOT tier ${formatRM(tier.from)}-${upper}: ${tier.rate}% = ${formatRM(tier.duty)}.`;
+  });
+
+  return {
+    ...emptyResult,
+    toolName: "stamp_duty_calculator",
+    context: exactContext("Property stamp duty (YA2025)", [
+      `Buyer type: ${buyerType}.`,
+      `Property price: ${formatRM(result.propertyPrice)}.`,
+      `Loan amount: ${formatRM(result.loanAmount)}.`,
+      `Foreigner flat rate: ${result.foreignerFlatRate ? "yes" : "no"}.`,
+      `First-time buyer: ${firstTimeBuyer ? "yes" : "no"}.`,
+      `First-time exemption applied: ${result.firstTimeExemptionApplied ? "yes" : "no"}.`,
+      `MOT duty before exemption: ${formatRM(result.motDutyBeforeExemption)}.`,
+      `Loan agreement duty before exemption: ${formatRM(result.loanDutyBeforeExemption)}.`,
+      `MOT duty payable: ${formatRM(result.motDuty)}.`,
+      `Loan agreement duty payable: ${formatRM(result.loanDuty)}.`,
+      `Total stamp duty: ${formatRM(result.totalDuty)}.`,
+      ...tierLines,
     ]),
     usedDeterministic: true,
   };
@@ -744,6 +837,9 @@ export function buildDeterministicAgentContext(
   }
   if (toolName === "rpgt_calculator") {
     return buildRpgtContext(message);
+  }
+  if (toolName === "stamp_duty_calculator") {
+    return buildStampDutyContext(message);
   }
   if (toolName === "pcb_calculator") {
     return buildPcbContext(message);

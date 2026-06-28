@@ -235,4 +235,47 @@ describe("agent tools", () => {
     expect(result.context).toContain("RPGT rate: 10%");
     expect(result.context).toContain("RPGT payable: RM30,000");
   });
+
+  it("detects property stamp duty questions", () => {
+    expect(
+      detectAgentTool("Property price RM500k, loan amount RM450k. Calculate stamp duty.")
+    ).toBe("stamp_duty_calculator");
+  });
+
+  it("asks for property price before stamp duty calculation", () => {
+    const result = buildDeterministicAgentContext(
+      "How much stamp duty do I pay when buying a house?"
+    );
+
+    expect(result.toolName).toBe("stamp_duty_calculator");
+    expect(result.needsFollowUp).toBe(true);
+    expect(result.followUpQuestion).toContain("property price");
+  });
+
+  it("builds exact stamp duty context for a citizen or PR buyer with a loan", () => {
+    const result = buildDeterministicAgentContext(
+      "Citizen buyer property price RM500k, loan amount RM450k. Calculate stamp duty."
+    );
+
+    expect(result.toolName).toBe("stamp_duty_calculator");
+    expect(result.usedDeterministic).toBe(true);
+    expect(result.context).toContain("EXACT MYTAX FACTS");
+    expect(result.context).toContain("Property stamp duty (YA2025)");
+    expect(result.context).toContain("Buyer type: citizen_pr");
+    expect(result.context).toContain("Property price: RM500,000");
+    expect(result.context).toContain("MOT duty before exemption: RM9,000");
+    expect(result.context).toContain("Loan agreement duty before exemption: RM2,250");
+    expect(result.context).toContain("Total stamp duty: RM11,250");
+  });
+
+  it("builds exact stamp duty context for an eligible first-time buyer", () => {
+    const result = buildDeterministicAgentContext(
+      "First-time home buyer property price RM450k, loan amount RM400k. Calculate stamp duty."
+    );
+
+    expect(result.toolName).toBe("stamp_duty_calculator");
+    expect(result.context).toContain("First-time exemption applied: yes");
+    expect(result.context).toContain("MOT duty before exemption: RM8,000");
+    expect(result.context).toContain("Total stamp duty: RM0");
+  });
 });
