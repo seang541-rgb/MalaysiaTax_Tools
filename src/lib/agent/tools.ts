@@ -27,6 +27,7 @@ import type {
   TaxCalculationInput,
 } from "@/engine/types";
 import type { AgentContextResult, AgentToolName } from "./types";
+import { detectAgentTool as detectAgentToolIntent } from "./intents";
 import {
   extractIncomeAmount,
   extractMoneyAmount,
@@ -1586,7 +1587,7 @@ export const agentToolRegistry: Record<
 export function buildDeterministicAgentContext(
   message: string
 ): AgentContextResult {
-  const toolName = detectAgentTool(message);
+  const toolName = detectAgentToolIntent(message);
 
   return toolName
     ? withCalculatorLink(agentToolRegistry[toolName].buildContext(message))
