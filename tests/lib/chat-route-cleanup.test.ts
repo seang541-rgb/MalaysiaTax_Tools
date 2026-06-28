@@ -14,7 +14,8 @@ describe("chat route cleanup", () => {
     expect(source).not.toContain("_preCalculateTax");
     expect(source).not.toContain("_formatPreCalculation");
     expect(source).not.toContain("calculateCorporateTax");
-    expect(source).toContain("buildDeterministicAgentContext");
-    expect(source).toContain("buildChatSystemPrompt");
+    expect(source).not.toContain("buildDeterministicAgentContext");
+    expect(source).not.toContain("buildChatSystemPrompt");
+    expect(source).toContain("buildAgentTurn");
   });
 });

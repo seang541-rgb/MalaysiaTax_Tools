@@ -9,8 +9,10 @@ import {
   refundCredits,
 } from "@/lib/billing/credits";
 import { BILLING_FEATURE_COSTS } from "@/lib/billing/plans";
-import { buildChatSystemPrompt } from "@/lib/agent/prompts";
-import { buildDeterministicAgentContext } from "@/lib/agent/tools";
+import {
+  buildAgentTurn,
+  type AgentChatMessage,
+} from "@/lib/agent/orchestrator";
 import { checkRateLimit } from "@/lib/rate-limit";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 
@@ -115,7 +117,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const sanitizedMessages = messages.map((m) => ({
+    const sanitizedMessages: AgentChatMessage[] = messages.map((m) => ({
       role: isChatMessage(m) && m.role === "assistant" ? "assistant" : "user",
       content:
         isChatMessage(m) && typeof m.content === "string"
@@ -154,26 +156,14 @@ export async function POST(request: NextRequest) {
     }
 
     const ragContext = userMessage ? await retrieveContext(userMessage) : "";
-    const agentContext = userMessage
-      ? buildDeterministicAgentContext(userMessage)
-      : null;
-
-    const systemPrompt = buildChatSystemPrompt({
+    const agentTurn = buildAgentTurn({
       locale,
-      deterministicContext: agentContext?.context ?? "",
-      usedDeterministic: agentContext?.usedDeterministic ?? false,
+      userMessage,
       ragContext,
+      messages: sanitizedMessages,
     });
 
-    const llmMessages = [
-      { role: "system" as const, content: systemPrompt },
-      ...sanitizedMessages.map((m) => ({
-        role: m.role as "user" | "assistant",
-        content: m.content,
-      })),
-    ];
-
-    const llmRes = await chatStream(llmMessages);
+    const llmRes = await chatStream(agentTurn.llmMessages);
 
     if (!llmRes.ok || !llmRes.body) {
       const errText = await llmRes.text().catch(() => "");
@@ -203,9 +193,9 @@ export async function POST(request: NextRequest) {
     const chargedFeature = "ai_tax_question" as const;
     const chargedAmount = aiCreditCost;
 
-    const usedRag = ragContext !== "";
-    const usedPrecalc = agentContext?.toolName === "personal_tax_calculator";
-    const usedDeterministic = agentContext?.usedDeterministic ?? false;
+    const usedRag = agentTurn.usedRag;
+    const usedPrecalc = agentTurn.usedPrecalc;
+    const usedDeterministic = agentTurn.usedDeterministic;
     const logUserId = user.id;
 
     const stream = new ReadableStream({
@@ -278,10 +268,13 @@ export async function POST(request: NextRequest) {
               usedRag,
               usedPrecalc,
               usedDeterministic,
-              agentToolName: agentContext?.toolName ?? null,
-              agentNeedsFollowUp: agentContext?.needsFollowUp ?? false,
+              agentToolName: agentTurn.agentContext?.toolName ?? null,
+              agentNeedsFollowUp:
+                agentTurn.agentContext?.needsFollowUp ?? false,
               agentMissingFields:
-                agentContext?.missingFields.map((field) => field.field) ?? [],
+                agentTurn.agentContext?.missingFields.map(
+                  (field) => field.field
+                ) ?? [],
             });
           }
           if (!streamFailed) {
