@@ -2,7 +2,7 @@
 
 import { useState, useRef, useEffect, useCallback } from "react";
 import { useTranslations, useLocale } from "next-intl";
-import { AlertTriangle } from "lucide-react";
+import { AlertTriangle, BotMessageSquare } from "lucide-react";
 import { ChatMessage, getTaxAssistantResponse } from "@/engine/tax-assistant";
 
 const DISCLAIMER_ACK_KEY = "mytax.ai.disclaimerAck.v1";
@@ -55,6 +55,19 @@ export function TaxChat() {
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
+
+  useEffect(() => {
+    const handlePrompt = (event: Event) => {
+      const prompt = (event as CustomEvent<unknown>).detail;
+      if (typeof prompt !== "string" || !prompt.trim()) return;
+
+      setInput(prompt);
+      queueMicrotask(() => inputRef.current?.focus());
+    };
+
+    window.addEventListener("mytax:ai-prompt", handlePrompt);
+    return () => window.removeEventListener("mytax:ai-prompt", handlePrompt);
+  }, []);
 
   // Warm the chat endpoint on mount; request handling has its own fallback path.
   useEffect(() => {
@@ -306,7 +319,7 @@ export function TaxChat() {
   };
 
   return (
-    <div className="max-w-2xl mx-auto space-y-3">
+    <div className="mx-auto max-w-none space-y-3">
       {!disclaimerAck && (
         <div
           role="alert"
@@ -335,12 +348,14 @@ export function TaxChat() {
         </div>
       )}
 
-    <div className="flex flex-col h-[600px] border rounded-xl bg-white dark:bg-zinc-900 shadow-sm overflow-hidden">
+    <div className="flex h-[640px] flex-col overflow-hidden rounded-lg border bg-white shadow-sm dark:bg-zinc-900">
       {/* Header */}
-      <div className="px-4 py-3 border-b bg-primary/5">
+      <div className="border-b bg-primary/5 px-4 py-3">
         <div className="flex items-center gap-2">
           <div className="flex items-center gap-2">
-            <span className="text-2xl">🤖</span>
+            <span className="grid h-9 w-9 place-items-center rounded-md bg-primary/10 text-primary">
+              <BotMessageSquare className="h-5 w-5" aria-hidden="true" />
+            </span>
             <div>
               <h3 className="font-semibold text-sm">{t("title")}</h3>
               <p className="text-xs text-muted-foreground">{t("subtitle")}</p>

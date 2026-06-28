@@ -1,7 +1,8 @@
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import { getTranslations } from "next-intl/server";
 import { IncomeForm } from "@/components/income-form";
 import { DeadlineCountdown } from "@/components/deadline-countdown";
+import { HomeToolGrid } from "@/components/home-tool-grid";
 import { WhoAmI } from "@/components/who-am-i";
 import { FaqSection, FaqItem } from "@/components/faq-section";
 import { SITE_URL } from "@/lib/site";
@@ -52,22 +53,35 @@ const jsonLd = {
 export default function HomePage() {
   const t = useTranslations("calculator");
   const faq = useTranslations("homeFaq");
+  const locale = useLocale();
   const faqItems = faq.raw("items") as FaqItem[];
 
   return (
-    <div className="max-w-3xl mx-auto">
+    <div className="mx-auto max-w-6xl">
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
-      <div className="text-center py-8">
-        <h1 className="text-3xl font-bold mb-2">{t("title")}</h1>
-        <p className="text-muted-foreground">{t("subtitle")}</p>
+      <div className="rounded-lg border bg-card p-6 shadow-sm md:p-8">
+        <div className="max-w-3xl">
+          <p className="mb-3 text-sm font-medium text-primary">
+            Malaysia Tax Tools
+          </p>
+          <h1 className="text-3xl font-bold tracking-tight md:text-5xl">
+            {t("title")}
+          </h1>
+          <p className="mt-3 text-muted-foreground md:text-lg">
+            {t("subtitle")}
+          </p>
+        </div>
       </div>
-      <DeadlineCountdown />
-      <IncomeForm />
-      <WhoAmI />
-      <FaqSection title={faq("title")} items={faqItems} />
+      <HomeToolGrid locale={locale} />
+      <div className="mx-auto max-w-3xl">
+        <DeadlineCountdown />
+        <IncomeForm />
+        <WhoAmI />
+        <FaqSection title={faq("title")} items={faqItems} />
+      </div>
     </div>
   );
 }

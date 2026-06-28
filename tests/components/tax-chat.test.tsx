@@ -207,4 +207,23 @@ describe("TaxChat billing gate", () => {
     ).toBeInTheDocument();
     expect(screen.queryByText(/Estimated Tax/i)).toBeNull();
   });
+
+  it("fills the input when an outer AI prompt is selected", async () => {
+    vi.mocked(fetch).mockReset();
+    vi.mocked(fetch).mockResolvedValue({
+      json: vi.fn(async () => ({ status: "ok", available: true })),
+    } as never);
+
+    render(<TaxChat />);
+
+    window.dispatchEvent(
+      new CustomEvent("mytax:ai-prompt", {
+        detail: "What is the corporate tax rate?",
+      })
+    );
+
+    expect(
+      await screen.findByDisplayValue("What is the corporate tax rate?")
+    ).toBeInTheDocument();
+  });
 });
