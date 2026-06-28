@@ -2,6 +2,7 @@ import { existsSync, readFileSync, readdirSync } from "node:fs";
 import { join } from "node:path";
 
 const root = process.cwd();
+const envSource = new Map();
 
 function normalizeEnvValue(value) {
   const trimmed = value.trim();
@@ -12,6 +13,10 @@ function normalizeEnvValue(value) {
     return trimmed.slice(1, -1).trim();
   }
   return trimmed;
+}
+
+function isVercelPulledBlank(key) {
+  return envSource.get(key) === "vercel-empty-placeholder";
 }
 
 function loadDotEnvLocal() {
@@ -25,7 +30,12 @@ function loadDotEnvLocal() {
     }
     const [key, ...rest] = trimmed.split("=");
     if (!process.env[key]) {
-      process.env[key] = normalizeEnvValue(rest.join("="));
+      const rawValue = rest.join("=");
+      const value = normalizeEnvValue(rawValue);
+      process.env[key] = value;
+      if (rawValue.trim() === '""') {
+        envSource.set(key, "vercel-empty-placeholder");
+      }
     }
   }
 }
@@ -42,6 +52,18 @@ function hasAnyEnv(keys) {
 
 function record(results, ok, label, detail = "") {
   results.push({ ok, label, detail });
+}
+
+function recordEnv(results, key, label = `Env ${key}`) {
+  const value = process.env[key];
+  const detail = isVercelPulledBlank(key)
+    ? "empty local placeholder from Vercel sensitive env; provide a local value for readiness checks"
+    : maskSecret(value);
+  record(results, Boolean(value), label, detail);
+}
+
+function hasAnyEnvOrPulledBlank(keys) {
+  return keys.some((key) => Boolean(process.env[key]) || isVercelPulledBlank(key));
 }
 
 async function checkRestSelect(results, table, columns) {
@@ -119,22 +141,32 @@ async function main() {
   ];
 
   for (const key of required) {
-    record(results, Boolean(process.env[key]), `Env ${key}`, maskSecret(process.env[key]));
+    recordEnv(results, key);
   }
 
+  const hasChatKey = hasAnyEnv(["LLM_CHAT_API_KEY", "LLM_API_KEY"]);
   record(
     results,
-    hasAnyEnv(["LLM_CHAT_API_KEY", "LLM_API_KEY"]),
+    hasChatKey,
     "Env chat provider key",
-    hasAnyEnv(["LLM_CHAT_API_KEY", "LLM_API_KEY"]) ? "present" : "missing"
+    hasChatKey
+      ? "present"
+      : hasAnyEnvOrPulledBlank(["LLM_CHAT_API_KEY", "LLM_API_KEY"])
+        ? "empty local placeholder from Vercel sensitive env"
+        : "missing"
   );
+  const hasEmbedKey = hasAnyEnv(["LLM_EMBED_API_KEY", "LLM_API_KEY"]);
   record(
     results,
-    hasAnyEnv(["LLM_EMBED_API_KEY", "LLM_API_KEY"]),
+    hasEmbedKey,
     "Env embedding provider key",
-    hasAnyEnv(["LLM_EMBED_API_KEY", "LLM_API_KEY"]) ? "present" : "missing"
+    hasEmbedKey
+      ? "present"
+      : hasAnyEnvOrPulledBlank(["LLM_EMBED_API_KEY", "LLM_API_KEY"])
+        ? "empty local placeholder from Vercel sensitive env"
+        : "missing"
   );
-  record(results, Boolean(process.env.ADMIN_EMAIL), "Env ADMIN_EMAIL", "required in production");
+  recordEnv(results, "ADMIN_EMAIL");
 
   checkLocalSql(results);
   checkRawDocs(results);

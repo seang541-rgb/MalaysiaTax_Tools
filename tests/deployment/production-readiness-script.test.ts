@@ -27,6 +27,7 @@ describe("production readiness script", () => {
     expect(source).toContain("tax_chunks");
     expect(source).toContain("maskSecret");
     expect(source).toContain("normalizeEnvValue");
+    expect(source).toContain("isVercelPulledBlank");
     expect(source).not.toContain("console.log(process.env");
   });
 
