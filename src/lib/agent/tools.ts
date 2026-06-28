@@ -12,6 +12,7 @@ import { calculateRpgt, type RpgtDisposerType } from "@/engine/rpgt";
 import { calculateSoleProprietorTax } from "@/engine/sole-proprietor";
 import { calculateStampDuty, type StampBuyerType } from "@/engine/stamp-duty";
 import { calculateSst } from "@/engine/sst";
+import { calculateTaxComputation } from "@/engine/tax-computation";
 import {
   calculateWithholdingTax,
   type WhtPaymentType,
@@ -113,6 +114,14 @@ export function detectAgentTool(message: string): AgentToolName | null {
 
   if (/cp204|cp204a|cp207|estimated\s+tax|tax\s+estimate/.test(lower)) {
     return "cp204_calculator";
+  }
+
+  if (
+    /tax\s+computation|profit\s+before\s+tax|\bpbt\b|chargeable\s+income\s+worksheet/.test(
+      lower
+    )
+  ) {
+    return "tax_computation_calculator";
   }
 
   if (
@@ -404,6 +413,39 @@ function extractTotalReliefs(message: string): number {
 
 function extractZakatAmount(message: string): number {
   return extractMoneyAfter(message, "zakat") ?? 0;
+}
+
+function extractProfitBeforeTax(message: string): number | null {
+  return extractMoneyAfter(
+    message,
+    "profit\\s+before\\s+tax|pbt|accounting\\s+profit"
+  );
+}
+
+function extractDepreciation(message: string): number {
+  return extractMoneyAfter(message, "depreciation") ?? 0;
+}
+
+function extractNonTaxableIncome(message: string): number {
+  return (
+    extractMoneyAfter(
+      message,
+      "non[-\\s]?taxable\\s+income|exempt\\s+dividends|capital\\s+gains"
+    ) ?? 0
+  );
+}
+
+function extractBusinessLossBroughtForward(message: string): number {
+  return (
+    extractMoneyAfter(
+      message,
+      "business\\s+loss\\s+brought\\s+forward|loss\\s+brought\\s+forward"
+    ) ?? 0
+  );
+}
+
+function extractApprovedDonations(message: string): number {
+  return extractMoneyAfter(message, "approved\\s+donations|donations") ?? 0;
 }
 
 function extractMonthlyGrossSalary(message: string): number | null {
@@ -908,6 +950,74 @@ function buildSoleProprietorContext(message: string): AgentContextResult {
   };
 }
 
+function buildTaxComputationContext(message: string): AgentContextResult {
+  const profitBeforeTax = extractProfitBeforeTax(message);
+  if (profitBeforeTax === null) {
+    const question =
+      "What is the company's profit before tax in RM for the tax computation worksheet?";
+    return {
+      ...emptyResult,
+      toolName: "tax_computation_calculator",
+      context: followUpContext(question),
+      needsFollowUp: true,
+      followUpQuestion: question,
+      missingFields: [{ field: "profitBeforeTax", question }],
+    };
+  }
+
+  const lower = message.toLowerCase();
+  const isStandard = /non[-\s]?sme|standard|not\s+sme/.test(lower);
+  const result = calculateTaxComputation({
+    profitBeforeTax,
+    addBacks: {
+      depreciation: extractDepreciation(message),
+      provisions: 0,
+      entertainmentDisallowed: 0,
+      finesPenalties: 0,
+      privateExpenses: 0,
+      donationsInPnl: 0,
+      other: 0,
+    },
+    nonTaxableIncome: {
+      exemptDividends: extractNonTaxableIncome(message),
+      capitalGains: 0,
+      unrealisedForexGain: 0,
+      other: 0,
+    },
+    capitalAllowanceCurrent: extractCapitalAllowanceAmount(message),
+    capitalAllowanceBroughtForward: 0,
+    businessLossBroughtForward: extractBusinessLossBroughtForward(message),
+    otherIncome: extractOtherIncome(message),
+    approvedDonations: extractApprovedDonations(message),
+    isSme: !isStandard,
+    paidUpCapital: extractPaidUpCapital(message) ?? 1_000_000,
+    annualRevenue: extractAnnualRevenue(message) ?? 5_000_000,
+  });
+
+  return {
+    ...emptyResult,
+    toolName: "tax_computation_calculator",
+    context: exactContext("Corporate tax computation (YA2025)", [
+      `Profit before tax: ${formatRM(result.profitBeforeTax)}.`,
+      `Total add-backs: ${formatRM(result.totalAddBacks)}.`,
+      `Total non-taxable income: ${formatRM(result.totalNonTaxable)}.`,
+      `Adjusted income: ${formatRM(result.adjustedIncome)}.`,
+      `Current year loss: ${formatRM(result.currentYearLoss)}.`,
+      `Capital allowance used: ${formatRM(result.capitalAllowanceUsed)}.`,
+      `Capital allowance carried forward: ${formatRM(result.capitalAllowanceCarriedForward)}.`,
+      `Statutory business income: ${formatRM(result.statutoryBusinessIncome)}.`,
+      `Loss brought forward used: ${formatRM(result.lossBroughtForwardUsed)}.`,
+      `Aggregate income: ${formatRM(result.aggregateIncome)}.`,
+      `Donations allowed: ${formatRM(result.donationsAllowed)}.`,
+      `Chargeable income: ${formatRM(result.chargeableIncome)}.`,
+      `Loss carried forward: ${formatRM(result.lossCarriedForward)}.`,
+      `SME qualified: ${result.tax.isSmeQualified ? "yes" : "no"}.`,
+      `Corporate tax: ${formatRM(result.tax.totalTax)}.`,
+    ]),
+    usedDeterministic: true,
+  };
+}
+
 function buildCorporateTaxContext(message: string): AgentContextResult {
   const lower = message.toLowerCase();
   const chargeableIncome = extractChargeableIncome(message);
@@ -1231,6 +1341,9 @@ export function buildDeterministicAgentContext(
   }
   if (toolName === "sole_proprietor_tax_calculator") {
     return buildSoleProprietorContext(message);
+  }
+  if (toolName === "tax_computation_calculator") {
+    return buildTaxComputationContext(message);
   }
   if (toolName === "pcb_calculator") {
     return buildPcbContext(message);

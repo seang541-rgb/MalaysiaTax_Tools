@@ -480,4 +480,47 @@ describe("agent tools", () => {
     expect(result.context).toContain("Total income: RM30,000");
     expect(result.context).toContain("Tax payable: RM0");
   });
+
+  it("detects corporate tax computation worksheet questions", () => {
+    expect(
+      detectAgentTool("Tax computation profit before tax RM500k. Calculate chargeable income.")
+    ).toBe("tax_computation_calculator");
+  });
+
+  it("asks for profit before tax before tax computation", () => {
+    const result = buildDeterministicAgentContext(
+      "Help me prepare a company tax computation worksheet."
+    );
+
+    expect(result.toolName).toBe("tax_computation_calculator");
+    expect(result.needsFollowUp).toBe(true);
+    expect(result.followUpQuestion).toContain("profit before tax");
+  });
+
+  it("builds exact tax computation context for simple SME profit", () => {
+    const result = buildDeterministicAgentContext(
+      "Tax computation profit before tax RM500k. Calculate company chargeable income."
+    );
+
+    expect(result.toolName).toBe("tax_computation_calculator");
+    expect(result.usedDeterministic).toBe(true);
+    expect(result.context).toContain("EXACT MYTAX FACTS");
+    expect(result.context).toContain("Corporate tax computation (YA2025)");
+    expect(result.context).toContain("Profit before tax: RM500,000");
+    expect(result.context).toContain("Adjusted income: RM500,000");
+    expect(result.context).toContain("Chargeable income: RM500,000");
+    expect(result.context).toContain("Corporate tax: RM82,000");
+  });
+
+  it("builds exact tax computation context with depreciation and capital allowance", () => {
+    const result = buildDeterministicAgentContext(
+      "Tax computation profit before tax RM400k, depreciation RM100k, capital allowance RM140k."
+    );
+
+    expect(result.toolName).toBe("tax_computation_calculator");
+    expect(result.context).toContain("Total add-backs: RM100,000");
+    expect(result.context).toContain("Capital allowance used: RM140,000");
+    expect(result.context).toContain("Statutory business income: RM360,000");
+    expect(result.context).toContain("Chargeable income: RM360,000");
+  });
 });
