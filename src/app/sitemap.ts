@@ -1,9 +1,11 @@
 import { execFileSync } from "node:child_process";
+import { existsSync } from "node:fs";
 import type { MetadataRoute } from "next";
 import { getAllPosts } from "@/lib/blog";
 import { SITE_URL as BASE_URL } from "@/lib/site";
 
 const locales = ["en", "zh", "ms"];
+const hasGitMetadata = existsSync(".git");
 
 /**
  * Last commit date for a source file, used as a truthful `lastModified`.
@@ -11,6 +13,8 @@ const locales = ["en", "zh", "ms"];
  * so callers can omit the field rather than emit a misleading build-day date.
  */
 function gitLastModified(file: string): Date | null {
+  if (!hasGitMetadata) return null;
+
   try {
     const iso = execFileSync("git", ["log", "-1", "--format=%cI", "--", file], {
       encoding: "utf8",
