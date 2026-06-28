@@ -12,6 +12,8 @@ export interface TaxSource {
 
 export interface TaxSourceEntry {
   verified: string; // ISO year-month, e.g. "2026-06"
+  reviewedLabel?: string;
+  rulePeriod?: string;
   sources: TaxSource[];
 }
 
@@ -19,14 +21,16 @@ export type TaxTopic =
   | "personal"
   | "corporate"
   | "sst"
-  | "einvoice"
+  | "e-invoice"
   | "rpgt"
-  | "stampduty"
-  | "wht"
-  | "soleprop"
+  | "stamp-duty"
+  | "withholding-tax"
+  | "sole-proprietor"
   | "cp204"
-  | "capalw"
-  | "employer";
+  | "pcb"
+  | "capital-allowance"
+  | "employer-contributions"
+  | "joint-assessment";
 
 export const TAX_SOURCES: Record<TaxTopic, TaxSourceEntry> = {
   personal: {
@@ -53,7 +57,7 @@ export const TAX_SOURCES: Record<TaxTopic, TaxSourceEntry> = {
       { label: "RMCD MySST", url: "https://mysst.customs.gov.my/" },
     ],
   },
-  einvoice: {
+  "e-invoice": {
     verified: "2026-06",
     sources: [
       { label: "LHDN e-Invoice", url: "https://www.hasil.gov.my/en/e-invoice/" },
@@ -68,26 +72,26 @@ export const TAX_SOURCES: Record<TaxTopic, TaxSourceEntry> = {
       },
     ],
   },
-  stampduty: {
+  "stamp-duty": {
     verified: "2026-06",
     sources: [
-      { label: "LHDN — Stamp Duty", url: "https://www.hasil.gov.my/en/stamp-duty/" },
+      { label: "LHDN - Stamp Duty", url: "https://www.hasil.gov.my/en/stamp-duty/" },
     ],
   },
-  wht: {
+  "withholding-tax": {
     verified: "2026-06",
     sources: [
       {
-        label: "LHDN — Withholding Tax",
+        label: "LHDN - Withholding Tax",
         url: "https://www.hasil.gov.my/en/legislation/withholding-tax/",
       },
     ],
   },
-  soleprop: {
+  "sole-proprietor": {
     verified: "2026-06",
     sources: [
       {
-        label: "LHDN — Individual Income Tax Rates",
+        label: "LHDN - Individual Income Tax Rates",
         url: "https://www.hasil.gov.my/en/individual/individual-life-cycle/how-to-declare-income/tax-rate/",
       },
     ],
@@ -101,20 +105,46 @@ export const TAX_SOURCES: Record<TaxTopic, TaxSourceEntry> = {
       },
     ],
   },
-  capalw: {
+  pcb: {
+    verified: "2026-06",
+    rulePeriod: "YA 2025",
+    sources: [
+      {
+        label: "HASiL - MTD/PCB Payment",
+        url: "https://www.hasil.gov.my/en/employers/mtd-payment/",
+      },
+      {
+        label: "HASiL - Computerized MTD/PCB Specification 2025",
+        url: "https://www.hasil.gov.my/media/mdahzjwi/spesifikasi-kaedah-pengiraan-berkomputer-pcb-2025.pdf",
+      },
+    ],
+  },
+  "capital-allowance": {
     verified: "2026-06",
     sources: [
       {
-        label: "LHDN — Public Rulings (Capital Allowances)",
+        label: "LHDN - Public Rulings (Capital Allowances)",
         url: "https://www.hasil.gov.my/en/legislation/public-rulings/",
       },
     ],
   },
-  employer: {
+  "employer-contributions": {
     verified: "2026-06",
     sources: [
       { label: "KWSP/EPF", url: "https://www.kwsp.gov.my/" },
       { label: "PERKESO/SOCSO", url: "https://www.perkeso.gov.my/" },
+    ],
+  },
+  "joint-assessment": {
+    verified: "2026-06",
+    reviewedLabel: "comparisonRules",
+    rulePeriod: "YA 2025",
+    sources: [
+      {
+        label: "LHDN - Individual Income Tax Rates",
+        url: "https://www.hasil.gov.my/en/individual/individual-life-cycle/how-to-declare-income/tax-rate/",
+      },
+      { label: "LHDN", url: "https://www.hasil.gov.my/" },
     ],
   },
 };

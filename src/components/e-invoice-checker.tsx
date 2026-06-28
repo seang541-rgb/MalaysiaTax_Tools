@@ -222,7 +222,7 @@ export function EInvoiceChecker() {
         </CardContent>
       </Card>
 
-      <SourceNote topic="einvoice" />
+      <SourceNote topic="e-invoice" />
     </div>
   );
 }

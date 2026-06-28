@@ -1,14 +1,41 @@
 /**
  * Owner/admin gate shared by admin-only routes and pages.
  *
- * Admins are identified by their signed-in email matching ADMIN_EMAIL
- * (comma-separated list; defaults to the project owner).
+ * Production fails closed when ADMIN_EMAIL is not configured. Local
+ * development keeps the project owner's email as a convenience fallback.
  */
-export const ADMIN_EMAILS = (process.env.ADMIN_EMAIL || "seang541@gmail.com")
-  .split(",")
-  .map((e) => e.trim().toLowerCase())
-  .filter(Boolean);
+type AdminEnv = {
+  ADMIN_EMAIL?: string;
+  VERCEL_ENV?: string;
+  NODE_ENV?: string;
+};
 
-export function isAdminEmail(email: string | null | undefined): boolean {
-  return !!email && ADMIN_EMAILS.includes(email.toLowerCase());
+const LOCAL_DEV_ADMIN_EMAIL = "seang541@gmail.com";
+
+function isProductionEnv(env: AdminEnv): boolean {
+  return env.VERCEL_ENV === "production" || env.NODE_ENV === "production";
+}
+
+function parseEmails(value: string | undefined): string[] {
+  return (value || "")
+    .split(",")
+    .map((email) => email.trim().toLowerCase())
+    .filter(Boolean);
+}
+
+export function getAdminEmails(env: AdminEnv = process.env): string[] {
+  const configured = parseEmails(env.ADMIN_EMAIL);
+  if (configured.length > 0) return configured;
+  return isProductionEnv(env) ? [] : [LOCAL_DEV_ADMIN_EMAIL];
+}
+
+export function isAdminConfigured(env: AdminEnv = process.env): boolean {
+  return getAdminEmails(env).length > 0;
+}
+
+export function isAdminEmail(
+  email: string | null | undefined,
+  env: AdminEnv = process.env
+): boolean {
+  return !!email && getAdminEmails(env).includes(email.toLowerCase());
 }

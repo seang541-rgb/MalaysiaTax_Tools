@@ -8,6 +8,7 @@ import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { CreditChargeButton } from "@/components/credit-charge-button";
+import { SourceNote } from "@/components/source-note";
 import { calculateBatchPcb } from "@/engine/batch-pcb";
 import { BatchEmployeeInput, BatchPcbSummary } from "@/engine/types";
 
@@ -295,6 +296,8 @@ export function BatchPcbForm() {
           </Card>
         </>
       )}
+
+      <SourceNote topic="pcb" />
     </div>
   );
 }

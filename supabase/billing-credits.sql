@@ -133,6 +133,9 @@ alter table public.credit_transactions enable row level security;
 alter table public.usage_logs enable row level security;
 alter table public.stripe_events enable row level security;
 
+grant select on public.profiles, public.credit_balances, public.credit_transactions, public.usage_logs
+  to authenticated;
+
 drop policy if exists "Users can read their own profile" on public.profiles;
 create policy "Users can read their own profile"
 on public.profiles for select

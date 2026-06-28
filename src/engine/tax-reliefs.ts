@@ -1,8 +1,7 @@
 import { ReliefDefinition } from "./types";
 
-// Disability reliefs increased by Budget 2025, effective YA2025
-// (LHDN / Crowe / EY): disabled_individual 7000, disabled_spouse 6000,
-// disabled_child 8000.
+// YA2025 relief caps verified against LHDN BE2025 notes, TP1 2025 notes,
+// Public Ruling 7/2025, and LHDN tax relief guidance.
 export const TAX_RELIEFS_YA2025: ReliefDefinition[] = [
   { id: "individual", maxAmount: 9000, category: "personal" },
   { id: "disabled_individual", maxAmount: 7000, category: "personal" },
@@ -25,9 +24,7 @@ export const TAX_RELIEFS_YA2025: ReliefDefinition[] = [
   { id: "ev_charging", maxAmount: 2500, category: "lifestyle" },
   { id: "epf_employee", maxAmount: 4000, category: "contribution" },
   { id: "life_insurance", maxAmount: 3000, category: "contribution" },
-  // TODO: verify against official LHDN YA2025 relief PDF — some sources cite
-  // RM4,000 for YA2025 but this is unconfirmed; keep 3000 until verified.
-  { id: "education_medical_insurance", maxAmount: 3000, category: "contribution" },
+  { id: "education_medical_insurance", maxAmount: 4000, category: "contribution" },
   { id: "socso_eis", maxAmount: 350, category: "contribution" },
   { id: "prs_annuity", maxAmount: 3000, category: "contribution" },
   { id: "sspn", maxAmount: 8000, category: "contribution" },
@@ -37,9 +34,43 @@ export const TAX_RELIEFS_YA2025: ReliefDefinition[] = [
   { id: "parents_medical", maxAmount: 8000, category: "medical" },
 ];
 
-export function getReliefDefinitions(yearOfAssessment: number): ReliefDefinition[] {
-  if (yearOfAssessment === 2025) {
-    return TAX_RELIEFS_YA2025;
-  }
-  return TAX_RELIEFS_YA2025;
+export interface ReliefRuleSet {
+  yearOfAssessment: number;
+  requestedYearOfAssessment: number;
+  reliefs: ReliefDefinition[];
+  reviewed: string;
+  sources: string[];
+}
+
+const RELIEF_RULE_SETS: Record<
+  number,
+  Omit<ReliefRuleSet, "requestedYearOfAssessment">
+> = {
+  2025: {
+    yearOfAssessment: 2025,
+    reliefs: TAX_RELIEFS_YA2025,
+    reviewed: "2026-06",
+    sources: [
+      "LHDN BE2025 explanatory notes",
+      "LHDN TP1 2025 notes",
+      "LHDN Public Ruling 7/2025",
+      "LHDN tax relief guidance",
+    ],
+  },
+};
+
+export function getReliefRuleSet(yearOfAssessment: number): ReliefRuleSet {
+  const exact = RELIEF_RULE_SETS[yearOfAssessment];
+  const selected = exact ?? RELIEF_RULE_SETS[2025];
+
+  return {
+    ...selected,
+    requestedYearOfAssessment: yearOfAssessment,
+  };
+}
+
+export function getReliefDefinitions(
+  yearOfAssessment: number
+): ReliefDefinition[] {
+  return getReliefRuleSet(yearOfAssessment).reliefs;
 }

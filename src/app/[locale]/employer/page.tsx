@@ -2,7 +2,6 @@ import { useTranslations } from "next-intl";
 import { getTranslations } from "next-intl/server";
 import { EmployerForm } from "@/components/employer-form";
 import { PaidFeatureGate } from "@/components/paid-feature-gate";
-import { SourceNote } from "@/components/source-note";
 
 export async function generateMetadata({
   params,
@@ -29,7 +28,6 @@ export default function EmployerPage() {
       </div>
       <PaidFeatureGate>
         <EmployerForm />
-        <SourceNote topic="employer" />
       </PaidFeatureGate>
     </div>
   );

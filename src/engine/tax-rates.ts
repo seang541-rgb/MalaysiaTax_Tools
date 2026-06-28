@@ -15,9 +15,36 @@ export const TAX_RATES_YA2025: TaxBand[] = [
   { min: 2000000, max: Infinity, rate: 0.30 },
 ];
 
+export interface TaxRateRuleSet {
+  yearOfAssessment: number;
+  requestedYearOfAssessment: number;
+  rates: TaxBand[];
+  reviewed: string;
+  sources: string[];
+}
+
+const TAX_RATE_RULE_SETS: Record<
+  number,
+  Omit<TaxRateRuleSet, "requestedYearOfAssessment">
+> = {
+  2025: {
+    yearOfAssessment: 2025,
+    rates: TAX_RATES_YA2025,
+    reviewed: "2026-06",
+    sources: ["LHDN resident individual tax rates", "LHDN e-BE YA2025 guidance"],
+  },
+};
+
+export function getTaxRateRuleSet(yearOfAssessment: number): TaxRateRuleSet {
+  const exact = TAX_RATE_RULE_SETS[yearOfAssessment];
+  const selected = exact ?? TAX_RATE_RULE_SETS[2025];
+
+  return {
+    ...selected,
+    requestedYearOfAssessment: yearOfAssessment,
+  };
+}
+
 export function getTaxRates(yearOfAssessment: number): TaxBand[] {
-  if (yearOfAssessment === 2025) {
-    return TAX_RATES_YA2025;
-  }
-  return TAX_RATES_YA2025;
+  return getTaxRateRuleSet(yearOfAssessment).rates;
 }

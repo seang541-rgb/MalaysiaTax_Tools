@@ -11,6 +11,11 @@ export async function logChatInteraction(input: {
   usedRag: boolean;
   usedPrecalc: boolean;
   usedDeterministic: boolean;
+  agentIntent?: string | null;
+  agentToolName?: string | null;
+  agentNeedsFollowUp?: boolean;
+  agentMissingFields?: string[];
+  providerMetadata?: Record<string, unknown>;
 }): Promise<void> {
   try {
     const { createSupabaseAdminClient } = await import("@/lib/supabase/admin");
@@ -29,6 +34,11 @@ export async function logChatInteraction(input: {
       used_rag: input.usedRag,
       used_precalc: input.usedPrecalc,
       used_deterministic: input.usedDeterministic,
+      agent_intent: input.agentIntent ?? null,
+      agent_tool_name: input.agentToolName ?? null,
+      agent_needs_follow_up: input.agentNeedsFollowUp ?? false,
+      agent_missing_fields: input.agentMissingFields ?? [],
+      provider_metadata: input.providerMetadata ?? {},
     });
   } catch {
     // Logging is best-effort. Never surface to the user.

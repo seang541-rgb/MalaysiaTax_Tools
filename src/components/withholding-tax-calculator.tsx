@@ -166,7 +166,7 @@ export function WithholdingTaxCalculator() {
         </Card>
       )}
 
-      <SourceNote topic="wht" />
+      <SourceNote topic="withholding-tax" />
     </div>
   );
 }

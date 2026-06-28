@@ -2,7 +2,6 @@ import { useTranslations } from "next-intl";
 import { getTranslations } from "next-intl/server";
 import { JointVsSeparateForm } from "@/components/joint-vs-separate-form";
 import { FaqSection, FaqItem } from "@/components/faq-section";
-import { SourceNote } from "@/components/source-note";
 import { SITE_URL } from "@/lib/site";
 
 export async function generateMetadata({
@@ -56,7 +55,6 @@ export default function JointVsSeparatePage() {
       </div>
       <JointVsSeparateForm />
       <FaqSection title={t("faqTitle")} items={faqItems} />
-      <SourceNote topic="personal" />
     </div>
   );
 }

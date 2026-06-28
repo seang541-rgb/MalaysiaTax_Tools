@@ -398,7 +398,11 @@
   },
   "sourceNote": {
     "verified": "税率核实于 {date}",
-    "sourceLabel": "来源"
+    "sourceLabel": "来源",
+    "appliesTo": "适用于 {period}",
+    "reviewedLabel": {
+      "comparisonRules": "并行评税规则已核实"
+    }
   },
   "property": {
     "hubIntro": "选择一个房产税工具。卖房用 RPGT,买房用印花税。",
@@ -798,7 +802,8 @@
     "send": "发送",
     "disclaimer": "回答仅供参考。请咨询 LHDN 或税务顾问获取正式建议。",
     "authRequired": "请先登录才能使用 MYTax AI。",
-    "insufficientCredits": "Credit 不足。请前往收费页面购买 credits。"
+    "insufficientCredits": "Credit 不足。请前往收费页面购买 credits。",
+    "serviceUnavailable": "MYTax AI 暂时不可用，请稍后再试。"
   },
   "common": {
     "rm": "RM",

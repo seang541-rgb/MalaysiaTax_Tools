@@ -1,7 +1,6 @@
 import { useTranslations } from "next-intl";
 import { getTranslations } from "next-intl/server";
 import { IncomeForm } from "@/components/income-form";
-import { SourceNote } from "@/components/source-note";
 import { DeadlineCountdown } from "@/components/deadline-countdown";
 import { WhoAmI } from "@/components/who-am-i";
 import { FaqSection, FaqItem } from "@/components/faq-section";
@@ -69,7 +68,6 @@ export default function HomePage() {
       <IncomeForm />
       <WhoAmI />
       <FaqSection title={faq("title")} items={faqItems} />
-      <SourceNote topic="personal" />
     </div>
   );
 }

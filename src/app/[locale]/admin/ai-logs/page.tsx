@@ -1,15 +1,11 @@
 import { notFound } from "next/navigation";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { createSupabaseAdminClient } from "@/lib/supabase/admin";
+import { isAdminEmail } from "@/lib/admin";
 
 // Owner-only. Never indexed, never cached.
 export const dynamic = "force-dynamic";
 export const metadata = { robots: { index: false, follow: false } };
-
-const ADMIN_EMAILS = (process.env.ADMIN_EMAIL || "seang541@gmail.com")
-  .split(",")
-  .map((e) => e.trim().toLowerCase())
-  .filter(Boolean);
 
 interface ChatLog {
   id: string;
@@ -21,6 +17,14 @@ interface ChatLog {
   used_rag: boolean | null;
   used_precalc: boolean | null;
   used_deterministic: boolean | null;
+  agent_intent: string | null;
+  agent_tool_name: string | null;
+  agent_needs_follow_up: boolean | null;
+  agent_missing_fields: string[] | null;
+  provider_metadata: {
+    chatModel?: string;
+    embedModel?: string;
+  } | null;
 }
 
 function Badge({ on, label }: { on: boolean | null; label: string }) {
@@ -45,7 +49,7 @@ export default async function AiLogsPage() {
   } = await supabase.auth.getUser();
 
   // 2. Owner gate. Anyone else gets a 404 (don't reveal the page exists).
-  if (!user || !ADMIN_EMAILS.includes((user.email || "").toLowerCase())) {
+  if (!isAdminEmail(user?.email)) {
     notFound();
   }
 
@@ -54,7 +58,7 @@ export default async function AiLogsPage() {
   const { data, error } = await admin
     .from("ai_chat_logs")
     .select(
-      "id,created_at,locale,question,answer,answer_length,used_rag,used_precalc,used_deterministic"
+      "id,created_at,locale,question,answer,answer_length,used_rag,used_precalc,used_deterministic,agent_intent,agent_tool_name,agent_needs_follow_up,agent_missing_fields,provider_metadata"
     )
     .order("created_at", { ascending: false })
     .limit(200);
@@ -70,6 +74,8 @@ export default async function AiLogsPage() {
   const withRag = logs.filter((l) => l.used_rag).length;
   const withCalc = logs.filter((l) => l.used_precalc || l.used_deterministic)
     .length;
+  const withAgentTool = logs.filter((l) => l.agent_tool_name).length;
+  const needingFollowUp = logs.filter((l) => l.agent_needs_follow_up).length;
 
   return (
     <div className="mx-auto max-w-5xl">
@@ -84,12 +90,18 @@ export default async function AiLogsPage() {
         </p>
       ) : (
         <>
-          <div className="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-4">
+          <div className="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-5">
             <Stat label="总条数" value={total} />
             <Stat label="纯模型(高风险)" value={pureModel} accent />
             <Stat label="命中知识库" value={withRag} />
             <Stat label="命中计算兜底" value={withCalc} />
+            <Stat label="Agent 工具" value={withAgentTool} />
           </div>
+          {needingFollowUp > 0 && (
+            <p className="mt-3 text-xs text-muted-foreground">
+              需追问记录: {needingFollowUp} 条
+            </p>
+          )}
 
           <div className="mt-6 space-y-3">
             {logs.length === 0 ? (
@@ -116,6 +128,26 @@ export default async function AiLogsPage() {
                         <Badge on={l.used_rag} label="RAG" />
                         <Badge on={l.used_precalc} label="预计算" />
                         <Badge on={l.used_deterministic} label="确定性" />
+                        {l.agent_intent && (
+                          <span className="rounded bg-cyan-100 px-1.5 py-0.5 font-medium text-cyan-800 dark:bg-cyan-900/40 dark:text-cyan-300">
+                            Intent: {l.agent_intent}
+                          </span>
+                        )}
+                        {l.agent_tool_name && (
+                          <span className="rounded bg-blue-100 px-1.5 py-0.5 font-medium text-blue-800 dark:bg-blue-900/40 dark:text-blue-300">
+                            Agent 工具: {l.agent_tool_name}
+                          </span>
+                        )}
+                        {l.agent_needs_follow_up && (
+                          <span className="rounded bg-purple-100 px-1.5 py-0.5 font-medium text-purple-800 dark:bg-purple-900/40 dark:text-purple-300">
+                            需追问
+                          </span>
+                        )}
+                        {l.provider_metadata?.chatModel && (
+                          <span className="rounded bg-zinc-100 px-1.5 py-0.5 dark:bg-zinc-800">
+                            Model: {l.provider_metadata.chatModel}
+                          </span>
+                        )}
                         {risky && (
                           <span className="rounded bg-amber-100 px-1.5 py-0.5 font-medium text-amber-800 dark:bg-amber-900/40 dark:text-amber-300">
                             纯模型
@@ -128,6 +160,12 @@ export default async function AiLogsPage() {
                       </p>
                     </summary>
                     <div className="mt-3 whitespace-pre-wrap border-t pt-3 text-sm text-muted-foreground">
+                      {l.agent_missing_fields &&
+                        l.agent_missing_fields.length > 0 && (
+                          <p className="mb-3 rounded bg-zinc-100 px-2 py-1 text-xs text-zinc-700 dark:bg-zinc-800 dark:text-zinc-300">
+                            缺失字段: {l.agent_missing_fields.join(", ")}
+                          </p>
+                        )}
                       {l.answer || "(无回答)"}
                     </div>
                   </details>
