@@ -63,6 +63,10 @@ STRIPE_PRICE_BUSINESS=price_...
 NEXT_PUBLIC_APP_URL=https://your-domain.example
 ```
 
+For production, these Stripe values must come from the live Stripe account and
+must reference live one-time prices. Test keys are only for isolated local or
+staging environments.
+
 `LLM_EMBED_DIMENSIONS=0` means "don't send dimensions" (bge-m3 is fixed 1024).
 
 ## Step 3 - Create the Supabase RAG schema
@@ -190,5 +194,7 @@ gate: users must sign in and have at least 1 credit before the tool UI is availa
 `POST /api/chat` consumes 1 credit per AI question.
 
 For local setup on Windows, run `npm run billing:env`. The script prompts for Supabase
-and Stripe keys, writes `.env.local`, can create the three one-time Stripe prices, and
-can register the `checkout.session.completed` webhook endpoint automatically.
+and Stripe keys, writes `.env.local`, can create the three one-time Stripe prices for
+the key you provide, and can register the `checkout.session.completed` webhook endpoint
+automatically. Do not run it against production unless you intentionally want to create
+or rotate live billing resources.

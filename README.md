@@ -182,13 +182,18 @@ You can also rebuild the RAG index from the admin UI after signing in as an admi
 
 ## Billing Setup
 
-For local billing configuration on Windows:
+Production billing for `https://mytaxs.online` is handled by the deployed Stripe
+Checkout integration. End users do not install anything locally.
+
+For local development or a self-hosted copy on Windows:
 
 ```powershell
 npm run billing:env
 ```
 
-The helper prompts for Supabase and Stripe values, writes `.env.local`, and can help create the Stripe prices and webhook endpoint.
+The helper prompts for Supabase and Stripe values, writes `.env.local`, and can help create the Stripe prices and webhook endpoint for the key you provide.
+
+Use live Stripe keys and live price IDs for production. Use Stripe test keys only for an isolated local or staging environment.
 
 Stripe webhook endpoint:
 
