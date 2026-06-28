@@ -1,5 +1,8 @@
 import { describe, expect, it } from "vitest";
-import { buildAgentTurn } from "@/lib/agent/orchestrator";
+import {
+  buildAgentTurn,
+  buildDeterministicFallbackAnswer,
+} from "@/lib/agent/orchestrator";
 
 describe("agent orchestrator", () => {
   it("builds LLM messages with deterministic tool context and metadata", () => {
@@ -52,5 +55,48 @@ describe("agent orchestrator", () => {
     expect(result.usedRag).toBe(true);
     expect(result.llmMessages[0].content).toContain("FOLLOW-UP REQUIRED");
     expect(result.llmMessages[0].content).toContain("Retrieved Tax Knowledge");
+  });
+
+  it("builds a plain deterministic fallback answer when provider text is unavailable", () => {
+    const turn = buildAgentTurn({
+      locale: "en",
+      userMessage: "Single employee monthly gross salary RM5000, estimate PCB.",
+      ragContext: "",
+      messages: [
+        {
+          role: "user",
+          content: "Single employee monthly gross salary RM5000, estimate PCB.",
+        },
+      ],
+    });
+
+    const fallback = buildDeterministicFallbackAnswer(turn.agentContext);
+
+    expect(fallback).toContain("deterministic MYTax result");
+    expect(fallback).toContain("Monthly PCB: RM108.25");
+    expect(fallback).not.toContain("IMPORTANT:");
+    expect(fallback).not.toContain("END EXACT MYTAX FACTS");
+  });
+
+  it("localizes deterministic fallback framing for Chinese users", () => {
+    const turn = buildAgentTurn({
+      locale: "zh",
+      userMessage: "Single employee monthly gross salary RM5000, estimate PCB.",
+      ragContext: "",
+      messages: [
+        {
+          role: "user",
+          content: "Single employee monthly gross salary RM5000, estimate PCB.",
+        },
+      ],
+    });
+
+    const fallback = buildDeterministicFallbackAnswer(
+      turn.agentContext,
+      "zh"
+    );
+
+    expect(fallback).toContain("AI 说明服务暂时无法连接");
+    expect(fallback).toContain("Monthly PCB: RM108.25");
   });
 });

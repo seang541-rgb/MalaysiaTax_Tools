@@ -53,3 +53,45 @@ export function buildAgentTurn(input: AgentTurnInput): AgentTurnResult {
     usedDeterministic,
   };
 }
+
+export function buildDeterministicFallbackAnswer(
+  agentContext: AgentContextResult | null,
+  locale?: unknown
+): string | null {
+  if (!agentContext?.usedDeterministic || !agentContext.context.trim()) {
+    return null;
+  }
+
+  const facts = agentContext.context
+    .split("\n")
+    .map((line) => line.trim())
+    .filter(
+      (line) =>
+        line &&
+        !line.startsWith("---") &&
+        !line.startsWith("IMPORTANT:")
+    )
+    .join("\n");
+
+  if (locale === "zh") {
+    return [
+      "AI 说明服务暂时无法连接，但 MYTax 已经完成确定性计算：",
+      facts,
+      "请把以上内容视为计算器参考结果；正式申报前建议再向 LHDN 或税务专业人士确认。",
+    ].join("\n\n");
+  }
+
+  if (locale === "ms") {
+    return [
+      "Perkhidmatan penjelasan AI tidak dapat dicapai buat sementara waktu, tetapi MYTax telah mengira keputusan deterministik:",
+      facts,
+      "Sila anggap keputusan ini sebagai rujukan kalkulator sahaja dan semak dengan LHDN atau profesional cukai untuk nasihat rasmi.",
+    ].join("\n\n");
+  }
+
+  return [
+    "I could not reach the AI explanation provider, but MYTax already calculated a deterministic MYTax result:",
+    facts,
+    "Please treat this as a calculator result for reference only and consult LHDN or a tax professional for official advice.",
+  ].join("\n\n");
+}

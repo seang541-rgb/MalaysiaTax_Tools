@@ -11,6 +11,7 @@ import {
 import { BILLING_FEATURE_COSTS } from "@/lib/billing/plans";
 import {
   buildAgentTurn,
+  buildDeterministicFallbackAnswer,
   type AgentChatMessage,
 } from "@/lib/agent/orchestrator";
 import { checkRateLimit } from "@/lib/rate-limit";
@@ -167,6 +168,37 @@ export async function POST(request: NextRequest) {
 
     if (!llmRes.ok || !llmRes.body) {
       const errText = await llmRes.text().catch(() => "");
+      const fallbackAnswer = buildDeterministicFallbackAnswer(
+        agentTurn.agentContext,
+        locale
+      );
+      if (fallbackAnswer) {
+        await logChatInteraction({
+          userId: user.id,
+          locale: typeof locale === "string" ? locale : null,
+          question: userMessage,
+          answer: fallbackAnswer,
+          usedRag: agentTurn.usedRag,
+          usedPrecalc: agentTurn.usedPrecalc,
+          usedDeterministic: agentTurn.usedDeterministic,
+          agentToolName: agentTurn.agentContext?.toolName ?? null,
+          agentNeedsFollowUp: agentTurn.agentContext?.needsFollowUp ?? false,
+          agentMissingFields:
+            agentTurn.agentContext?.missingFields.map(
+              (field) => field.field
+            ) ?? [],
+        });
+
+        const payload = `data: ${JSON.stringify({ token: fallbackAnswer })}\n\ndata: [DONE]\n\n`;
+        return new Response(payload, {
+          headers: {
+            "Content-Type": "text/event-stream",
+            "Cache-Control": "no-cache",
+            Connection: "keep-alive",
+          },
+        });
+      }
+
       await refundCredits({
         userId: user.id,
         feature: "ai_tax_question",

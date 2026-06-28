@@ -304,7 +304,7 @@ describe("AI chat billing gate", () => {
     );
   });
 
-  it("refunds credits when the provider returns a non-200 response", async () => {
+  it("returns deterministic fallback when the provider fails after a tool result", async () => {
     getUserMock.mockResolvedValue({
       data: { user: { id: "user-1", email: "user@example.com" } },
     });
@@ -319,7 +319,41 @@ describe("AI chat billing gate", () => {
       new Request("http://localhost/api/chat", {
         method: "POST",
         body: JSON.stringify({
-          messages: [{ role: "user", content: "monthly salary RM5000" }],
+          messages: [
+            {
+              role: "user",
+              content:
+                "Single employee monthly gross salary RM5000, estimate PCB.",
+            },
+          ],
+        }),
+      }) as never
+    );
+
+    expect(res.status).toBe(200);
+    const text = await res.text();
+    expect(text).toContain("deterministic MYTax result");
+    expect(text).toContain("Monthly PCB: RM108.25");
+    expect(text).toContain("data: [DONE]");
+    expect(refundCreditsMock).not.toHaveBeenCalled();
+  });
+
+  it("refunds credits when the provider returns a non-200 response without a tool result", async () => {
+    getUserMock.mockResolvedValue({
+      data: { user: { id: "user-1", email: "user@example.com" } },
+    });
+    consumeCreditsMock.mockResolvedValue({ balance: 9 });
+    embedMock.mockRejectedValue(new Error("skip rag"));
+    chatStreamMock.mockResolvedValue(
+      new Response("provider exploded", { status: 502 })
+    );
+    const { POST } = await import("@/app/api/chat/route");
+
+    const res = await POST(
+      new Request("http://localhost/api/chat", {
+        method: "POST",
+        body: JSON.stringify({
+          messages: [{ role: "user", content: "When is the tax deadline?" }],
         }),
       }) as never
     );
