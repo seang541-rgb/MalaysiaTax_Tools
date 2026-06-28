@@ -17,6 +17,7 @@ interface ChatLog {
   used_rag: boolean | null;
   used_precalc: boolean | null;
   used_deterministic: boolean | null;
+  agent_intent: string | null;
   agent_tool_name: string | null;
   agent_needs_follow_up: boolean | null;
   agent_missing_fields: string[] | null;
@@ -53,7 +54,7 @@ export default async function AiLogsPage() {
   const { data, error } = await admin
     .from("ai_chat_logs")
     .select(
-      "id,created_at,locale,question,answer,answer_length,used_rag,used_precalc,used_deterministic,agent_tool_name,agent_needs_follow_up,agent_missing_fields"
+      "id,created_at,locale,question,answer,answer_length,used_rag,used_precalc,used_deterministic,agent_intent,agent_tool_name,agent_needs_follow_up,agent_missing_fields"
     )
     .order("created_at", { ascending: false })
     .limit(200);
@@ -123,6 +124,11 @@ export default async function AiLogsPage() {
                         <Badge on={l.used_rag} label="RAG" />
                         <Badge on={l.used_precalc} label="预计算" />
                         <Badge on={l.used_deterministic} label="确定性" />
+                        {l.agent_intent && (
+                          <span className="rounded bg-cyan-100 px-1.5 py-0.5 font-medium text-cyan-800 dark:bg-cyan-900/40 dark:text-cyan-300">
+                            Intent: {l.agent_intent}
+                          </span>
+                        )}
                         {l.agent_tool_name && (
                           <span className="rounded bg-blue-100 px-1.5 py-0.5 font-medium text-blue-800 dark:bg-blue-900/40 dark:text-blue-300">
                             Agent 工具: {l.agent_tool_name}

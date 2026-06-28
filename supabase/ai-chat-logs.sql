@@ -16,11 +16,15 @@ create table if not exists public.ai_chat_logs (
   used_rag           boolean default false,
   used_precalc       boolean default false,
   used_deterministic boolean default false,
+  agent_intent       text,
   agent_tool_name    text,
   agent_needs_follow_up boolean default false,
   agent_missing_fields text[] default '{}',
   created_at         timestamptz default now()
 );
+
+alter table public.ai_chat_logs
+  add column if not exists agent_intent text;
 
 alter table public.ai_chat_logs
   add column if not exists agent_tool_name text;

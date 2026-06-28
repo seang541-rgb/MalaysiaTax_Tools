@@ -173,6 +173,7 @@ export async function POST(request: NextRequest) {
         usedRag: agentTurn.usedRag,
         usedPrecalc: false,
         usedDeterministic: false,
+        agentIntent: null,
         agentToolName: null,
         agentNeedsFollowUp: false,
         agentMissingFields: [],
@@ -207,6 +208,7 @@ export async function POST(request: NextRequest) {
           usedRag: agentTurn.usedRag,
           usedPrecalc: agentTurn.usedPrecalc,
           usedDeterministic: agentTurn.usedDeterministic,
+          agentIntent: agentTurn.agentContext?.toolName ?? null,
           agentToolName: agentTurn.agentContext?.toolName ?? null,
           agentNeedsFollowUp: agentTurn.agentContext?.needsFollowUp ?? false,
           agentMissingFields:
@@ -344,6 +346,7 @@ export async function POST(request: NextRequest) {
               usedRag,
               usedPrecalc,
               usedDeterministic,
+              agentIntent: agentTurn.agentContext?.toolName ?? null,
               agentToolName: agentTurn.agentContext?.toolName ?? null,
               agentNeedsFollowUp:
                 agentTurn.agentContext?.needsFollowUp ?? false,
