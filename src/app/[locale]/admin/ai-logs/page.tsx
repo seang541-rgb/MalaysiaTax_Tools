@@ -21,6 +21,10 @@ interface ChatLog {
   agent_tool_name: string | null;
   agent_needs_follow_up: boolean | null;
   agent_missing_fields: string[] | null;
+  provider_metadata: {
+    chatModel?: string;
+    embedModel?: string;
+  } | null;
 }
 
 function Badge({ on, label }: { on: boolean | null; label: string }) {
@@ -54,7 +58,7 @@ export default async function AiLogsPage() {
   const { data, error } = await admin
     .from("ai_chat_logs")
     .select(
-      "id,created_at,locale,question,answer,answer_length,used_rag,used_precalc,used_deterministic,agent_intent,agent_tool_name,agent_needs_follow_up,agent_missing_fields"
+      "id,created_at,locale,question,answer,answer_length,used_rag,used_precalc,used_deterministic,agent_intent,agent_tool_name,agent_needs_follow_up,agent_missing_fields,provider_metadata"
     )
     .order("created_at", { ascending: false })
     .limit(200);
@@ -137,6 +141,11 @@ export default async function AiLogsPage() {
                         {l.agent_needs_follow_up && (
                           <span className="rounded bg-purple-100 px-1.5 py-0.5 font-medium text-purple-800 dark:bg-purple-900/40 dark:text-purple-300">
                             需追问
+                          </span>
+                        )}
+                        {l.provider_metadata?.chatModel && (
+                          <span className="rounded bg-zinc-100 px-1.5 py-0.5 dark:bg-zinc-800">
+                            Model: {l.provider_metadata.chatModel}
                           </span>
                         )}
                         {risky && (

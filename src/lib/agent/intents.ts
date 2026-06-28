@@ -1,5 +1,28 @@
 import type { AgentToolName } from "./types";
 
+export interface AgentIntentDetection {
+  toolName: AgentToolName | null;
+  confidence: number;
+  reason: string;
+}
+
+export function detectAgentIntent(message: string): AgentIntentDetection {
+  const toolName = detectAgentTool(message);
+  if (!toolName) {
+    return {
+      toolName: null,
+      confidence: 0.2,
+      reason: "general_tax_chat",
+    };
+  }
+
+  return {
+    toolName,
+    confidence: 0.9,
+    reason: toolName.replace(/_calculator$|_checker$/g, ""),
+  };
+}
+
 export function detectAgentTool(message: string): AgentToolName | null {
   const lower = message.toLowerCase();
 

@@ -110,4 +110,72 @@ describe("TaxChat billing gate", () => {
     expect(link).toHaveAttribute("href", "/en/sst");
     expect(await screen.findByText("SST result")).toBeInTheDocument();
   });
+
+  it("shows missing fields when the agent asks a follow-up question", async () => {
+    vi.mocked(fetch).mockReset();
+    vi.mocked(fetch)
+      .mockResolvedValueOnce({
+        json: vi.fn(async () => ({ status: "ok", available: true })),
+      } as never)
+      .mockResolvedValueOnce(
+        new Response(
+          'data: {"agent":{"toolName":"sst_checker","needsFollowUp":true,"calculatorLabel":"SST Calculator","calculatorPath":"/sst","missingFields":["taxType","taxableRevenue"]}}\n\ndata: {"token":"Is this sales tax or service tax?"}\n\ndata: [DONE]\n\n',
+          { status: 200 }
+        ) as never
+      );
+
+    render(<TaxChat />);
+
+    await waitFor(() => {
+      expect(fetch).toHaveBeenCalledWith(
+        "/api/chat",
+        expect.objectContaining({ signal: expect.any(AbortSignal) })
+      );
+    });
+
+    fireEvent.change(screen.getByPlaceholderText("Ask a tax question..."), {
+      target: { value: "Need SST?" },
+    });
+    fireEvent.click(screen.getByRole("button", { name: "Send" }));
+
+    expect(await screen.findByText("Needs details")).toBeInTheDocument();
+    expect(
+      await screen.findByText("Missing: taxType, taxableRevenue")
+    ).toBeInTheDocument();
+    expect(
+      await screen.findByText("Is this sales tax or service tax?")
+    ).toBeInTheDocument();
+  });
+
+  it("shows agent assumptions from stream metadata", async () => {
+    vi.mocked(fetch).mockReset();
+    vi.mocked(fetch)
+      .mockResolvedValueOnce({
+        json: vi.fn(async () => ({ status: "ok", available: true })),
+      } as never)
+      .mockResolvedValueOnce(
+        new Response(
+          'data: {"agent":{"toolName":"personal_tax_calculator","needsFollowUp":false,"calculatorLabel":"Personal Tax Calculator","calculatorPath":"/","missingFields":[],"assumptions":["YA2025","resident individual","single"]}}\n\ndata: {"token":"Tax result"}\n\ndata: [DONE]\n\n',
+          { status: 200 }
+        ) as never
+      );
+
+    render(<TaxChat />);
+
+    await waitFor(() => {
+      expect(fetch).toHaveBeenCalledWith(
+        "/api/chat",
+        expect.objectContaining({ signal: expect.any(AbortSignal) })
+      );
+    });
+
+    fireEvent.change(screen.getByPlaceholderText("Ask a tax question..."), {
+      target: { value: "monthly salary RM5000" },
+    });
+    fireEvent.click(screen.getByRole("button", { name: "Send" }));
+
+    expect(
+      await screen.findByText("Assumptions: YA2025, resident individual, single")
+    ).toBeInTheDocument();
+  });
 });

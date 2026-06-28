@@ -89,9 +89,8 @@ export function buildChatSystemPrompt(input: {
   }
 
   if (input.ragContext) {
-    prompt += `\n\nUse the following retrieved knowledge to enhance your answer. Prioritize this information over your general knowledge when answering:${input.ragContext}`;
+    prompt += `\n\nUse the following retrieved knowledge to enhance your answer. Prioritize this information over your general knowledge when answering. Do not use retrieved knowledge to override exact MYTax facts or deterministic calculator outputs:${input.ragContext}`;
   }
 
   return prompt;
 }
-

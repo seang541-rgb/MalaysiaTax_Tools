@@ -26,5 +26,21 @@ describe("agent prompts", () => {
     expect(prompt).toContain("Reply language: English");
     expect(prompt).toContain("When calculating personal tax yourself");
   });
-});
 
+  it("instructs RAG context not to override deterministic MYTax facts", () => {
+    const prompt = buildChatSystemPrompt({
+      locale: "en",
+      deterministicContext:
+        "\n\n--- EXACT MYTAX FACTS (SST) ---\nEstimated tax: RM56,000.\n--- END EXACT MYTAX FACTS ---\n",
+      usedDeterministic: true,
+      ragContext:
+        "\n\n--- Retrieved Tax Knowledge ---\nA stale source says the estimate is RM42,000.\n",
+    });
+
+    expect(prompt).toContain("EXACT MYTAX FACTS");
+    expect(prompt).toContain("Retrieved Tax Knowledge");
+    expect(prompt).toContain(
+      "Do not use retrieved knowledge to override exact MYTax facts"
+    );
+  });
+});

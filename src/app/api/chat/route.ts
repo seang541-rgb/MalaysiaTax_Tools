@@ -58,6 +58,34 @@ function isChatMessage(value: unknown): value is {
   return typeof value === "object" && value !== null;
 }
 
+function providerMetadata(): Record<string, unknown> {
+  return {
+    chatModel: llmInfo.CHAT_MODEL,
+    chatBase: llmInfo.CHAT_BASE,
+    embedModel: llmInfo.EMBED_MODEL,
+    embedBase: llmInfo.EMBED_BASE,
+    embedDimensions: llmInfo.EMBED_DIMENSIONS,
+  };
+}
+
+function extractAssumptions(context: string): string[] {
+  const assumptionsLine = context
+    .split("\n")
+    .map((line) => line.trim())
+    .find((line) => line.toLowerCase().startsWith("assumptions:"));
+
+  if (assumptionsLine) {
+    return assumptionsLine
+      .replace(/^assumptions:\s*/i, "")
+      .replace(/\.$/, "")
+      .split(",")
+      .map((item) => item.trim())
+      .filter(Boolean);
+  }
+
+  return context.includes("YA2025") ? ["YA2025"] : [];
+}
+
 export async function POST(request: NextRequest) {
   let chargedAiCredit = false;
   let chargedUserId: string | null = null;
@@ -176,6 +204,7 @@ export async function POST(request: NextRequest) {
         agentToolName: null,
         agentNeedsFollowUp: false,
         agentMissingFields: [],
+        providerMetadata: providerMetadata(),
       });
 
       const payload = `data: ${JSON.stringify({
@@ -214,6 +243,7 @@ export async function POST(request: NextRequest) {
             agentTurn.agentContext?.missingFields.map(
               (field) => field.field
             ) ?? [],
+          providerMetadata: providerMetadata(),
         });
 
         const payload = `data: ${JSON.stringify({ token: fallbackAnswer })}\n\ndata: [DONE]\n\n`;
@@ -235,6 +265,7 @@ export async function POST(request: NextRequest) {
           route: "/api/chat",
           status: llmRes.status,
           detail: errText,
+          providerMetadata: providerMetadata(),
         },
       });
       chargedAiCredit = false;
@@ -278,6 +309,9 @@ export async function POST(request: NextRequest) {
                     calculatorPath: agentTurn.agentContext.calculatorPath,
                     missingFields: agentTurn.agentContext.missingFields.map(
                       (field) => field.field
+                    ),
+                    assumptions: extractAssumptions(
+                      agentTurn.agentContext.context
                     ),
                   },
                 })}\n\n`
@@ -331,6 +365,7 @@ export async function POST(request: NextRequest) {
                 metadata: {
                   route: "/api/chat",
                   partialAnswerLength: fullAnswer.length,
+                  providerMetadata: providerMetadata(),
                 },
               })
             ).catch(() => {});
@@ -353,6 +388,7 @@ export async function POST(request: NextRequest) {
                 agentTurn.agentContext?.missingFields.map(
                   (field) => field.field
                 ) ?? [],
+              providerMetadata: providerMetadata(),
             });
           }
           if (!streamFailed) {

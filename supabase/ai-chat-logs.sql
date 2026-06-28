@@ -20,6 +20,7 @@ create table if not exists public.ai_chat_logs (
   agent_tool_name    text,
   agent_needs_follow_up boolean default false,
   agent_missing_fields text[] default '{}',
+  provider_metadata  jsonb not null default '{}'::jsonb,
   created_at         timestamptz default now()
 );
 
@@ -34,6 +35,9 @@ alter table public.ai_chat_logs
 
 alter table public.ai_chat_logs
   add column if not exists agent_missing_fields text[] default '{}';
+
+alter table public.ai_chat_logs
+  add column if not exists provider_metadata jsonb not null default '{}'::jsonb;
 
 -- 启用 RLS 但不加任何 policy => 仅 service role 可读写。
 alter table public.ai_chat_logs enable row level security;

@@ -15,6 +15,7 @@ interface AgentStreamMetadata {
   calculatorLabel: string | null;
   calculatorPath: string | null;
   missingFields: string[];
+  assumptions?: string[];
 }
 
 type UiChatMessage = ChatMessage & {
@@ -282,6 +283,28 @@ export function TaxChat() {
         ? "Buka kalkulator"
         : "Open calculator";
 
+  const missingFieldsLabel = (agent: AgentStreamMetadata) => {
+    if (!agent.needsFollowUp || agent.missingFields.length === 0) {
+      return null;
+    }
+
+    const fields = agent.missingFields.join(", ");
+    if (locale === "zh") return `缺少: ${fields}`;
+    if (locale === "ms") return `Maklumat kurang: ${fields}`;
+    return `Missing: ${fields}`;
+  };
+
+  const assumptionsLabel = (agent: AgentStreamMetadata) => {
+    if (!agent.assumptions || agent.assumptions.length === 0) {
+      return null;
+    }
+
+    const assumptions = agent.assumptions.join(", ");
+    if (locale === "zh") return `假设: ${assumptions}`;
+    if (locale === "ms") return `Andaian: ${assumptions}`;
+    return `Assumptions: ${assumptions}`;
+  };
+
   return (
     <div className="max-w-2xl mx-auto space-y-3">
       {!disclaimerAck && (
@@ -357,6 +380,16 @@ export function TaxChat() {
                                 {openCalculatorLabel}
                               </a>
                             )}
+                          {missingFieldsLabel(msg.agent) && (
+                            <span className="rounded bg-background px-2 py-0.5">
+                              {missingFieldsLabel(msg.agent)}
+                            </span>
+                          )}
+                          {assumptionsLabel(msg.agent) && (
+                            <span className="rounded bg-background px-2 py-0.5">
+                              {assumptionsLabel(msg.agent)}
+                            </span>
+                          )}
                         </div>
                       )}
                       {renderContent(msg.content)}

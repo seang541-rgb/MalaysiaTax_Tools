@@ -287,6 +287,39 @@ describe("AI chat billing gate", () => {
     expect(text.indexOf('"agent"')).toBeLessThan(text.indexOf('"token":"ok"'));
   });
 
+  it("streams deterministic assumptions in agent metadata", async () => {
+    getUserMock.mockResolvedValue({
+      data: { user: { id: "user-1", email: "user@example.com" } },
+    });
+    consumeCreditsMock.mockResolvedValue({ balance: 9 });
+    embedMock.mockRejectedValue(new Error("skip rag"));
+    chatStreamMock.mockResolvedValue(
+      new Response('data: {"choices":[{"delta":{"content":"ok"}}]}\n\ndata: [DONE]\n\n')
+    );
+    const { POST } = await import("@/app/api/chat/route");
+
+    const res = await POST(
+      new Request("http://localhost/api/chat", {
+        method: "POST",
+        body: JSON.stringify({
+          locale: "en",
+          messages: [
+            {
+              role: "user",
+              content: "Single monthly salary RM5000, calculate personal tax.",
+            },
+          ],
+        }),
+      }) as never
+    );
+
+    expect(res.status).toBe(200);
+    const text = await res.text();
+    expect(text).toContain('"assumptions"');
+    expect(text).toContain("YA2025");
+    expect(text).toContain("Malaysian tax resident individual");
+  });
+
   it("asks for SST tax type before calculating ambiguous SST questions", async () => {
     getUserMock.mockResolvedValue({
       data: { user: { id: "user-1", email: "user@example.com" } },
