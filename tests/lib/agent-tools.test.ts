@@ -523,4 +523,75 @@ describe("agent tools", () => {
     expect(result.context).toContain("Statutory business income: RM360,000");
     expect(result.context).toContain("Chargeable income: RM360,000");
   });
+
+  it("detects joint assessment comparison questions", () => {
+    expect(
+      detectAgentTool(
+        "Joint assessment: spouse 1 annual income RM100k, spouse 2 annual income RM20k. Compare separate and joint."
+      )
+    ).toBe("joint_assessment_calculator");
+  });
+
+  it("asks for spouse incomes before joint assessment comparison", () => {
+    const result = buildDeterministicAgentContext(
+      "Should my spouse and I choose joint assessment or separate assessment?"
+    );
+
+    expect(result.toolName).toBe("joint_assessment_calculator");
+    expect(result.needsFollowUp).toBe(true);
+    expect(result.followUpQuestion).toContain("spouse 1");
+    expect(result.followUpQuestion).toContain("spouse 2");
+  });
+
+  it("builds exact joint assessment context from the deterministic engine", () => {
+    const result = buildDeterministicAgentContext(
+      "Joint assessment: spouse 1 annual income RM100k, spouse 2 annual income RM20k. Compare separate and joint."
+    );
+
+    expect(result.toolName).toBe("joint_assessment_calculator");
+    expect(result.usedDeterministic).toBe(true);
+    expect(result.context).toContain("EXACT MYTAX FACTS");
+    expect(result.context).toContain("Joint vs separate assessment (YA2025)");
+    expect(result.context).toContain("Spouse 1 annual income: RM100,000");
+    expect(result.context).toContain("Spouse 2 annual income: RM20,000");
+    expect(result.context).toContain("Separate assessment tax: RM7,690");
+    expect(result.context).toContain("Joint assessment tax: RM11,150");
+    expect(result.context).toContain("Recommended assessment: separate");
+    expect(result.context).toContain("Tax difference: RM3,460");
+  });
+
+  it("detects batch PCB payroll questions before single employee PCB", () => {
+    expect(
+      detectAgentTool(
+        "Batch PCB for payroll: Ali monthly salary RM5000, Siti monthly salary RM8000."
+      )
+    ).toBe("batch_pcb_calculator");
+  });
+
+  it("asks for employee salaries before batch PCB calculation", () => {
+    const result = buildDeterministicAgentContext(
+      "Calculate batch PCB for my payroll."
+    );
+
+    expect(result.toolName).toBe("batch_pcb_calculator");
+    expect(result.needsFollowUp).toBe(true);
+    expect(result.followUpQuestion).toContain("employee names");
+    expect(result.followUpQuestion).toContain("monthly gross salaries");
+  });
+
+  it("builds exact batch PCB context from the deterministic engine", () => {
+    const result = buildDeterministicAgentContext(
+      "Batch PCB payroll: Ali monthly salary RM5000 single, Siti monthly salary RM8000 married spouse no income 2 children."
+    );
+
+    expect(result.toolName).toBe("batch_pcb_calculator");
+    expect(result.usedDeterministic).toBe(true);
+    expect(result.context).toContain("EXACT MYTAX FACTS");
+    expect(result.context).toContain("Batch PCB payroll summary (YA2025)");
+    expect(result.context).toContain("Employee count: 2");
+    expect(result.context).toContain("Ali: monthly salary RM5,000, monthly PCB RM108.25, annual PCB RM1,299");
+    expect(result.context).toContain("Siti: monthly salary RM8,000, monthly PCB RM381.96, annual PCB RM4,583.52");
+    expect(result.context).toContain("Total monthly PCB: RM490.21");
+    expect(result.context).toContain("Total annual PCB: RM5,882.52");
+  });
 });

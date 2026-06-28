@@ -1,4 +1,5 @@
 import { checkEInvoicePhase } from "@/engine/e-invoice";
+import { calculateBatchPcb } from "@/engine/batch-pcb";
 import {
   calculateCapitalAllowance,
   type CapitalAssetType,
@@ -6,6 +7,7 @@ import {
 import { calculateCorporateTax } from "@/engine/corporate";
 import { calculateCp204 } from "@/engine/cp204";
 import { calculateEmployerContributions } from "@/engine/employer-contributions";
+import { compareJointVsSeparate } from "@/engine/joint-assessment";
 import { calculatePersonalTax } from "@/engine/personal";
 import { estimateMonthlyPcb } from "@/engine/pcb";
 import { calculateRpgt, type RpgtDisposerType } from "@/engine/rpgt";
@@ -18,7 +20,9 @@ import {
   type WhtPaymentType,
 } from "@/engine/withholding-tax";
 import type {
+  BatchEmployeeInput,
   EmployerContributionInput,
+  IncomeInput,
   ReliefClaim,
   TaxCalculationInput,
 } from "@/engine/types";
@@ -78,6 +82,23 @@ export function detectAgentTool(message: string): AgentToolName | null {
 
   if (/sst|sales tax|service tax|cukai jualan|cukai perkhidmatan/.test(lower)) {
     return "sst_checker";
+  }
+
+  if (
+    /joint\s+assessment|separate\s+assessment|joint\s+vs\s+separate|spouse\s+1|spouse\s+2|husband.*wife|wife.*husband/.test(
+      lower
+    )
+  ) {
+    return "joint_assessment_calculator";
+  }
+
+  if (
+    /batch|payroll|multiple\s+employees|employee\s+list|staff\s+list/.test(
+      lower
+    ) &&
+    /pcb|mtd|monthly\s+tax\s+deduction|potongan\s+cukai\s+bulanan/.test(lower)
+  ) {
+    return "batch_pcb_calculator";
   }
 
   if (
@@ -176,7 +197,7 @@ function extractMoneyAfter(message: string, labelPattern: string): number | null
   const normalized = message.replace(/,/g, "").replace(/\s+/g, " ");
   const match = normalized.match(
     new RegExp(
-      `(?:${labelPattern})[^0-9]*(?:RM|rm)?\\s*(\\d+(?:\\.\\d+)?)\\s*(million|juta|m|k|K|ribu)?`,
+      `(?:${labelPattern})[^0-9]*(?:RM|rm)?\\s*(\\d+(?:\\.\\d+)?)\\s*(million|juta|m\\b|k\\b|K\\b|ribu)?`,
       "i"
     )
   );
@@ -551,6 +572,158 @@ function buildPcbContext(message: string): AgentContextResult {
       `Annual PCB: ${formatRM(result.annualPcb)}.`,
       `Annual tax: ${formatRM(result.annualTax)}.`,
       `Rounding difference: ${formatRM(result.difference)}.`,
+    ]),
+    usedDeterministic: true,
+  };
+}
+
+function annualEmploymentIncome(amount: number): IncomeInput {
+  return {
+    employment: amount,
+    commission: 0,
+    rental: 0,
+    interest: 0,
+    dividend: 0,
+    other: 0,
+  };
+}
+
+function extractSpouseAnnualIncome(
+  message: string,
+  spouseNumber: 1 | 2
+): number | null {
+  const spouseLabel =
+    spouseNumber === 1
+      ? "spouse\\s*(?:1|one)|husband|wife\\s*1"
+      : "spouse\\s*(?:2|two)|wife|husband\\s*2";
+
+  return extractMoneyAfter(
+    message,
+    `${spouseLabel}\\s*(?:annual\\s+)?(?:income|salary|employment\\s+income)`
+  );
+}
+
+function buildJointAssessmentContext(message: string): AgentContextResult {
+  const spouse1Income = extractSpouseAnnualIncome(message, 1);
+  const spouse2Income = extractSpouseAnnualIncome(message, 2);
+
+  if (spouse1Income === null || spouse2Income === null) {
+    const question =
+      "What are spouse 1 and spouse 2 annual income amounts in RM for the joint assessment comparison?";
+    return {
+      ...emptyResult,
+      toolName: "joint_assessment_calculator",
+      context: followUpContext(question),
+      needsFollowUp: true,
+      followUpQuestion: question,
+      missingFields: [
+        ...(spouse1Income === null
+          ? [{ field: "spouse1AnnualIncome", question }]
+          : []),
+        ...(spouse2Income === null
+          ? [{ field: "spouse2AnnualIncome", question }]
+          : []),
+      ],
+    };
+  }
+
+  const basicReliefs: ReliefClaim[] = [
+    { reliefId: "individual", amount: 9_000 },
+  ];
+  const result = compareJointVsSeparate({
+    yearOfAssessment: 2025,
+    spouse1: {
+      income: annualEmploymentIncome(spouse1Income),
+      reliefs: basicReliefs,
+      zakatAmount: 0,
+      monthlyPcbPaid: 0,
+    },
+    spouse2: {
+      income: annualEmploymentIncome(spouse2Income),
+      reliefs: basicReliefs,
+      zakatAmount: 0,
+      monthlyPcbPaid: 0,
+    },
+  });
+
+  return {
+    ...emptyResult,
+    toolName: "joint_assessment_calculator",
+    context: exactContext("Joint vs separate assessment (YA2025)", [
+      `Spouse 1 annual income: ${formatRM(spouse1Income)}.`,
+      `Spouse 2 annual income: ${formatRM(spouse2Income)}.`,
+      "Assumptions: Malaysian tax resident spouses, employment income only, individual relief RM9,000 each, no zakat, no PCB offsets.",
+      `Spouse 1 separate tax: ${formatRM(result.separate.spouse1.taxAfterRebateAndZakat + result.separate.spouse1.dividendTax)}.`,
+      `Spouse 2 separate tax: ${formatRM(result.separate.spouse2.taxAfterRebateAndZakat + result.separate.spouse2.dividendTax)}.`,
+      `Separate assessment tax: ${formatRM(result.separateTax)}.`,
+      `Joint assessment tax: ${formatRM(result.jointTax)}.`,
+      `Recommended assessment: ${result.recommended}.`,
+      `Tax difference: ${formatRM(result.saving)}.`,
+    ]),
+    usedDeterministic: true,
+  };
+}
+
+function parseBatchPcbEmployees(message: string): BatchEmployeeInput[] {
+  return message
+    .split(/[;\n,]+/)
+    .map((rawSegment, index) => {
+      const segment = rawSegment.includes(":")
+        ? rawSegment.slice(rawSegment.lastIndexOf(":") + 1)
+        : rawSegment;
+      const monthlyGrossSalary = extractMonthlyGrossSalary(segment);
+      if (monthlyGrossSalary === null) return null;
+
+      const nameMatch = segment.match(
+        /^\s*([A-Za-z][A-Za-z .'-]{0,40}?)\s+(?:monthly|gross|salary|wage|gaji)/i
+      );
+      const name =
+        nameMatch?.[1]?.trim().replace(/\s+/g, " ") || `Employee ${index + 1}`;
+      const maritalStatus = inferMaritalStatus(segment);
+
+      return {
+        name,
+        monthlyGrossSalary,
+        maritalStatus,
+        spouseHasIncome:
+          maritalStatus === "married" ? inferSpouseHasIncome(segment) : true,
+        numberOfChildren: inferNumberOfChildren(segment),
+      };
+    })
+    .filter((employee): employee is BatchEmployeeInput => employee !== null);
+}
+
+function buildBatchPcbContext(message: string): AgentContextResult {
+  const employees = parseBatchPcbEmployees(message);
+
+  if (employees.length === 0) {
+    const question =
+      "What are the employee names and monthly gross salaries in RM for the batch PCB calculation?";
+    return {
+      ...emptyResult,
+      toolName: "batch_pcb_calculator",
+      context: followUpContext(question),
+      needsFollowUp: true,
+      followUpQuestion: question,
+      missingFields: [{ field: "employees", question }],
+    };
+  }
+
+  const result = calculateBatchPcb(2025, employees);
+  const employeeLines = result.employees.map(
+    ({ employee, monthlyPcb, annualPcb, annualTax }) =>
+      `${employee.name}: monthly salary ${formatRM(employee.monthlyGrossSalary)}, monthly PCB ${formatRM(monthlyPcb)}, annual PCB ${formatRM(annualPcb)}, annual tax ${formatRM(annualTax)}.`
+  );
+
+  return {
+    ...emptyResult,
+    toolName: "batch_pcb_calculator",
+    context: exactContext("Batch PCB payroll summary (YA2025)", [
+      `Employee count: ${result.employees.length}.`,
+      ...employeeLines,
+      `Total monthly PCB: ${formatRM(result.totalMonthlyPcb)}.`,
+      `Total annual PCB: ${formatRM(result.totalAnnualPcb)}.`,
+      `Total annual tax: ${formatRM(result.totalAnnualTax)}.`,
     ]),
     usedDeterministic: true,
   };
@@ -1344,6 +1517,12 @@ export function buildDeterministicAgentContext(
   }
   if (toolName === "tax_computation_calculator") {
     return buildTaxComputationContext(message);
+  }
+  if (toolName === "joint_assessment_calculator") {
+    return buildJointAssessmentContext(message);
+  }
+  if (toolName === "batch_pcb_calculator") {
+    return buildBatchPcbContext(message);
   }
   if (toolName === "pcb_calculator") {
     return buildPcbContext(message);
