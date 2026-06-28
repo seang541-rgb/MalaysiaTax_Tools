@@ -336,4 +336,59 @@ describe("agent tools", () => {
     expect(result.context).toContain("Total withholding tax rate: 8%");
     expect(result.context).toContain("Total withholding tax: RM8,000");
   });
+
+  it("detects CP204 estimated tax questions", () => {
+    expect(
+      detectAgentTool("Company CP204 estimated tax RM120k, calculate monthly installments.")
+    ).toBe("cp204_calculator");
+  });
+
+  it("asks for estimated tax before CP204 calculation", () => {
+    const result = buildDeterministicAgentContext(
+      "How much should my company pay for CP204 installments?"
+    );
+
+    expect(result.toolName).toBe("cp204_calculator");
+    expect(result.needsFollowUp).toBe(true);
+    expect(result.followUpQuestion).toContain("estimated tax");
+  });
+
+  it("builds exact CP204 installment context from the deterministic engine", () => {
+    const result = buildDeterministicAgentContext(
+      "Company CP204 estimated tax RM120k. Calculate monthly installments."
+    );
+
+    expect(result.toolName).toBe("cp204_calculator");
+    expect(result.usedDeterministic).toBe(true);
+    expect(result.context).toContain("EXACT MYTAX FACTS");
+    expect(result.context).toContain("CP204 estimated tax payable (YA2025)");
+    expect(result.context).toContain("Estimated tax: RM120,000");
+    expect(result.context).toContain("Installment count: 12");
+    expect(result.context).toContain("Monthly installment: RM10,000");
+    expect(result.context).toContain("First payment month of basis period: 2");
+    expect(result.context).toContain("Revision months: 6, 9, 11");
+  });
+
+  it("builds exact CP204 context with 85 percent minimum check", () => {
+    const result = buildDeterministicAgentContext(
+      "Company CP204 estimated tax RM80k, prior year estimate RM100k."
+    );
+
+    expect(result.toolName).toBe("cp204_calculator");
+    expect(result.context).toContain("Prior year estimate: RM100,000");
+    expect(result.context).toContain("Minimum required: RM85,000");
+    expect(result.context).toContain("Meets 85% minimum: no");
+  });
+
+  it("builds exact CP204 penalty simulation context", () => {
+    const result = buildDeterministicAgentContext(
+      "Company CP204 estimated tax RM100k, actual tax RM200k. Simulate penalty."
+    );
+
+    expect(result.toolName).toBe("cp204_calculator");
+    expect(result.context).toContain("Actual tax: RM200,000");
+    expect(result.context).toContain("30% buffer: RM60,000");
+    expect(result.context).toContain("Excess over buffer: RM40,000");
+    expect(result.context).toContain("Penalty amount: RM4,000");
+  });
 });

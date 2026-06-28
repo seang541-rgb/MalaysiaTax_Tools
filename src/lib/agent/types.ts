@@ -7,7 +7,8 @@ export type AgentToolName =
   | "pcb_calculator"
   | "rpgt_calculator"
   | "stamp_duty_calculator"
-  | "withholding_tax_calculator";
+  | "withholding_tax_calculator"
+  | "cp204_calculator";
 
 export interface MissingField {
   field: string;

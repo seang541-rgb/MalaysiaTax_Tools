@@ -1,5 +1,6 @@
 import { checkEInvoicePhase } from "@/engine/e-invoice";
 import { calculateCorporateTax } from "@/engine/corporate";
+import { calculateCp204 } from "@/engine/cp204";
 import { calculateEmployerContributions } from "@/engine/employer-contributions";
 import { calculatePersonalTax } from "@/engine/personal";
 import { estimateMonthlyPcb } from "@/engine/pcb";
@@ -103,6 +104,10 @@ export function detectAgentTool(message: string): AgentToolName | null {
     )
   ) {
     return "withholding_tax_calculator";
+  }
+
+  if (/cp204|cp204a|cp207|estimated\s+tax|tax\s+estimate/.test(lower)) {
+    return "cp204_calculator";
   }
 
   if (
@@ -288,6 +293,36 @@ function inferWhtPaymentType(message: string): WhtPaymentType | null {
   }
   if (/section\s+4f|4\(f\)|other\s+gain/.test(lower)) return "other_4f";
   return null;
+}
+
+function extractEstimatedTax(message: string): number | null {
+  return extractMoneyAfter(
+    message,
+    "estimated\\s+tax|tax\\s+estimate|cp204"
+  );
+}
+
+function extractPriorYearEstimate(message: string): number | undefined {
+  return (
+    extractMoneyAfter(
+      message,
+      "prior\\s+year\\s+estimate|previous\\s+year\\s+estimate|last\\s+year\\s+estimate"
+    ) ?? undefined
+  );
+}
+
+function extractActualTax(message: string): number | undefined {
+  return extractMoneyAfter(message, "actual\\s+tax|final\\s+tax") ?? undefined;
+}
+
+function extractBasisPeriodMonths(message: string): number | undefined {
+  const match = message.match(
+    /(?:basis\s+period|period)\s*(?:of|is|=)?\s*(\d+)\s*months?/i
+  );
+  if (!match) return undefined;
+
+  const months = Number.parseInt(match[1], 10);
+  return Number.isFinite(months) && months > 0 ? months : undefined;
 }
 
 function extractMonthlyGrossSalary(message: string): number | null {
@@ -631,6 +666,70 @@ function buildWithholdingTaxContext(message: string): AgentContextResult {
   };
 }
 
+function buildCp204Context(message: string): AgentContextResult {
+  const estimatedTax = extractEstimatedTax(message);
+  if (estimatedTax === null) {
+    const question =
+      "What is the company's estimated tax payable in RM for the CP204 calculation?";
+    return {
+      ...emptyResult,
+      toolName: "cp204_calculator",
+      context: followUpContext(question),
+      needsFollowUp: true,
+      followUpQuestion: question,
+      missingFields: [{ field: "estimatedTax", question }],
+    };
+  }
+
+  const result = calculateCp204({
+    estimatedTax,
+    priorYearEstimate: extractPriorYearEstimate(message),
+    actualTax: extractActualTax(message),
+    basisPeriodMonths: extractBasisPeriodMonths(message),
+  });
+  const firstInstallment = result.installments[0];
+  const lastInstallment = result.installments[result.installments.length - 1];
+  const lines = [
+    `Estimated tax: ${formatRM(result.estimatedTax)}.`,
+    `Prior year estimate: ${
+      result.minimumRequired === null
+        ? "not provided"
+        : formatRM(extractPriorYearEstimate(message) ?? 0)
+    }.`,
+    `Minimum required: ${
+      result.minimumRequired === null
+        ? "not applicable"
+        : formatRM(result.minimumRequired)
+    }.`,
+    `Meets 85% minimum: ${
+      result.meetsMinimum === null ? "not checked" : result.meetsMinimum ? "yes" : "no"
+    }.`,
+    `Installment count: ${result.installmentCount}.`,
+    `Monthly installment: ${formatRM(result.monthlyAmount)}.`,
+    `Final installment: ${formatRM(result.finalAmount)}.`,
+    `First payment month of basis period: ${firstInstallment?.monthOfBasisPeriod ?? "n/a"}.`,
+    `Last payment month of basis period: ${lastInstallment?.monthOfBasisPeriod ?? "n/a"}.`,
+    `Revision months: ${result.revisionMonths.join(", ")}.`,
+  ];
+
+  if (result.penalty) {
+    lines.push(
+      `Actual tax: ${formatRM(result.penalty.actualTax)}.`,
+      `Underestimation difference: ${formatRM(result.penalty.difference)}.`,
+      `30% buffer: ${formatRM(result.penalty.buffer)}.`,
+      `Excess over buffer: ${formatRM(result.penalty.excessOverBuffer)}.`,
+      `Penalty amount: ${formatRM(result.penalty.penaltyAmount)}.`
+    );
+  }
+
+  return {
+    ...emptyResult,
+    toolName: "cp204_calculator",
+    context: exactContext("CP204 estimated tax payable (YA2025)", lines),
+    usedDeterministic: true,
+  };
+}
+
 function buildCorporateTaxContext(message: string): AgentContextResult {
   const lower = message.toLowerCase();
   const chargeableIncome = extractChargeableIncome(message);
@@ -945,6 +1044,9 @@ export function buildDeterministicAgentContext(
   }
   if (toolName === "withholding_tax_calculator") {
     return buildWithholdingTaxContext(message);
+  }
+  if (toolName === "cp204_calculator") {
+    return buildCp204Context(message);
   }
   if (toolName === "pcb_calculator") {
     return buildPcbContext(message);
