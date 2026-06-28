@@ -3,6 +3,7 @@ import { calculateCorporateTax } from "@/engine/corporate";
 import { calculateEmployerContributions } from "@/engine/employer-contributions";
 import { calculatePersonalTax } from "@/engine/personal";
 import { estimateMonthlyPcb } from "@/engine/pcb";
+import { calculateRpgt, type RpgtDisposerType } from "@/engine/rpgt";
 import { calculateSst } from "@/engine/sst";
 import type {
   EmployerContributionInput,
@@ -84,6 +85,14 @@ export function detectAgentTool(message: string): AgentToolName | null {
   }
 
   if (
+    /rpgt|real\s+property\s+gains\s+tax|property\s+gains\s+tax|sold\s+(?:a\s+)?property|sell\s+(?:a\s+)?property|selling\s+(?:my\s+)?property|dispose\s+(?:of\s+)?property|disposal\s+price/.test(
+      lower
+    )
+  ) {
+    return "rpgt_calculator";
+  }
+
+  if (
     /company|corporate|sdn\.?\s?bhd|cukai korporat|company tax|corporate tax|chargeable income|sme/.test(
       lower
     )
@@ -147,6 +156,51 @@ function extractAnnualRevenue(message: string): number | null {
     message,
     "annual\\s+revenue|revenue|turnover|sales|hasil"
   );
+}
+
+function extractDisposalPrice(message: string): number | null {
+  return extractMoneyAfter(
+    message,
+    "disposal\\s+price|selling\\s+price|sale\\s+price|sold\\s+(?:a\\s+)?property\\s+for|sold\\s+for"
+  );
+}
+
+function extractAcquisitionPrice(message: string): number | null {
+  return extractMoneyAfter(
+    message,
+    "acquisition\\s+price|purchase\\s+price|bought\\s+(?:a\\s+)?property\\s+for|bought\\s+for|original\\s+purchase\\s+price"
+  );
+}
+
+function extractAllowableExpenses(message: string): number {
+  return (
+    extractMoneyAfter(
+      message,
+      "allowable\\s+expenses|expenses|legal\\s+fees|renovation|agent\\s+commission"
+    ) ?? 0
+  );
+}
+
+function extractHoldingYears(message: string): number | null {
+  const normalized = message.replace(/,/g, "").replace(/\s+/g, " ");
+  const match = normalized.match(
+    /(?:held|holding|owned|hold)\s*(?:for)?\s*(\d+(?:\.\d+)?)\s*(?:years?|yrs?)/i
+  );
+  if (!match) return null;
+
+  const years = Number.parseFloat(match[1]);
+  return Number.isFinite(years) && years >= 0 ? years : null;
+}
+
+function inferRpgtDisposerType(message: string): RpgtDisposerType {
+  const lower = message.toLowerCase();
+  if (/company|sdn\.?\s?bhd|corporate|incorporated/.test(lower)) {
+    return "company";
+  }
+  if (/foreign|foreigner|non[-\s]?citizen|non[-\s]?resident/.test(lower)) {
+    return "foreigner";
+  }
+  return "citizen_pr";
 }
 
 function extractMonthlyGrossSalary(message: string): number | null {
@@ -316,6 +370,70 @@ function formatCorporateBandBreakdown(
       bandResult.band.max === Infinity ? "above" : formatRM(bandResult.band.max);
     return `Band ${bandResult.band.label}: ${formatRM(bandResult.taxableInBand)} taxed at ${bandResult.band.rate * 100}% (${bandMax}) = ${formatRM(bandResult.taxForBand)}.`;
   });
+}
+
+function buildRpgtContext(message: string): AgentContextResult {
+  const disposalPrice = extractDisposalPrice(message);
+  const acquisitionPrice = extractAcquisitionPrice(message);
+  const holdingYears = extractHoldingYears(message);
+
+  if (
+    disposalPrice === null ||
+    acquisitionPrice === null ||
+    holdingYears === null
+  ) {
+    const question =
+      "What are the disposal price, acquisition price, and holding period in years for the RPGT estimate?";
+    return {
+      ...emptyResult,
+      toolName: "rpgt_calculator",
+      context: followUpContext(question),
+      needsFollowUp: true,
+      followUpQuestion: question,
+      missingFields: [
+        ...(disposalPrice === null
+          ? [{ field: "disposalPrice", question }]
+          : []),
+        ...(acquisitionPrice === null
+          ? [{ field: "acquisitionPrice", question }]
+          : []),
+        ...(holdingYears === null ? [{ field: "holdingYears", question }] : []),
+      ],
+    };
+  }
+
+  const disposerType = inferRpgtDisposerType(message);
+  const result = calculateRpgt({
+    disposalPrice,
+    acquisitionPrice,
+    allowableExpenses: extractAllowableExpenses(message),
+    disposerType,
+    holdingYears,
+    onceInLifetimeExemption:
+      /once[-\s]in[-\s]a[-\s]lifetime|private\s+residence\s+exemption/.test(
+        message.toLowerCase()
+      ),
+  });
+
+  return {
+    ...emptyResult,
+    toolName: "rpgt_calculator",
+    context: exactContext("RPGT property disposal (YA2025)", [
+      `Disposer type: ${disposerType}.`,
+      `Disposal price: ${formatRM(result.disposalPrice)}.`,
+      `Acquisition price: ${formatRM(result.acquisitionPrice)}.`,
+      `Allowable expenses: ${formatRM(result.allowableExpenses)}.`,
+      `Holding period: ${holdingYears} years.`,
+      `Holding bracket: ${result.holdingBracket}.`,
+      `Chargeable gain: ${formatRM(result.chargeableGain)}.`,
+      `Schedule 4 exemption: ${formatRM(result.scheduleExemption)}.`,
+      `Once-in-a-lifetime exemption applied: ${result.onceInLifetimeApplied ? "yes" : "no"}.`,
+      `Net chargeable gain: ${formatRM(result.netChargeableGain)}.`,
+      `RPGT rate: ${result.rate}%.`,
+      `RPGT payable: ${formatRM(result.rpgtPayable)}.`,
+    ]),
+    usedDeterministic: true,
+  };
 }
 
 function buildCorporateTaxContext(message: string): AgentContextResult {
@@ -623,6 +741,9 @@ export function buildDeterministicAgentContext(
   }
   if (toolName === "corporate_tax_calculator") {
     return buildCorporateTaxContext(message);
+  }
+  if (toolName === "rpgt_calculator") {
+    return buildRpgtContext(message);
   }
   if (toolName === "pcb_calculator") {
     return buildPcbContext(message);

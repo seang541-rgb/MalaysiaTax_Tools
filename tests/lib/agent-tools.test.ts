@@ -189,4 +189,50 @@ describe("agent tools", () => {
     expect(result.context).toContain("Standard corporate tax (YA2025)");
     expect(result.context).toContain("Total tax: RM192,000");
   });
+
+  it("detects RPGT property disposal questions", () => {
+    expect(
+      detectAgentTool("I sold a property for RM800k, bought for RM500k. Calculate RPGT.")
+    ).toBe("rpgt_calculator");
+  });
+
+  it("asks for missing RPGT disposal details", () => {
+    const result = buildDeterministicAgentContext(
+      "How much RPGT do I pay when selling my property?"
+    );
+
+    expect(result.toolName).toBe("rpgt_calculator");
+    expect(result.needsFollowUp).toBe(true);
+    expect(result.followUpQuestion).toContain("disposal price");
+    expect(result.followUpQuestion).toContain("acquisition price");
+    expect(result.followUpQuestion).toContain("holding period");
+  });
+
+  it("builds exact RPGT context for a citizen or PR disposal within 3 years", () => {
+    const result = buildDeterministicAgentContext(
+      "Malaysian citizen sold property disposal price RM800k, acquisition price RM500k, held for 2 years. Calculate RPGT."
+    );
+
+    expect(result.toolName).toBe("rpgt_calculator");
+    expect(result.usedDeterministic).toBe(true);
+    expect(result.context).toContain("EXACT MYTAX FACTS");
+    expect(result.context).toContain("RPGT property disposal (YA2025)");
+    expect(result.context).toContain("Disposer type: citizen_pr");
+    expect(result.context).toContain("Chargeable gain: RM300,000");
+    expect(result.context).toContain("Schedule 4 exemption: RM30,000");
+    expect(result.context).toContain("RPGT rate: 30%");
+    expect(result.context).toContain("RPGT payable: RM81,000");
+  });
+
+  it("builds exact RPGT context for a company disposal after 6 years", () => {
+    const result = buildDeterministicAgentContext(
+      "Company sold property disposal price RM800k, acquisition price RM500k, held for 7 years. Calculate RPGT."
+    );
+
+    expect(result.toolName).toBe("rpgt_calculator");
+    expect(result.context).toContain("Disposer type: company");
+    expect(result.context).toContain("Schedule 4 exemption: RM0");
+    expect(result.context).toContain("RPGT rate: 10%");
+    expect(result.context).toContain("RPGT payable: RM30,000");
+  });
 });
