@@ -128,6 +128,9 @@ export async function POST(request: Request) {
   const successUrl = new URL(`/${locale}/billing/success`, appUrl);
   successUrl.searchParams.set("session_id", "{CHECKOUT_SESSION_ID}");
   if (returnTo) successUrl.searchParams.set("return_to", String(returnTo));
+  const successUrlString = successUrl
+    .toString()
+    .replace("%7BCHECKOUT_SESSION_ID%7D", "{CHECKOUT_SESSION_ID}");
 
   const cancelUrl = new URL(`/${locale}/pricing`, appUrl);
   cancelUrl.searchParams.set("cancelled", "1");
@@ -137,7 +140,7 @@ export async function POST(request: Request) {
     customer: customerId,
     client_reference_id: user.id,
     line_items: [{ price: priceId, quantity: 1 }],
-    success_url: successUrl.toString(),
+    success_url: successUrlString,
     cancel_url: cancelUrl.toString(),
     metadata: {
       user_id: user.id,

@@ -177,6 +177,30 @@ describe("billing checkout route", () => {
     );
   });
 
+  it("keeps the Stripe checkout session placeholder unencoded", async () => {
+    process.env.STRIPE_PRICE_STARTER = "price_starter";
+    getUserMock.mockResolvedValue({
+      data: { user: { id: "user-1", email: "user@example.com" } },
+    });
+    const { POST } = await import("@/app/api/billing/checkout/route");
+
+    const res = await POST(
+      new Request("http://localhost/api/billing/checkout", {
+        method: "POST",
+        body: JSON.stringify({ packId: "starter", locale: "en" }),
+      })
+    );
+
+    expect(res.status).toBe(200);
+    expect(sessionsCreateMock).toHaveBeenCalledWith(
+      expect.objectContaining({
+        success_url: expect.stringContaining(
+          "session_id={CHECKOUT_SESSION_ID}"
+        ),
+      })
+    );
+  });
+
   it("reuses an existing Stripe customer when it exists in the active mode", async () => {
     process.env.STRIPE_PRICE_STARTER = "price_starter";
     maybeSingleMock.mockResolvedValue({
