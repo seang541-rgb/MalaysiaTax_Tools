@@ -1,6 +1,7 @@
 import { billingErrorResponse } from "@/lib/billing/errors";
 import { getBillingPack } from "@/lib/billing/plans";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
+import type Stripe from "stripe";
 
 const SUPPORTED_LOCALES = new Set(["en", "zh", "ms"]);
 
@@ -8,6 +9,36 @@ function safeLocale(value: unknown): string {
   return typeof value === "string" && SUPPORTED_LOCALES.has(value)
     ? value
     : "en";
+}
+
+function isMissingStripeResourceError(error: unknown): boolean {
+  if (!error || typeof error !== "object") return false;
+
+  const candidate = error as { code?: unknown; type?: unknown };
+  return (
+    candidate.type === "StripeInvalidRequestError" &&
+    candidate.code === "resource_missing"
+  );
+}
+
+async function canReuseStripeCustomer(
+  stripe: Stripe,
+  customerId: string | null
+): Promise<boolean> {
+  if (!customerId) return false;
+
+  try {
+    const customer = await stripe.customers.retrieve(customerId);
+    return !("deleted" in customer && customer.deleted);
+  } catch (error) {
+    if (isMissingStripeResourceError(error)) return false;
+    throw error;
+  }
+}
+
+function shouldPersistNewCustomer(hasStoredCustomer: boolean): boolean {
+  if (!hasStoredCustomer) return true;
+  return !process.env.STRIPE_SECRET_KEY?.startsWith("sk_test_");
 }
 
 export async function POST(request: Request) {
@@ -69,7 +100,13 @@ export async function POST(request: Request) {
 
   if (error) throw new Error(error.message);
 
-  let customerId = profile?.stripe_customer_id as string | null;
+  const storedCustomerId =
+    typeof profile?.stripe_customer_id === "string"
+      ? profile.stripe_customer_id
+      : null;
+  const canReuseCustomer = await canReuseStripeCustomer(stripe, storedCustomerId);
+  let customerId = canReuseCustomer ? storedCustomerId : null;
+
   if (!customerId) {
     const customer = await stripe.customers.create({
       email: user.email,
@@ -77,13 +114,15 @@ export async function POST(request: Request) {
     });
     customerId = customer.id;
 
-    const { error: upsertError } = await admin.from("profiles").upsert({
-      id: user.id,
-      email: user.email,
-      stripe_customer_id: customerId,
-    });
+    if (shouldPersistNewCustomer(Boolean(storedCustomerId))) {
+      const { error: upsertError } = await admin.from("profiles").upsert({
+        id: user.id,
+        email: user.email,
+        stripe_customer_id: customerId,
+      });
 
-    if (upsertError) throw new Error(upsertError.message);
+      if (upsertError) throw new Error(upsertError.message);
+    }
   }
 
   const successUrl = new URL(`/${locale}/billing/success`, appUrl);

@@ -15,6 +15,20 @@ export function CheckoutButton({
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  async function readCheckoutResponse(res: Response) {
+    const text = await res.text();
+    if (!text) return null;
+
+    try {
+      return JSON.parse(text) as {
+        url?: string;
+        error?: { message?: string };
+      };
+    } catch {
+      return null;
+    }
+  }
+
   async function startCheckout() {
     setLoading(true);
     setError(null);
@@ -25,9 +39,15 @@ export function CheckoutButton({
       body: JSON.stringify({ packId, locale }),
     });
 
-    const data = await res.json();
+    const data = await readCheckoutResponse(res);
     if (!res.ok) {
       setError(data?.error?.message ?? "Unable to start checkout.");
+      setLoading(false);
+      return;
+    }
+
+    if (!data?.url) {
+      setError("Unable to start checkout.");
       setLoading(false);
       return;
     }

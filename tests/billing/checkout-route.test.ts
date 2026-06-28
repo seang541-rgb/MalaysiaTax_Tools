@@ -5,6 +5,7 @@ const upsertMock = vi.fn();
 const maybeSingleMock = vi.fn();
 const sessionsCreateMock = vi.fn();
 const customersCreateMock = vi.fn();
+const customersRetrieveMock = vi.fn();
 
 vi.mock("@/lib/supabase/server", () => ({
   createSupabaseServerClient: vi.fn(async () => ({
@@ -42,6 +43,7 @@ vi.mock("@/lib/stripe", () => ({
     },
     customers: {
       create: customersCreateMock,
+      retrieve: customersRetrieveMock,
     },
   })),
 }));
@@ -54,12 +56,15 @@ describe("billing checkout route", () => {
     maybeSingleMock.mockReset();
     sessionsCreateMock.mockReset();
     customersCreateMock.mockReset();
+    customersRetrieveMock.mockReset();
     delete process.env.STRIPE_PRICE_STARTER;
+    delete process.env.STRIPE_SECRET_KEY;
     delete process.env.NEXT_PUBLIC_APP_URL;
 
     maybeSingleMock.mockResolvedValue({ data: null, error: null });
     upsertMock.mockResolvedValue({ error: null });
     customersCreateMock.mockResolvedValue({ id: "cus_123" });
+    customersRetrieveMock.mockResolvedValue({ id: "cus_123" });
     sessionsCreateMock.mockResolvedValue({
       url: "https://checkout.stripe.com/c/pay/cs_test_123",
     });
@@ -169,6 +174,74 @@ describe("billing checkout route", () => {
         success_url: expect.stringContaining("/en/billing/success"),
         cancel_url: expect.stringContaining("/en/pricing"),
       })
+    );
+  });
+
+  it("reuses an existing Stripe customer when it exists in the active mode", async () => {
+    process.env.STRIPE_PRICE_STARTER = "price_starter";
+    maybeSingleMock.mockResolvedValue({
+      data: {
+        stripe_customer_id: "cus_existing",
+        email: "user@example.com",
+      },
+      error: null,
+    });
+    getUserMock.mockResolvedValue({
+      data: { user: { id: "user-1", email: "user@example.com" } },
+    });
+    const { POST } = await import("@/app/api/billing/checkout/route");
+
+    const res = await POST(
+      new Request("http://localhost/api/billing/checkout", {
+        method: "POST",
+        body: JSON.stringify({ packId: "starter", locale: "en" }),
+      })
+    );
+
+    expect(res.status).toBe(200);
+    expect(customersRetrieveMock).toHaveBeenCalledWith("cus_existing");
+    expect(customersCreateMock).not.toHaveBeenCalled();
+    expect(upsertMock).not.toHaveBeenCalled();
+    expect(sessionsCreateMock).toHaveBeenCalledWith(
+      expect.objectContaining({ customer: "cus_existing" })
+    );
+  });
+
+  it("creates a temporary test customer when the stored customer belongs to live mode", async () => {
+    process.env.STRIPE_PRICE_STARTER = "price_starter";
+    process.env.STRIPE_SECRET_KEY = "sk_test_123";
+    maybeSingleMock.mockResolvedValue({
+      data: {
+        stripe_customer_id: "cus_live_existing",
+        email: "user@example.com",
+      },
+      error: null,
+    });
+    customersRetrieveMock.mockRejectedValue({
+      type: "StripeInvalidRequestError",
+      code: "resource_missing",
+    });
+    customersCreateMock.mockResolvedValue({ id: "cus_test_new" });
+    getUserMock.mockResolvedValue({
+      data: { user: { id: "user-1", email: "user@example.com" } },
+    });
+    const { POST } = await import("@/app/api/billing/checkout/route");
+
+    const res = await POST(
+      new Request("http://localhost/api/billing/checkout", {
+        method: "POST",
+        body: JSON.stringify({ packId: "starter", locale: "en" }),
+      })
+    );
+
+    expect(res.status).toBe(200);
+    expect(customersCreateMock).toHaveBeenCalledWith({
+      email: "user@example.com",
+      metadata: { user_id: "user-1" },
+    });
+    expect(upsertMock).not.toHaveBeenCalled();
+    expect(sessionsCreateMock).toHaveBeenCalledWith(
+      expect.objectContaining({ customer: "cus_test_new" })
     );
   });
 });
