@@ -278,4 +278,62 @@ describe("agent tools", () => {
     expect(result.context).toContain("MOT duty before exemption: RM8,000");
     expect(result.context).toContain("Total stamp duty: RM0");
   });
+
+  it("detects withholding tax questions", () => {
+    expect(
+      detectAgentTool("Royalty payment to non-resident RM50k, calculate withholding tax.")
+    ).toBe("withholding_tax_calculator");
+  });
+
+  it("asks for gross amount before withholding tax calculation", () => {
+    const result = buildDeterministicAgentContext(
+      "How much withholding tax for royalty paid to a non-resident?"
+    );
+
+    expect(result.toolName).toBe("withholding_tax_calculator");
+    expect(result.needsFollowUp).toBe(true);
+    expect(result.followUpQuestion).toContain("gross payment amount");
+  });
+
+  it("builds exact withholding tax context for royalty payments", () => {
+    const result = buildDeterministicAgentContext(
+      "Royalty payment to non-resident gross amount RM50k. Calculate withholding tax."
+    );
+
+    expect(result.toolName).toBe("withholding_tax_calculator");
+    expect(result.usedDeterministic).toBe(true);
+    expect(result.context).toContain("EXACT MYTAX FACTS");
+    expect(result.context).toContain("Withholding tax on non-resident payment (YA2025)");
+    expect(result.context).toContain("Payment type: royalty");
+    expect(result.context).toContain("Gross amount: RM50,000");
+    expect(result.context).toContain("Total withholding tax rate: 10%");
+    expect(result.context).toContain("Total withholding tax: RM5,000");
+    expect(result.context).toContain("Net payment: RM45,000");
+    expect(result.context).toContain("Form: CP37");
+  });
+
+  it("builds exact withholding tax context for contract payments", () => {
+    const result = buildDeterministicAgentContext(
+      "Contract payment to non-resident contractor gross amount RM200k. Calculate WHT."
+    );
+
+    expect(result.toolName).toBe("withholding_tax_calculator");
+    expect(result.context).toContain("Payment type: contract");
+    expect(result.context).toContain("Component contractor: 10% = RM20,000");
+    expect(result.context).toContain("Component employees: 3% = RM6,000");
+    expect(result.context).toContain("Total withholding tax rate: 13%");
+    expect(result.context).toContain("Total withholding tax: RM26,000");
+    expect(result.context).toContain("Form: CP37A");
+  });
+
+  it("applies lower DTA rate in withholding tax context", () => {
+    const result = buildDeterministicAgentContext(
+      "Royalty payment to non-resident gross amount RM100k, DTA rate 8%. Calculate withholding tax."
+    );
+
+    expect(result.toolName).toBe("withholding_tax_calculator");
+    expect(result.context).toContain("DTA applied: yes");
+    expect(result.context).toContain("Total withholding tax rate: 8%");
+    expect(result.context).toContain("Total withholding tax: RM8,000");
+  });
 });

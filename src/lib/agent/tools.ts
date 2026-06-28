@@ -6,6 +6,10 @@ import { estimateMonthlyPcb } from "@/engine/pcb";
 import { calculateRpgt, type RpgtDisposerType } from "@/engine/rpgt";
 import { calculateStampDuty, type StampBuyerType } from "@/engine/stamp-duty";
 import { calculateSst } from "@/engine/sst";
+import {
+  calculateWithholdingTax,
+  type WhtPaymentType,
+} from "@/engine/withholding-tax";
 import type {
   EmployerContributionInput,
   ReliefClaim,
@@ -91,6 +95,14 @@ export function detectAgentTool(message: string): AgentToolName | null {
     )
   ) {
     return "stamp_duty_calculator";
+  }
+
+  if (
+    /withholding\s+tax|\bwht\b|non[-\s]?resident|royalt(?:y|ies)|technical\s+fee|contract\s+payment|public\s+entertainer|dta\s+rate/.test(
+      lower
+    )
+  ) {
+    return "withholding_tax_calculator";
   }
 
   if (
@@ -242,6 +254,40 @@ function inferFirstTimeBuyer(message: string): boolean {
   return /first[-\s]?time|first\s+home|first\s+house|first\s+property|rumah\s+pertama/.test(
     message.toLowerCase()
   );
+}
+
+function extractGrossPaymentAmount(message: string): number | null {
+  return (
+    extractMoneyAfter(
+      message,
+      "gross\\s+amount|gross\\s+payment|payment\\s+amount|payment|amount"
+    ) ?? extractMoneyAmount(message)
+  );
+}
+
+function extractDtaRate(message: string): number | undefined {
+  const match = message.match(
+    /(?:dta|treaty)\s+rate[^0-9]*(\d+(?:\.\d+)?)\s*%?/i
+  );
+  if (!match) return undefined;
+
+  const rate = Number.parseFloat(match[1]);
+  return Number.isFinite(rate) && rate >= 0 ? rate : undefined;
+}
+
+function inferWhtPaymentType(message: string): WhtPaymentType | null {
+  const lower = message.toLowerCase();
+  if (/interest/.test(lower)) return "interest";
+  if (/royalt(?:y|ies)/.test(lower)) return "royalty";
+  if (/contract/.test(lower)) return "contract";
+  if (/public\s+entertainer|entertainer/.test(lower)) {
+    return "public_entertainer";
+  }
+  if (/technical|advisory|special\s+class|s4a|section\s+4a/.test(lower)) {
+    return "special_4a";
+  }
+  if (/section\s+4f|4\(f\)|other\s+gain/.test(lower)) return "other_4f";
+  return null;
 }
 
 function extractMonthlyGrossSalary(message: string): number | null {
@@ -524,6 +570,62 @@ function buildStampDutyContext(message: string): AgentContextResult {
       `Loan agreement duty payable: ${formatRM(result.loanDuty)}.`,
       `Total stamp duty: ${formatRM(result.totalDuty)}.`,
       ...tierLines,
+    ]),
+    usedDeterministic: true,
+  };
+}
+
+function buildWithholdingTaxContext(message: string): AgentContextResult {
+  const paymentType = inferWhtPaymentType(message);
+  if (paymentType === null) {
+    const question =
+      "What type of non-resident payment is this: interest, royalty, technical fee, contract payment, public entertainer, or other Section 4(f) income?";
+    return {
+      ...emptyResult,
+      toolName: "withholding_tax_calculator",
+      context: followUpContext(question),
+      needsFollowUp: true,
+      followUpQuestion: question,
+      missingFields: [{ field: "paymentType", question }],
+    };
+  }
+
+  const grossAmount = extractGrossPaymentAmount(message);
+  if (grossAmount === null) {
+    const question =
+      "What is the gross payment amount in RM for the withholding tax calculation?";
+    return {
+      ...emptyResult,
+      toolName: "withholding_tax_calculator",
+      context: followUpContext(question),
+      needsFollowUp: true,
+      followUpQuestion: question,
+      missingFields: [{ field: "grossAmount", question }],
+    };
+  }
+
+  const result = calculateWithholdingTax({
+    paymentType,
+    grossAmount,
+    dtaRate: extractDtaRate(message),
+  });
+  const componentLines = result.components.map(
+    (component) =>
+      `Component ${component.label}: ${component.rate}% = ${formatRM(component.amount)}.`
+  );
+
+  return {
+    ...emptyResult,
+    toolName: "withholding_tax_calculator",
+    context: exactContext("Withholding tax on non-resident payment (YA2025)", [
+      `Payment type: ${result.paymentType}.`,
+      `Gross amount: ${formatRM(result.grossAmount)}.`,
+      `DTA applied: ${result.dtaApplied ? "yes" : "no"}.`,
+      `Total withholding tax rate: ${result.totalRate}%.`,
+      `Total withholding tax: ${formatRM(result.totalWht)}.`,
+      `Net payment: ${formatRM(result.netPayment)}.`,
+      `Form: ${result.form}.`,
+      ...componentLines,
     ]),
     usedDeterministic: true,
   };
@@ -840,6 +942,9 @@ export function buildDeterministicAgentContext(
   }
   if (toolName === "stamp_duty_calculator") {
     return buildStampDutyContext(message);
+  }
+  if (toolName === "withholding_tax_calculator") {
+    return buildWithholdingTaxContext(message);
   }
   if (toolName === "pcb_calculator") {
     return buildPcbContext(message);
