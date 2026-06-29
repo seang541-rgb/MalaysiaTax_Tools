@@ -51,10 +51,44 @@ const jsonLd = {
   },
 };
 
+function getHomeCopy(locale: string) {
+  if (locale === "zh") {
+    return {
+      eyebrow: "马来西亚税务工具",
+      title: "先说任务，再进入税表",
+      subtitle:
+        "更清晰的马来西亚税务工作区，先判断你是个人、雇主还是公司，再带你进入正确流程。",
+      askAi: "询问 AI 税务助手",
+      viewTools: "查看工具",
+    };
+  }
+
+  if (locale === "ms") {
+    return {
+      eyebrow: "Alat Cukai Malaysia",
+      title: "Mulakan dengan tugas, bukan borang cukai",
+      subtitle:
+        "Ruang kerja cukai Malaysia yang lebih jelas untuk individu, majikan dan syarikat sebelum meminta butiran.",
+      askAi: "Tanya AI Tax",
+      viewTools: "Lihat alat",
+    };
+  }
+
+  return {
+    eyebrow: "Malaysia Tax Tools",
+    title: "Start with the task, not the tax form",
+    subtitle:
+      "A clearer Malaysia tax workspace that routes individuals, employers and companies into the right workflow before asking for details.",
+    askAi: "Ask AI Tax",
+    viewTools: "View all tools",
+  };
+}
+
 export default function HomePage() {
   const faq = useTranslations("homeFaq");
   const locale = useLocale();
   const faqItems = faq.raw("items") as FaqItem[];
+  const copy = getHomeCopy(locale);
 
   return (
     <div className="mx-auto max-w-7xl space-y-8">
@@ -62,19 +96,17 @@ export default function HomePage() {
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
-      <section className="rounded-lg border border-emerald-100 bg-white p-6 shadow-sm md:p-8">
+      <section className="rounded-lg border border-border bg-card p-6 text-card-foreground shadow-sm md:p-8">
         <div className="flex flex-col gap-6 lg:flex-row lg:items-start lg:justify-between">
           <div>
-            <p className="mb-4 text-sm font-medium text-emerald-700">
-              Malaysia Tax Tools
+            <p className="mb-4 text-sm font-medium text-primary">
+              {copy.eyebrow}
             </p>
-            <h1 className="max-w-3xl text-3xl font-semibold tracking-tight text-zinc-950 md:text-4xl">
-              Start with the task, not the tax form
+            <h1 className="max-w-3xl text-3xl font-semibold tracking-tight text-foreground md:text-4xl">
+              {copy.title}
             </h1>
-            <p className="mt-4 max-w-2xl text-base leading-7 text-zinc-600 md:text-lg">
-              A clearer Malaysia tax workspace that routes individuals,
-              employers and companies into the right workflow before asking for
-              details.
+            <p className="mt-4 max-w-2xl text-base leading-7 text-muted-foreground md:text-lg">
+              {copy.subtitle}
             </p>
           </div>
           <div className="flex flex-wrap gap-3 lg:justify-end">
@@ -82,13 +114,13 @@ export default function HomePage() {
               href="/ai-tax"
               className="inline-flex min-h-11 items-center justify-center rounded-md bg-emerald-700 px-5 text-sm font-semibold text-white transition-colors hover:bg-emerald-800"
             >
-              Ask AI Tax
+              {copy.askAi}
             </Link>
             <Link
               href="/corporate"
-              className="inline-flex min-h-11 items-center justify-center rounded-md border border-zinc-200 bg-white px-5 text-sm font-semibold text-zinc-800 transition-colors hover:bg-zinc-50"
+              className="inline-flex min-h-11 items-center justify-center rounded-md border border-border bg-background px-5 text-sm font-semibold text-foreground transition-colors hover:bg-muted"
             >
-              View all tools
+              {copy.viewTools}
             </Link>
           </div>
         </div>

@@ -3,6 +3,10 @@ import { render, screen } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 import { ToolPageShell } from "@/components/tool-page-shell";
 
+vi.mock("next-intl", () => ({
+  useLocale: () => "zh",
+}));
+
 vi.mock("@/i18n/navigation", () => ({
   Link: ({
     href,
@@ -35,8 +39,8 @@ describe("ToolPageShell", () => {
 
     expect(screen.getByText("Corporate Tax")).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: "Company tax calculator" })).toBeInTheDocument();
-    expect(screen.getByText("Need help while filling this?")).toBeInTheDocument();
-    expect(screen.getByText("Before using credits")).toBeInTheDocument();
+    expect(screen.getByText("填写时需要帮忙？")).toBeInTheDocument();
+    expect(screen.getByText("使用 credits 前")).toBeInTheDocument();
     expect(screen.getAllByText("1 credit")).toHaveLength(2);
     expect(screen.getByRole("form", { name: "Company details" })).toBeInTheDocument();
   });

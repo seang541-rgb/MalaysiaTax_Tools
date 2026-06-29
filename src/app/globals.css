@@ -210,6 +210,55 @@
   font-size: 0.85em;
 }
 
+/* Compatibility layer for older utility-heavy screens that still use fixed
+   zinc/white classes. This keeps the whole site visibly synced with dark mode
+   while components are gradually moved to semantic tokens. */
+.dark .bg-white,
+.dark .bg-zinc-50,
+.dark .bg-gray-50 {
+  background-color: var(--card);
+}
+
+.dark .bg-zinc-100,
+.dark .bg-gray-100,
+.dark .bg-emerald-50 {
+  background-color: var(--muted);
+}
+
+.dark .bg-\[\#f7faf8\] {
+  background-color: var(--muted);
+}
+
+.dark .text-zinc-950,
+.dark .text-zinc-900,
+.dark .text-gray-950,
+.dark .text-gray-900 {
+  color: var(--foreground);
+}
+
+.dark .text-zinc-800,
+.dark .text-zinc-700,
+.dark .text-zinc-600,
+.dark .text-zinc-500,
+.dark .text-gray-800,
+.dark .text-gray-700,
+.dark .text-gray-600,
+.dark .text-gray-500 {
+  color: var(--muted-foreground);
+}
+
+.dark .border-zinc-200,
+.dark .border-gray-200,
+.dark .border-emerald-100 {
+  border-color: var(--border);
+}
+
+.dark .shadow-sm,
+.dark .shadow-md,
+.dark .shadow-lg {
+  box-shadow: none;
+}
+
 /* Print styles */
 @media print {
   /* Hide non-essential elements */

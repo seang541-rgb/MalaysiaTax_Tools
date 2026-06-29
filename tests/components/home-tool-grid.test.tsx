@@ -36,10 +36,11 @@ describe("HomeToolGrid", () => {
   it("uses the v2 task-first workspace structure across the home page", () => {
     render(<HomeToolGrid locale="zh" />);
 
-    expect(screen.getByText("Best first step")).toBeInTheDocument();
-    expect(screen.getByText("Tell MYTax what you are trying to do")).toBeInTheDocument();
-    expect(screen.getByRole("heading", { name: "Common workflows" })).toBeInTheDocument();
-    expect(screen.getByText("Your workspace")).toBeInTheDocument();
-    expect(screen.getByRole("link", { name: /Ask AI Tax/i })).toHaveAttribute("href", "/ai-tax");
+    expect(screen.getByText("建议第一步")).toBeInTheDocument();
+    expect(screen.getByText("告诉 MYTax 你想处理什么")).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "常用流程" })).toBeInTheDocument();
+    expect(screen.getByText("你的工作区")).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: /询问 AI 税务助手/i })).toHaveAttribute("href", "/ai-tax");
+    expect(screen.queryByRole("heading", { name: "Common workflows" })).not.toBeInTheDocument();
   });
 });
