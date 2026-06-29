@@ -32,4 +32,14 @@ describe("HomeToolGrid", () => {
     ).toBe(true);
     expect(screen.getByRole("link", { name: /Pricing/i })).toHaveAttribute("href", "/pricing");
   });
+
+  it("uses the redesigned workspace structure across the home page", () => {
+    render(<HomeToolGrid locale="zh" />);
+
+    expect(screen.getByRole("heading", { name: "常用工具" })).toBeInTheDocument();
+    expect(screen.getByText("先问 AI，再进入计算器")).toBeInTheDocument();
+    expect(screen.getByText("Credits & access")).toBeInTheDocument();
+    expect(screen.getByText("Recent work")).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: /Ask AI Tax/i })).toHaveAttribute("href", "/ai-tax");
+  });
 });

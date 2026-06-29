@@ -29,16 +29,16 @@ export function Header() {
   ];
 
   return (
-    <header className="border-b bg-white dark:bg-zinc-900 relative">
-      <div className="container mx-auto flex h-16 items-center justify-between px-4">
+    <header className="sticky top-0 z-40 border-b border-zinc-200 bg-white/95 text-zinc-950 backdrop-blur">
+      <div className="mx-auto flex min-h-16 max-w-7xl items-center justify-between gap-4 px-4 sm:px-6 lg:px-8">
         <div className="flex items-center gap-2">
-          <Link href="/" className="text-xl font-bold text-primary">
+          <Link href="/" className="text-xl font-semibold text-emerald-800">
             MYTax
           </Link>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex min-w-0 items-center gap-2">
           {/* Desktop nav */}
-          <nav className="hidden lg:flex gap-1">
+          <nav className="hidden min-w-0 gap-1 overflow-x-auto lg:flex">
             {navItems.map((item) => {
               const isActive =
                 item.href === "/"
@@ -48,10 +48,10 @@ export function Header() {
                 <Link
                   key={item.href}
                   href={item.href}
-                  className={`px-3 py-2 rounded-md text-sm transition-colors ${
+                  className={`whitespace-nowrap rounded-md px-3 py-2 text-sm transition-colors ${
                     isActive
-                      ? "bg-primary/10 text-primary font-medium"
-                      : "text-muted-foreground hover:text-foreground hover:bg-muted"
+                      ? "bg-emerald-50 font-medium text-emerald-800"
+                      : "text-zinc-600 hover:bg-zinc-100 hover:text-zinc-950"
                   }`}
                 >
                   {item.label}
@@ -67,7 +67,7 @@ export function Header() {
           </div>
           {/* Mobile hamburger */}
           <button
-            className="lg:hidden p-2 rounded-md hover:bg-muted transition-colors"
+            className="rounded-md p-2 text-zinc-700 transition-colors hover:bg-zinc-100 hover:text-zinc-950 lg:hidden"
             onClick={() => setMobileOpen(!mobileOpen)}
             aria-label="Toggle menu"
             aria-expanded={mobileOpen}
@@ -79,9 +79,9 @@ export function Header() {
 
       {/* Mobile nav dropdown */}
       {mobileOpen && (
-        <nav className="lg:hidden border-t bg-white dark:bg-zinc-900 absolute left-0 right-0 z-50 shadow-lg">
-          <div className="container mx-auto px-4 py-2 flex flex-col gap-1">
-            <div className="flex items-center justify-between gap-3 border-b pb-3">
+        <nav className="absolute left-0 right-0 z-50 border-t border-zinc-200 bg-white shadow-lg lg:hidden">
+          <div className="mx-auto flex max-w-7xl flex-col gap-1 px-4 py-2 sm:px-6">
+            <div className="flex items-center justify-between gap-3 border-b border-zinc-200 pb-3">
               <LocaleSwitcher />
               <ThemeToggle />
             </div>
@@ -95,17 +95,17 @@ export function Header() {
                   key={item.href}
                   href={item.href}
                   onClick={() => setMobileOpen(false)}
-                  className={`px-3 py-3 rounded-md text-sm transition-colors ${
+                  className={`rounded-md px-3 py-3 text-sm transition-colors ${
                     isActive
-                      ? "bg-primary/10 text-primary font-medium"
-                      : "text-muted-foreground hover:text-foreground hover:bg-muted"
+                      ? "bg-emerald-50 font-medium text-emerald-800"
+                      : "text-zinc-600 hover:bg-zinc-100 hover:text-zinc-950"
                   }`}
                 >
                   {item.label}
                 </Link>
               );
             })}
-            <div className="mt-2 flex flex-col gap-2 border-t pt-3">
+            <div className="mt-2 flex flex-col gap-2 border-t border-zinc-200 pt-3">
               <CreditBalance />
               <AuthButton />
             </div>

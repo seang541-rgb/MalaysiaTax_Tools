@@ -56,20 +56,29 @@ function getDescription(label: string, locale: string) {
 
 export function PricingTrustPanel({ locale = "en" }: { locale?: string }) {
   return (
-    <section className="mt-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-      {ITEMS.map((item) => {
-        const Icon = item.icon;
-        const description = getDescription(item.label, locale) ?? item.description;
-        return (
-          <div key={item.label} className="rounded-lg border bg-card p-4 shadow-sm">
-            <Icon className="h-5 w-5 text-primary" aria-hidden="true" />
-            <h2 className="mt-3 text-sm font-semibold">{item.label}</h2>
-            <p className="mt-1 text-xs leading-relaxed text-muted-foreground">
-              {description}
-            </p>
-          </div>
-        );
-      })}
+    <section className="rounded-lg border border-zinc-200 bg-white p-4 shadow-sm md:p-5">
+      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+        {ITEMS.map((item) => {
+          const Icon = item.icon;
+          const description =
+            getDescription(item.label, locale) ?? item.description;
+          return (
+            <div key={item.label} className="flex gap-3">
+              <span className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-md bg-emerald-50 text-emerald-700">
+                <Icon className="h-5 w-5" aria-hidden="true" />
+              </span>
+              <div>
+                <h2 className="text-sm font-semibold text-zinc-950">
+                  {item.label}
+                </h2>
+                <p className="mt-1 text-xs leading-relaxed text-zinc-600">
+                  {description}
+                </p>
+              </div>
+            </div>
+          );
+        })}
+      </div>
     </section>
   );
 }

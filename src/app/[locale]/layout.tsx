@@ -24,19 +24,24 @@ export default async function LocaleLayout({
 
   return (
     <NextIntlClientProvider messages={messages}>
-      <GoogleAnalytics />
-      <ServiceWorkerRegister />
-      <a
-        href="#main-content"
-        className="sr-only focus:not-sr-only focus:absolute focus:z-[100] focus:top-4 focus:left-4 focus:bg-primary focus:text-primary-foreground focus:px-4 focus:py-2 focus:rounded-md focus:text-sm"
-      >
-        Skip to content
-      </a>
-      <Header />
-      <main id="main-content" className="container mx-auto px-4 py-8 flex-1">
-        {children}
-      </main>
-      <Footer />
+      <div className="flex min-h-screen flex-col bg-[#f3f6f3] text-zinc-950 [--accent:#e8f5ee] [--accent-foreground:#064e3b] [--background:#f3f6f3] [--border:#d5ddd8] [--card:#ffffff] [--card-foreground:#18181b] [--foreground:#18181b] [--input:#d5ddd8] [--muted:#f4f7f5] [--muted-foreground:#52635d] [--popover:#ffffff] [--popover-foreground:#18181b] [--primary:#047857] [--primary-foreground:#ffffff] [--ring:#047857] [--secondary:#eef7f2] [--secondary-foreground:#15372d]">
+        <GoogleAnalytics />
+        <ServiceWorkerRegister />
+        <a
+          href="#main-content"
+          className="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-[100] focus:rounded-md focus:bg-primary focus:px-4 focus:py-2 focus:text-sm focus:text-primary-foreground"
+        >
+          Skip to content
+        </a>
+        <Header />
+        <main
+          id="main-content"
+          className="mx-auto w-full max-w-7xl flex-1 px-4 py-8 sm:px-6 lg:px-8"
+        >
+          {children}
+        </main>
+        <Footer />
+      </div>
     </NextIntlClientProvider>
   );
 }
