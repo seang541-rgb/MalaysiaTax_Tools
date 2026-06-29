@@ -2,6 +2,7 @@ import { useTranslations } from "next-intl";
 import { getTranslations } from "next-intl/server";
 import { EmployerForm } from "@/components/employer-form";
 import { PaidFeatureGate } from "@/components/paid-feature-gate";
+import { ToolPageShell } from "@/components/tool-page-shell";
 
 export async function generateMetadata({
   params,
@@ -21,14 +22,16 @@ export default function EmployerPage() {
   const t = useTranslations("employer");
 
   return (
-    <div className="max-w-5xl mx-auto">
-      <div className="text-center py-8">
-        <h1 className="text-3xl font-bold mb-2">{t("title")}</h1>
-        <p className="text-muted-foreground">{t("subtitle")}</p>
-      </div>
+    <ToolPageShell
+      eyebrow="Employer / PCB"
+      title={t("title")}
+      subtitle={t("subtitle")}
+      creditLabel="Free"
+      resultTitle="Payroll preview"
+    >
       <PaidFeatureGate>
         <EmployerForm />
       </PaidFeatureGate>
-    </div>
+    </ToolPageShell>
   );
 }

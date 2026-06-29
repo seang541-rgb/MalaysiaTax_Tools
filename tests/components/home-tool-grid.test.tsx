@@ -33,13 +33,13 @@ describe("HomeToolGrid", () => {
     expect(screen.getByRole("link", { name: /Pricing/i })).toHaveAttribute("href", "/pricing");
   });
 
-  it("uses the redesigned workspace structure across the home page", () => {
+  it("uses the v2 task-first workspace structure across the home page", () => {
     render(<HomeToolGrid locale="zh" />);
 
-    expect(screen.getByRole("heading", { name: "常用工具" })).toBeInTheDocument();
-    expect(screen.getByText("先问 AI，再进入计算器")).toBeInTheDocument();
-    expect(screen.getByText("Credits & access")).toBeInTheDocument();
-    expect(screen.getByText("Recent work")).toBeInTheDocument();
+    expect(screen.getByText("Best first step")).toBeInTheDocument();
+    expect(screen.getByText("Tell MYTax what you are trying to do")).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Common workflows" })).toBeInTheDocument();
+    expect(screen.getByText("Your workspace")).toBeInTheDocument();
     expect(screen.getByRole("link", { name: /Ask AI Tax/i })).toHaveAttribute("href", "/ai-tax");
   });
 });

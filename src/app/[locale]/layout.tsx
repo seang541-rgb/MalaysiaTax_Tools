@@ -36,7 +36,7 @@ export default async function LocaleLayout({
         <Header />
         <main
           id="main-content"
-          className="mx-auto w-full max-w-7xl flex-1 px-4 py-8 sm:px-6 lg:px-8"
+          className="w-full flex-1 px-4 pb-28 pt-8 sm:px-6 lg:pb-10 lg:pl-[284px] lg:pr-10 lg:pt-9"
         >
           {children}
         </main>

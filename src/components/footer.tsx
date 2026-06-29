@@ -9,7 +9,7 @@ export function Footer() {
   const locale = useLocale();
 
   return (
-    <footer className="border-t border-zinc-200 bg-white py-6 text-xs text-zinc-500">
+    <footer className="border-t border-zinc-200 bg-white py-6 text-xs text-zinc-500 lg:ml-[244px]">
       <div className="mx-auto max-w-7xl space-y-3 px-4 text-center sm:px-6 lg:px-8">
         <div className="flex flex-wrap items-center justify-center gap-4">
           <Link

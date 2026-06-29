@@ -2,7 +2,7 @@ import { useTranslations } from "next-intl";
 import { getTranslations } from "next-intl/server";
 import { ArrowRight } from "lucide-react";
 import { Link } from "@/i18n/navigation";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { ToolPageShell } from "@/components/tool-page-shell";
 
 export async function generateMetadata({
   params,
@@ -31,28 +31,30 @@ export default function CorporateToolsPage() {
   ];
 
   return (
-    <div className="max-w-3xl mx-auto">
-      <div className="text-center py-8">
-        <h1 className="text-3xl font-bold mb-2">{t("title")}</h1>
-        <p className="text-muted-foreground">{t("hubIntro")}</p>
-      </div>
+    <ToolPageShell
+      eyebrow="Corporate Tools"
+      title={t("title")}
+      subtitle={t("hubIntro")}
+      creditLabel="1 credit"
+      resultTitle="Tool workflow"
+    >
       <div className="grid gap-4 sm:grid-cols-2">
         {tools.map((tool) => (
           <Link key={tool.href} href={tool.href} className="group">
-            <Card className="h-full transition-colors hover:border-primary">
-              <CardHeader>
-                <CardTitle className="flex items-center justify-between gap-2">
+            <div className="h-full rounded-lg border border-zinc-200 bg-white p-5 shadow-sm transition-colors hover:border-emerald-200 hover:shadow-md">
+              <div className="flex items-center justify-between gap-3">
+                <h2 className="text-lg font-semibold text-zinc-950">
                   {tool.title}
-                  <ArrowRight className="h-4 w-4 shrink-0 text-muted-foreground transition-transform group-hover:translate-x-1" />
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="text-sm text-muted-foreground">
+                </h2>
+                <ArrowRight className="h-4 w-4 shrink-0 text-zinc-500 transition-transform group-hover:translate-x-1" />
+              </div>
+              <p className="mt-3 text-sm leading-6 text-zinc-600">
                 {tool.desc}
-              </CardContent>
-            </Card>
+              </p>
+            </div>
           </Link>
         ))}
       </div>
-    </div>
+    </ToolPageShell>
   );
 }
