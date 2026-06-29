@@ -80,13 +80,15 @@ export function Header() {
 
   return (
     <>
-      <aside className="fixed inset-y-0 left-0 z-40 hidden w-[244px] flex-col border-r border-zinc-200 bg-white/90 px-4 py-6 text-zinc-950 shadow-sm backdrop-blur lg:flex">
+      <aside className="fixed inset-y-0 left-0 z-40 hidden w-[244px] flex-col border-r border-border bg-card/90 px-4 py-6 text-card-foreground shadow-sm backdrop-blur lg:flex">
         <div>
-          <Link href="/" className="text-2xl font-semibold text-emerald-700">
+          <Link href="/" className="text-2xl font-semibold text-primary">
             MYTax
           </Link>
-          <p className="mt-2 text-sm text-zinc-500">Malaysia tax workspace</p>
-          <div className="mt-5 space-y-3 rounded-lg border border-zinc-200 bg-white p-3 shadow-sm">
+          <p className="mt-2 text-sm text-muted-foreground">
+            Malaysia tax workspace
+          </p>
+          <div className="mt-5 space-y-3 rounded-lg border border-border bg-background p-3 shadow-sm">
             <LocaleSwitcher />
             <div className="flex flex-wrap items-center gap-2">
               <AuthButton />
@@ -98,7 +100,7 @@ export function Header() {
         <nav aria-label="Primary" className="mt-10 space-y-7">
           {groups.map((group) => (
             <div key={group.title} className="space-y-2">
-              <p className="px-2 text-[11px] font-semibold uppercase tracking-normal text-zinc-500">
+              <p className="px-2 text-[11px] font-semibold uppercase tracking-normal text-muted-foreground">
                 {group.title}
               </p>
               <div className="space-y-1">
@@ -111,12 +113,12 @@ export function Header() {
                       href={item.href}
                       className={`flex min-h-10 items-center gap-3 rounded-md px-3 text-sm transition-colors ${
                         active
-                          ? "bg-emerald-50 font-semibold text-emerald-800"
-                          : "text-zinc-700 hover:bg-zinc-100 hover:text-zinc-950"
+                          ? "bg-accent font-semibold text-accent-foreground"
+                          : "text-muted-foreground hover:bg-muted hover:text-foreground"
                       }`}
                     >
                       <Icon
-                        className={`h-4 w-4 ${active ? "text-emerald-700" : "text-zinc-500"}`}
+                        className={`h-4 w-4 ${active ? "text-primary" : "text-muted-foreground"}`}
                         aria-hidden={true}
                       />
                       <span>{item.label}</span>
@@ -128,19 +130,17 @@ export function Header() {
           ))}
         </nav>
 
-        <div className="mt-auto space-y-3 rounded-lg border border-zinc-200 bg-white p-3 text-sm shadow-sm">
+        <div className="mt-auto space-y-3 rounded-lg border border-border bg-background p-3 text-sm shadow-sm">
           <CreditBalance />
-          <div className="text-xs text-zinc-500">Account / EN 中文 BM</div>
-          <div className="flex flex-wrap items-center gap-2">
-            <AuthButton />
-            <ThemeToggle />
+          <div className="text-xs text-muted-foreground">
+            Account and credits
           </div>
         </div>
       </aside>
 
-      <header className="sticky top-0 z-40 border-b border-zinc-200 bg-white/95 text-zinc-950 backdrop-blur lg:hidden">
+      <header className="sticky top-0 z-40 border-b border-border bg-card/95 text-card-foreground backdrop-blur lg:hidden">
         <div className="flex min-h-16 items-center justify-between gap-3 px-4">
-          <Link href="/" className="text-xl font-semibold text-emerald-700">
+          <Link href="/" className="text-xl font-semibold text-primary">
             MYTax
           </Link>
           <div className="flex items-center gap-2">
@@ -148,7 +148,7 @@ export function Header() {
             <AuthButton />
             <button
               type="button"
-              className="rounded-md p-2 text-zinc-700 transition-colors hover:bg-zinc-100 hover:text-zinc-950"
+              className="rounded-md p-2 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
               onClick={() => setMobileOpen(!mobileOpen)}
               aria-label="Toggle menu"
               aria-expanded={mobileOpen}
@@ -165,9 +165,9 @@ export function Header() {
         {mobileOpen ? (
           <nav
             aria-label="Mobile menu"
-            className="absolute left-0 right-0 z-50 border-t border-zinc-200 bg-white p-4 shadow-lg"
+            className="absolute left-0 right-0 z-50 border-t border-border bg-card p-4 shadow-lg"
           >
-            <div className="mb-4 flex items-center justify-between gap-3 border-b border-zinc-200 pb-3">
+            <div className="mb-4 flex items-center justify-between gap-3 border-b border-border pb-3">
               <LocaleSwitcher />
               <ThemeToggle />
             </div>
@@ -178,14 +178,14 @@ export function Header() {
                     key={`${group.title}-mobile-${item.href}-${item.label}`}
                     href={item.href}
                     onClick={() => setMobileOpen(false)}
-                    className="rounded-md px-3 py-3 text-sm font-medium text-zinc-700 hover:bg-zinc-100 hover:text-zinc-950"
+                    className="rounded-md px-3 py-3 text-sm font-medium text-muted-foreground hover:bg-muted hover:text-foreground"
                   >
                     {item.label}
                   </Link>
                 )),
               )}
             </div>
-            <div className="mt-4 border-t border-zinc-200 pt-3">
+            <div className="mt-4 border-t border-border pt-3">
               <AuthButton />
             </div>
           </nav>
@@ -194,7 +194,7 @@ export function Header() {
 
       <nav
         aria-label="Mobile workflow"
-        className="fixed inset-x-0 bottom-0 z-40 grid grid-cols-4 border-t border-zinc-200 bg-white/95 px-2 pb-2 pt-2 text-xs text-zinc-500 shadow-[0_-6px_20px_rgba(15,23,42,0.08)] backdrop-blur lg:hidden"
+        className="fixed inset-x-0 bottom-0 z-40 grid grid-cols-4 border-t border-border bg-card/95 px-2 pb-2 pt-2 text-xs text-muted-foreground shadow-[0_-6px_20px_rgba(15,23,42,0.08)] backdrop-blur lg:hidden"
       >
         {mobileActions.map((item) => {
           const active = isActive(pathname, item);
@@ -204,7 +204,7 @@ export function Header() {
               key={`mobile-action-${item.href}-${item.label}`}
               href={item.href}
               className={`flex min-h-12 flex-col items-center justify-center gap-1 rounded-md ${
-                active ? "font-semibold text-emerald-700" : "text-zinc-500"
+                active ? "font-semibold text-primary" : "text-muted-foreground"
               }`}
             >
               <Icon className="h-4 w-4" aria-hidden={true} />
