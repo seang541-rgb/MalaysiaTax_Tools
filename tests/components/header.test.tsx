@@ -64,6 +64,8 @@ describe("Header", () => {
     expect(screen.getByText("CALCULATE")).toBeInTheDocument();
     expect(screen.getByText("MANAGE")).toBeInTheDocument();
     expect(screen.getByText("Malaysia tax workspace")).toBeInTheDocument();
+    expect(screen.getByText("EN 中文 BM")).toBeInTheDocument();
+    expect(screen.getAllByRole("button", { name: "Sign in" }).length).toBeGreaterThan(0);
     expect(screen.getByRole("link", { name: /Workspace/i })).toHaveAttribute("href", "/");
     expect(screen.getByRole("link", { name: /Corporate Tax/i })).toHaveAttribute("href", "/corporate");
     expect(

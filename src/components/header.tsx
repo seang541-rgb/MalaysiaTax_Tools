@@ -86,6 +86,13 @@ export function Header() {
             MYTax
           </Link>
           <p className="mt-2 text-sm text-zinc-500">Malaysia tax workspace</p>
+          <div className="mt-5 space-y-3 rounded-lg border border-zinc-200 bg-white p-3 shadow-sm">
+            <LocaleSwitcher />
+            <div className="flex flex-wrap items-center gap-2">
+              <AuthButton />
+              <ThemeToggle />
+            </div>
+          </div>
         </div>
 
         <nav aria-label="Primary" className="mt-10 space-y-7">
@@ -138,6 +145,7 @@ export function Header() {
           </Link>
           <div className="flex items-center gap-2">
             <CreditBalance />
+            <AuthButton />
             <button
               type="button"
               className="rounded-md p-2 text-zinc-700 transition-colors hover:bg-zinc-100 hover:text-zinc-950"
