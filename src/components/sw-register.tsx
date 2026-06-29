@@ -5,39 +5,42 @@ import { useEffect } from "react";
 export function ServiceWorkerRegister() {
   useEffect(() => {
     if ("serviceWorker" in navigator && process.env.NODE_ENV === "production") {
-      let refreshing = false;
+      let reloaded = false;
 
-      navigator.serviceWorker.addEventListener("controllerchange", () => {
-        if (refreshing) return;
-        refreshing = true;
+      const reloadOnce = () => {
+        if (reloaded) return;
+        reloaded = true;
         window.location.reload();
-      });
+      };
+
+      const clearCaches = () => {
+        if (!("caches" in window)) return Promise.resolve();
+        return caches.keys().then((keys) => {
+          return Promise.all(
+            keys
+              .filter((key) => key.startsWith("mytax-"))
+              .map((key) => caches.delete(key))
+          ).then(() => undefined);
+        });
+      };
 
       navigator.serviceWorker
-        .register("/sw.js")
-        .then((registration) => {
-          if (registration.waiting) {
-            registration.waiting.postMessage({ type: "SKIP_WAITING" });
+        .getRegistrations()
+        .then((registrations) => {
+          return Promise.all(
+            registrations.map((registration) => registration.unregister())
+          );
+        })
+        .then(() => clearCaches())
+        .then(() => {
+          if (navigator.serviceWorker.controller) {
+            reloadOnce();
           }
-
-          registration.addEventListener("updatefound", () => {
-            const worker = registration.installing;
-            if (!worker) return;
-
-            worker.addEventListener("statechange", () => {
-              if (
-                worker.state === "installed" &&
-                navigator.serviceWorker.controller
-              ) {
-                worker.postMessage({ type: "SKIP_WAITING" });
-              }
-            });
-          });
-
-          return registration.update();
         })
         .catch(() => {
-          // SW registration failed silently
+          clearCaches().catch(() => {
+            // Cache cleanup failed silently.
+          });
         });
     }
   }, []);
